@@ -1,0 +1,54 @@
+/* =========================================================
+   NEXUS VR — global.css   [PHỤ TRÁCH: Đức Huy]
+   TẦNG 1 - FOUNDATION
+   Typography, Grid layout, Utility class dùng chung.
+   Nhúng SAU reset.css.
+   ========================================================= */
+
+h1, h2, h3, h4 { font-family: var(--font-head); line-height: 1.15; font-weight: 700; }
+h1 { font-size: clamp(34px, 4.4vw, 56px); }
+h2 { font-size: clamp(26px, 3vw, 36px); }
+h3 { font-size: 19px; font-weight: 600; }
+p { line-height: 1.65; color: var(--text-secondary); }
+
+.wrap { max-width: var(--container-w); margin: 0 auto; padding: 0 32px; }
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+section { padding: 90px 0; }
+.section-alt { background: var(--bg-tertiary); }
+
+/* Nút dùng chung toàn site — mọi trang dùng lại 2 class này,
+   không tự tạo nút mới trừ khi thật sự cần thiết */
+.btn-primary {
+  font-family: var(--font-head); font-weight: 600; font-size: 14px;
+  padding: 12px 26px; border-radius: var(--radius-sm);
+  background: var(--accent-gradient-solid); color: #fff;
+  box-shadow: var(--shadow-glow); border: none; cursor: pointer;
+  transition: transform .25s;
+}
+.btn-primary:hover { transform: translateY(-2px); }
+.btn-outline {
+  font-family: var(--font-head); font-weight: 600; font-size: 14px;
+  padding: 12px 24px; border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border); background: var(--glass-bg);
+  color: var(--text-primary); cursor: pointer;
+}
+
+/* Utility */
+.text-center { text-align: center; }
+.mt-16 { margin-top: 16px; } .mt-24 { margin-top: 24px; } .mt-40 { margin-top: 40px; }
+.flex { display: flex; } .flex-center { display: flex; align-items: center; justify-content: center; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+@media (max-width: 900px) {
+  .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
