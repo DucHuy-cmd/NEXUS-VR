@@ -1,0 +1,25 @@
+/* =========================================================
+   NEXUS VR — reset.css   [PHỤ TRÁCH: Đức Huy]
+   TẦNG 1 - FOUNDATION
+   Reset chuẩn CSS toàn trình duyệt — nhúng SAU variables.css,
+   TRƯỚC global.css.
+   ========================================================= */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  transition: background .4s ease, color .4s ease;
+  min-height: 100vh;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font-family: inherit; color: inherit; }
+ul { list-style: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
