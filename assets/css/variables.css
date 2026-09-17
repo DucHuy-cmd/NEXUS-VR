@@ -1,0 +1,99 @@
+/* =========================================================
+   NEXUS VR — variables.css   [PHỤ TRÁCH: Đức Huy]
+   TẦNG 1 - FOUNDATION
+   Toàn bộ biến màu, font, bo góc dùng chung cho cả site.
+   KHÔNG ai được hardcode mã màu (#0a0a0f...) ở file khác —
+   luôn dùng var(--ten-bien) khai báo tại đây.
+
+   [CẬP NHẬT] Đổi định hướng thiết kế: từ "Cyber/Neon lạnh"
+   sang "Quiet Luxury / Warm Minimalist Tech" (tham chiếu
+   Apple Vision Pro, Bang & Olufsen) — bảng màu Warm Neutrals
+   (Coffee & Cream). TÊN BIẾN được GIỮ NGUYÊN để không phải
+   sửa lại toàn bộ file CSS khác (navbar, footer, product-card,
+   toast, global...) — chỉ GIÁ TRỊ màu bên trong đổi.
+   ========================================================= */
+
+:root {
+  /* ---- Nền (Backgrounds) ---- */
+  --bg-primary: #F9F6F0;     /* Be kem ấm — Warm Cream (nền chính) */
+  --bg-secondary: #F2ECE4;   /* Be cát — Soft Sand (card/header/footer) */
+  --bg-tertiary: #EDE4D8;    /* Sand đậm hơn 1 chút — section-alt, thumbnail placeholder */
+
+  /* ---- Màu điểm nhấn (Accent) ---- */
+  /* Nâu Caramel / Đồng ánh kim — dùng cho icon lớn, viền, sao đánh giá,
+     khối trang trí KHÔNG có chữ đè lên (đạt chuẩn contrast ≥3:1 cho
+     graphic/UI component theo WCAG). */
+  --accent-bronze: #A67C52;
+  /* Biến thể ĐẬM hơn — dùng khi màu accent đóng vai trò CHỮ/LINK/nút có
+     chữ trắng đè lên, để đảm bảo contrast ≥4.5:1 (chuẩn AA cho text). */
+  --accent-bronze-deep: #8B6239;
+  --accent-purple: #6F4E2E;  /* Nâu cà phê đậm — điểm dừng thứ 2 của gradient ánh kim */
+
+  /* --accent-cyan giữ tên cũ để toàn bộ file CSS khác (đang gọi
+     var(--accent-cyan) cho text/link/price/focus-border) tự động
+     nhận màu mới mà không cần sửa từng file — nay trỏ về bronze đậm
+     (an toàn cho chữ). */
+  --accent-cyan: var(--accent-bronze-deep);
+
+  /* Gradient "ánh kim" trang trí — dùng cho chấm logo, gạch chân active,
+     thanh toast — những chỗ KHÔNG có chữ đè trực tiếp lên toàn vùng. */
+  --accent-gradient: linear-gradient(135deg, var(--accent-bronze) 0%, var(--accent-purple) 100%);
+  /* Gradient "an toàn cho chữ trắng" — dùng cho nút bấm (.btn-primary),
+     badge số... nơi có chữ trắng đè lên nền accent. */
+  --accent-gradient-solid: linear-gradient(135deg, var(--accent-bronze-deep) 0%, var(--accent-purple) 100%);
+
+  /* ---- Chữ (Text) ---- */
+  --text-primary: #231F1C;   /* Nâu cà phê đậm — Deep Espresso (thay hoàn toàn cho #000) */
+  --text-secondary: #6E625A; /* Nâu ấm nhạt hơn — mô tả, đoạn văn phụ (đạt AA trên nền cream/sand) */
+  --text-muted: #8C8075;     /* Nâu xám nhạt nhất — timestamp, giá gạch, chữ phụ ít quan trọng */
+
+  /* ---- Glass / Shadow ---- */
+  --glass-bg: rgba(35, 31, 28, 0.035);   /* kính mờ ánh nâu ấm, thay cho kính mờ trắng/lạnh */
+  --glass-border: rgba(35, 31, 28, 0.10);
+  --shadow-glow: 0 10px 30px rgba(166, 124, 82, 0.28); /* đổ bóng ấm dịu, thay cho glow neon cyan */
+
+  --success: #6E8F63;  /* xanh sage trầm */
+  --error: #B4483C;    /* đỏ đất nung trầm */
+  --warning: #C08A3E;  /* vàng hổ phách trầm */
+
+  --font-head: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --container-w: 1180px;
+}
+
+/* [FIX #1 — 2026] Đổi selector từ "body.light-mode" sang ":root.dark-mode".
+   Trước đây tên class "light-mode" bị lệch nghĩa: mặc định (:root, không
+   class) đã là giao diện SÁNG (Warm Cream) từ khi đổi bảng màu, nhưng class
+   bật thêm lại được đặt tên "light-mode" trong khi thực chất hiển thị bản
+   TỐI — gây nhầm lẫn khi đọc code. Nay class đúng tên với hình ảnh nó tạo
+   ra: "dark-mode" = bản tối (Warm Dark). Gắn trên <html> (:root) thay vì
+   <body> để khớp với script chống FOUC chạy trong <head> — thời điểm đó
+   <body> chưa được parser dựng xong nhưng <html> thì luôn sẵn có. */
+:root.dark-mode {
+  --bg-primary: #231F1C;     /* Nâu cà phê đậm làm nền tối */
+  --bg-secondary: #2C2621;
+  --bg-tertiary: #362F28;
+
+  --accent-bronze: #C79A6E;      /* bronze sáng hơn để nổi trên nền tối */
+  --accent-bronze-deep: #C79A6E; /* trên nền tối, bronze sáng đã đủ contrast cho chữ */
+  --accent-purple: #A67C52;
+  --accent-cyan: var(--accent-bronze-deep);
+  --accent-gradient: linear-gradient(135deg, var(--accent-bronze) 0%, var(--accent-purple) 100%);
+  --accent-gradient-solid: linear-gradient(135deg, var(--accent-bronze-deep) 0%, var(--accent-purple) 100%);
+
+  --text-primary: #F9F6F0;   /* Warm Cream làm chữ chính trên nền tối */
+  --text-secondary: #B8AFA6;
+  --text-muted: #8C8075;
+
+  --glass-bg: rgba(249, 246, 240, 0.05);
+  --glass-border: rgba(249, 246, 240, 0.12);
+  --shadow-glow: 0 10px 30px rgba(0, 0, 0, 0.45);
+
+  --success: #82A876;
+  --error: #C96A5C;
+  --warning: #D29A4E;
+}
