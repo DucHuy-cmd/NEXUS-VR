@@ -1,0 +1,29 @@
+/* =========================================================
+   NEXUS VR — components/toast.css   [PHỤ TRÁCH: Đức Huy]
+   TẦNG 2 - COMPONENTS
+   Style cho hệ thống thông báo, thay thế alert().
+   ========================================================= */
+
+.toast-container {
+  position: fixed; bottom: 24px; right: 24px; z-index: 999;
+  display: flex; flex-direction: column; gap: 12px; width: 320px; max-width: calc(100vw - 32px);
+}
+.toast {
+  position: relative; overflow: hidden;
+  background: var(--bg-secondary); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  box-shadow: 0 15px 35px rgba(35,31,28,.18);
+  display: flex; align-items: flex-start; gap: 10px;
+  animation: toast-in .35s ease;
+}
+.toast.is-leaving { animation: toast-out .3s ease forwards; }
+.toast__icon { font-size: 16px; line-height: 1; margin-top: 1px; }
+.toast--success .toast__icon { color: var(--success); }
+.toast--error .toast__icon { color: var(--error); }
+.toast--info .toast__icon { color: var(--accent-cyan); }
+.toast__msg { font-size: 13.5px; color: var(--text-primary); flex: 1; }
+.toast__bar { position: absolute; left: 0; bottom: 0; height: 2px; background: var(--accent-gradient); animation: toast-shrink linear forwards; }
+
+@keyframes toast-in { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toast-out { to { opacity: 0; transform: translateX(30px); } }
+@keyframes toast-shrink { from { width: 100%; } to { width: 0%; } }

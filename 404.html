@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS VR — 404 Không tìm thấy trang</title>
+<!-- [PHỤ TRÁCH: Đức Huy] -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="assets/css/variables.css">
+<link rel="stylesheet" href="assets/css/reset.css">
+<link rel="stylesheet" href="assets/css/global.css">
+<link rel="stylesheet" href="assets/css/components/navbar.css">
+<link rel="stylesheet" href="assets/css/components/footer.css">
+<link rel="stylesheet" href="assets/css/components/toast.css">
+
+<style>
+  .error-section {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; text-align: center; padding-top: 90px;
+  }
+  .error-code {
+    font-family: var(--font-head); font-weight: 700; font-size: clamp(100px, 20vw, 200px);
+    line-height: 1; background: var(--accent-gradient); -webkit-background-clip: text;
+    background-clip: text; color: transparent; position: relative;
+    animation: glitch 2.5s infinite;
+  }
+  @keyframes glitch {
+    0%, 92%, 100% { transform: translate(0,0); filter: none; }
+    93% { transform: translate(-3px, 2px); filter: hue-rotate(20deg); }
+    95% { transform: translate(3px, -2px); filter: hue-rotate(-20deg); }
+    97% { transform: translate(-2px, 0); filter: none; }
+  }
+  .error-msg { font-size: 17px; color: var(--text-secondary); max-width: 420px; margin: 18px 0 34px; }
+  .error-btns { display: flex; gap: 16px; }
+</style>
+</head>
+<body data-page="">
+
+<div id="navbar-root"></div>
+
+<section class="error-section">
+  <div class="error-code">404</div>
+  <p class="error-msg">Có vẻ bạn đã lạc vào một vùng không gian chưa được NEXUS VR khám phá. Trang bạn tìm không tồn tại.</p>
+  <div class="error-btns">
+    <a href="index.html" class="btn-primary">Về trang chủ</a>
+    <a href="shop.html" class="btn-outline">Xem cửa hàng</a>
+  </div>
+</section>
+
+<div id="footer-root"></div>
+
+<script src="assets/js/data/products-data.js"></script>
+<script src="assets/js/services/storage-service.js"></script>
+<script src="assets/js/modules/toast.js"></script>
+<script src="assets/js/modules/theme-toggle.js"></script>
+<script src="assets/js/modules/layout-loader.js"></script>
+</body>
+</html>
