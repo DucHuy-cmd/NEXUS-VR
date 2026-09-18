@@ -1,0 +1,2 @@
+# assets/js/modules
+Thư mục chứa các module tiện ích tái sử dụng (theme-toggle.js, toast.js, cart-manager.js, validator.js, counter-engine.js, slider-engine.js, accordion-engine.js)
