@@ -42,8 +42,20 @@ const NAVBAR_HTML = `
     </div>
 
     <div class="navbar__actions">
-      <button type="button" class="navbar__icon-btn" id="theme-toggle"
-        aria-label="Đổi giao diện sáng/tối" aria-pressed="false" title="Đổi giao diện">◐</button>
+      <button type="button" class="navbar__icon-btn navbar__theme-btn" id="theme-toggle"
+        aria-label="Đổi giao diện sáng/tối" aria-pressed="false" title="Đổi giao diện sáng/tối">
+        <span class="theme-icon-box" aria-hidden="true">
+          <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4.5"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+          <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            <circle cx="17" cy="7" r="0.8" fill="currentColor" stroke="none" class="theme-star theme-star--1"></circle>
+            <circle cx="19" cy="11" r="0.6" fill="currentColor" stroke="none" class="theme-star theme-star--2"></circle>
+          </svg>
+        </span>
+      </button>
       <a class="navbar__icon-btn" href="cart.html" title="Giỏ hàng" aria-label="Giỏ hàng">
         🛒<span class="navbar__cart-badge" id="cart-badge">0</span>
       </a>
@@ -78,7 +90,7 @@ const FOOTER_HTML = `
     </div>
     <div class="footer__bottom">
       <span>© 2026 NEXUS VR. Đồ án môn Thiết Kế Web.</span>
-      <span>Made with 🖤 by nhóm 5 người</span>
+      <span class="footer__credit">Dự án phát triển bởi Nguyễn Trường Vũ</span>
     </div>
   </div>
 </footer>`;

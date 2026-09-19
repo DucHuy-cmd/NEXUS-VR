@@ -32,13 +32,161 @@
 .navbar__actions { display: flex; align-items: center; gap: 16px; }
 
 .navbar__icon-btn {
-  width: 38px; height: 38px; border-radius: 10px;
+  width: 38px; height: 38px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   background: var(--glass-bg); border: 1px solid var(--glass-border);
   cursor: pointer; color: var(--text-secondary); transition: all .25s; position: relative;
+  padding: 8px;
   font-size: 15px; /* để icon trong <button> giữ đúng cỡ như trước khi là <div> */
 }
 .navbar__icon-btn:hover { color: var(--accent-cyan); border-color: var(--accent-cyan); }
+
+/* ---------------------------------------------------------
+   NÚT CHUYỂN ĐỔI THEME SÁNG/TỐI (SUN & MOON MORPHING)
+   --------------------------------------------------------- */
+.navbar__theme-btn {
+  overflow: hidden;
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.navbar__theme-btn:hover {
+  transform: scale(1.1);
+  border-color: var(--accent-bronze, #C79A6E);
+  box-shadow: 0 0 16px rgba(199, 154, 110, 0.4);
+  color: var(--accent-bronze, #C79A6E);
+}
+
+.theme-icon-box {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.navbar__theme-btn:hover .theme-icon-box {
+  transform: rotate(25deg);
+}
+
+.theme-icon {
+  position: absolute;
+  width: 19px;
+  height: 19px;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+}
+
+/* NỀN SÁNG: HIỆN MẶT TRỜI VÀNG ẤM */
+.theme-icon--sun {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  color: #A6734B;
+}
+
+.theme-icon--moon {
+  opacity: 0;
+  transform: scale(0.3) rotate(90deg);
+  color: #DFC19B;
+}
+
+/* NỀN TỐI: HIỆN MẶT TRĂNG & SAO KHÔNG GIAN */
+:root.dark-mode .theme-icon--sun {
+  opacity: 0;
+  transform: scale(0.3) rotate(-90deg);
+}
+
+:root.dark-mode .theme-icon--moon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.theme-star {
+  animation: themeStarTwinkle 2.2s infinite ease-in-out;
+}
+.theme-star--2 {
+  animation-delay: 1.1s;
+}
+
+@keyframes themeStarTwinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.navbar__theme-btn.is-animating .theme-icon-box {
+  animation: themeBtnSpinPop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes themeBtnSpinPop {
+  0% { transform: scale(0.9) rotate(0deg); }
+  50% { transform: scale(1.3) rotate(190deg); }
+  100% { transform: scale(1) rotate(360deg); }
+}
+
+/* ---------------------------------------------------------
+   ANIMATION ICON GIỎ HÀNG & USER
+   --------------------------------------------------------- */
+.navbar__icon-btn[title="Giỏ hàng"]:hover {
+  animation: cartWobble 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes cartWobble {
+  0%, 100% { transform: rotate(0deg) scale(1.08); }
+  25% { transform: rotate(-8deg) scale(1.08); }
+  75% { transform: rotate(8deg) scale(1.08); }
+}
+
+.navbar__icon-btn:hover .navbar__cart-badge {
+  animation: badgeSpring 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes badgeSpring {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* ---------------------------------------------------------
+   VIEW TRANSITIONS API CHO CHUYỂN ĐỔI SÁNG/TỐI SIÊU MƯỢT (60/120 FPS)
+   --------------------------------------------------------- */
+::view-transition-group(root) {
+  animation-duration: 0.46s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 999999;
+  will-change: clip-path;
+}
+
+/* Đóng băng tạm thời CSS transitions trên DOM trong khoảnh khắc chụp snapshot để chống giật khung hình */
+.theme-switching-instant *:not(.navbar__theme-btn):not(.theme-icon-box):not(.theme-icon):not(.theme-star) {
+  transition: none !important;
+}
+
+/* Fallback siêu nhẹ cho trình duyệt không hỗ trợ View Transition (Firefox / Safari cũ) - Không dùng selector * */
+.theme-fallback-fade,
+.theme-fallback-fade body,
+.theme-fallback-fade .contact-page-root,
+.theme-fallback-fade .caustic-canvas,
+.theme-fallback-fade .navbar {
+  transition: background-color 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+              color 0.28s ease !important;
+}
 .navbar__cart-badge {
   position: absolute; top: -6px; right: -6px; background: var(--accent-gradient-solid);
   color: #fff; font-size: 10px; font-weight: 700; width: 17px; height: 17px;
@@ -61,7 +209,7 @@
 
 .navbar__search { position: relative; }
 .navbar__search input {
-  width: 210px; padding: 9px 14px; border-radius: 10px;
+  width: 210px; padding: 9px 14px; border-radius: 8px;
   border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-primary);
   font-size: 13.5px;
 }
