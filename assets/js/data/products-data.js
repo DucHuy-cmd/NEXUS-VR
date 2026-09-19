@@ -128,6 +128,90 @@ const PRODUCTS = [
     reviews: [],
     featured: false,
     stock: 210
+  },
+  {
+    id: "vr-003",
+    name: "NEXUS Vision SE",
+    category: "kinh-vr",
+    categoryLabel: "Kính VR",
+    price: 17990000,
+    oldPrice: 19990000,
+    rating: 4.6,
+    reviewCount: 97,
+    colors: [
+      { name: "Đen Vũ Trụ", hex: "#12121a" },
+      { name: "Xám Titan", hex: "#5a5f6b" }
+    ],
+    images: [
+      "assets/images/products/vr-003-1.webp",
+      "assets/images/products/vr-003-2.webp",
+      "assets/images/products/vr-003-3.webp"
+    ],
+    shortDesc: "Bản cân bằng giữa Pro và Air — 6K, FOV rộng, giá hợp lý.",
+    description: "NEXUS Vision SE lấp khoảng trống giữa Air Lite và Vision Pro 8K — vẫn giữ độ phân giải 6K sắc nét, trường nhìn rộng 120°, nhưng lược bớt AI Eye Tracking để tối ưu chi phí cho người dùng phổ thông muốn trải nghiệm cao cấp.",
+    specs: [
+      { label: "Độ phân giải", value: "6K (5760 x 2880) mỗi mắt" },
+      { label: "Tần số quét", value: "100Hz" },
+      { label: "Trường nhìn (FOV)", value: "120°" },
+      { label: "Trọng lượng", value: "360g" },
+      { label: "Thời lượng pin", value: "3 giờ sử dụng liên tục" },
+      { label: "Kết nối", value: "USB-C 3.2, Wi-Fi 6, Bluetooth 5.2" }
+    ],
+    reviews: [
+      { author: "Ngọc Hân", rating: 5, comment: "Giá tốt mà chất lượng hình ảnh gần bằng bản Pro.", date: "2026-08-05" },
+      { author: "Anh Dũng", rating: 4, comment: "Ổn trong tầm giá, chỉ tiếc thiếu Eye Tracking.", date: "2026-07-22" }
+    ],
+    featured: false,
+    stock: 63
+  },
+  {
+    id: "ctrl-002",
+    name: "NEXUS Precision Grip",
+    category: "tay-cam",
+    categoryLabel: "Tay cầm",
+    price: 3990000,
+    oldPrice: null,
+    rating: 4.6,
+    reviewCount: 54,
+    colors: [{ name: "Đen Vũ Trụ", hex: "#12121a" }],
+    images: [
+      "assets/images/products/ctrl-002-1.webp",
+      "assets/images/products/ctrl-002-2.webp"
+    ],
+    shortDesc: "Tay cầm cảm biến lực bóp, dành cho game bắn súng/thể thao.",
+    description: "NEXUS Precision Grip bổ sung cảm biến lực bóp (grip pressure sensor) cho các thao tác cầm nắm vật thể ảo mượt mà hơn, kèm dải đeo cổ tay điều chỉnh được, phù hợp các tựa game cường độ cao.",
+    specs: [
+      { label: "Loại cảm biến", value: "6-DOF Motion Tracking + Grip Pressure" },
+      { label: "Phản hồi", value: "Haptic Feedback đa cấp độ" },
+      { label: "Pin", value: "Sạc trong, dùng được 20 giờ" }
+    ],
+    reviews: [
+      { author: "Việt Hoàng", rating: 5, comment: "Cảm biến lực bóp rất nhạy, chơi game bắn súng đã hơn hẳn.", date: "2026-08-20" }
+    ],
+    featured: false,
+    stock: 89
+  },
+  {
+    id: "acc-002",
+    name: "NEXUS Lens Protector",
+    category: "phu-kien",
+    categoryLabel: "Phụ kiện",
+    price: 350000,
+    oldPrice: null,
+    rating: 4.1,
+    reviewCount: 26,
+    colors: [{ name: "Trong Suốt", hex: "#f0f4f8" }],
+    images: ["assets/images/products/acc-002-1.webp"],
+    shortDesc: "Miếng dán bảo vệ thấu kính, chống trầy xước.",
+    description: "Bộ 2 miếng dán bảo vệ thấu kính trong suốt độ trong 99.5%, không ảnh hưởng chất lượng hình ảnh, dễ dán và tháo không để lại keo dư.",
+    specs: [
+      { label: "Chất liệu", value: "PET quang học độ trong 99.5%" },
+      { label: "Số lượng", value: "2 miếng/bộ" },
+      { label: "Tương thích", value: "NEXUS Vision Pro 8K, Vision SE, Air Lite" }
+    ],
+    reviews: [],
+    featured: false,
+    stock: 340
   }
 ];
 
@@ -184,3 +268,5 @@ const POSTS = [
     featured: false
   }
 ];
+
+
