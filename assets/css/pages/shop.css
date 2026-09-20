@@ -1,0 +1,753 @@
+/* =========================================================
+   assets/css/pages/shop.css
+   CSS RIÊNG cho trang Cửa hàng (shop.html) — phần việc của Hưng.
+
+   DESIGN SYSTEM: "Quiet Luxury / Warm Minimalist Tech"
+   Bảng màu Warm Neutrals (Oat Milk & Espresso).
+
+   Mọi màu sắc dùng qua var(--ten-bien, GIÁ-TRỊ-DỰ-PHÒNG):
+   nếu assets/css/variables.css (do nhóm phụ trách chung) đã
+   khai báo --bg-primary, --accent-bronze... thì giá trị đó
+   được ưu tiên tự động; nếu chưa có / chưa khớp tên, trang vẫn
+   hiển thị đúng bảng màu Quiet Luxury nhờ giá trị dự phòng bên
+   dưới. Cách này tránh việc file này phải tự khai báo lại :root
+   (đè lên phần việc của người phụ trách variables.css).
+
+   Không đổi bất kỳ ID/class/cấu trúc nào so với bản trước —
+   chỉ tinh chỉnh style, màu sắc, typography, spacing, shadow,
+   hover effect. Không style .product-card nội bộ (thuộc
+   product-card.css) — chỉ set layout lưới chứa các thẻ đó.
+   ========================================================= */
+
+/* =========================================================
+   BUG-02 — WCAG AA CONTRAST CHECK (fix áp dụng cho shop.css)
+   Công thức: relative luminance L = 0.2126R + 0.7152G + 0.0722B
+   (mỗi kênh tuyến tính hoá theo sRGB: c<=0.03928 → c/12.92,
+   ngược lại → ((c+0.055)/1.055)^2.4). Contrast = (L1+0.05)/(L2+0.05)
+   với L1 là màu sáng hơn. Ngưỡng cần đạt cho văn bản thường: ≥4.5:1.
+
+   Nền tham chiếu --bg-secondary #F2ECE4 → L ≈ 0.845
+
+   1) --text-muted (dùng ở .price-range__labels...)
+      Cũ:  #9C9086 → L ≈ 0.409 → contrast ≈ 2.65:1  ❌ FAIL
+      Mới: #726657 → L ≈ 0.138 → contrast ≈ 4.77:1  ✅ PASS
+
+   2) Màu chữ Warm Bronze (.eyebrow) — tách biến riêng, KHÔNG đổi
+      --accent-bronze gốc (vẫn dùng cho border/icon):
+      Cũ (--accent-bronze làm chữ):       #A67C52 → L≈0.231 → 3.18:1 ❌ FAIL
+      Mới (--accent-bronze-text, biến mới):#7A5B3D → L≈0.120 → 5.28:1 ✅ PASS
+
+   3) Chữ trắng (#FFFFFF, L=1) trên nền nút Warm Bronze
+      (.btn-reset-filter:hover, .shop-empty .btn-reset-filter):
+      Cũ (nền --accent-bronze):      #A67C52 → 3.73:1 ❌ FAIL
+      Mới (nền --accent-bronze-dark mặc định, không chỉ khi hover):
+                                      #8A6440 → L≈0.149 → 5.28:1 ✅ PASS
+
+   Ghi chú: --text-muted và --accent-bronze-text hiện chưa có trong
+   assets/css/variables.css (ngoài phạm vi sửa của trang này) nên
+   được khai báo tạm ở :root bên dưới, chỉ có hiệu lực trong phạm vi
+   shop.html. Đề xuất đồng bộ 2 biến này vào variables.css để toàn
+   site dùng chung, tránh lệch màu giữa các trang.
+   ========================================================= */
+
+:root {
+  --text-muted: #726657;
+  --accent-bronze-text: #7A5B3D;
+}
+
+/* ---------- 1. KHUNG TRANG ---------- */
+.shop-page {
+  max-width: var(--max-width, 1200px);
+  margin: 0 auto;
+  padding: 0 24px 96px;
+  background: var(--bg-primary, #F9F6F0);
+}
+
+.shop-intro {
+  padding: 56px 0 36px;
+}
+
+.shop-intro .eyebrow {
+  display: inline-block;
+  color: var(--accent-bronze-text, #7A5B3D); /* BUG-02 fix: đủ AA, tách khỏi --accent-bronze */
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+
+.shop-intro h1 {
+  font-family: var(--font-heading, 'Space Grotesk', sans-serif);
+  font-size: clamp(1.9rem, 3.2vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text-primary, #231F1C);
+}
+
+/* ---------- 2. NÚT MỞ BỘ LỌC (chỉ hiện trên mobile/tablet) ---------- */
+.filter-toggle-btn {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 11px 20px;
+  border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.12));
+  border-radius: 999px;
+  background: var(--bg-secondary, #F2ECE4);
+  color: var(--text-primary, #231F1C);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.filter-toggle-btn:hover {
+  border-color: var(--accent-bronze, #A67C52);
+}
+
+/* ---------- 3. LAYOUT CHÍNH: SIDEBAR + NỘI DUNG ---------- */
+.shop-layout {
+  display: grid;
+  grid-template-columns: 268px 1fr;
+  gap: 44px;
+  align-items: start;
+}
+
+/* ---------- 4. SIDEBAR FILTER ---------- */
+.shop-sidebar {
+  position: sticky;
+  top: 90px;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+.sidebar-panel {
+  background: var(--bg-secondary, #F2ECE4);
+  border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.10));
+  border-radius: var(--radius-lg, 20px);
+  padding: 28px 24px;
+  box-shadow: 0 2px 14px rgba(166, 124, 82, 0.08);
+}
+
+.sidebar-panel__header {
+  display: none; /* chỉ hiện ở chế độ drawer trên mobile */
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.sidebar-panel__header h2 {
+  font-family: var(--font-heading, 'Space Grotesk', sans-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary, #231F1C);
+}
+
+.sidebar-close-btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text-secondary, #6B5F55);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(166, 124, 82, 0.1);
+  color: var(--text-primary, #231F1C);
+}
+
+.filter-group {
+  padding: 22px 0;
+  border-bottom: 1px solid var(--glass-border, rgba(35, 31, 28, 0.10));
+}
+
+.filter-group:first-of-type {
+  padding-top: 0;
+}
+
+.filter-group:last-of-type {
+  border-bottom: none;
+}
+
+.filter-group__title {
+  font-family: var(--font-heading, 'Space Grotesk', sans-serif);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text-primary, #231F1C);
+  margin-bottom: 16px;
+}
+
+.filter-checkbox,
+.filter-radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #6B5F55);
+  padding: 7px 0;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.filter-checkbox:hover,
+.filter-radio:hover {
+  color: var(--text-primary, #231F1C);
+}
+
+.filter-checkbox input,
+.filter-radio input {
+  accent-color: var(--accent-bronze, #A67C52);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.filter-radio .stars {
+  color: var(--accent-bronze, #A67C52);
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+}
+
+.price-range input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent-bronze, #A67C52);
+}
+
+.price-range__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-muted, #726657); /* BUG-02 fix: 2.65:1 -> 4.77:1 */
+  margin-top: 8px;
+}
+
+.btn-reset-filter {
+  width: 100%;
+  margin-top: 22px;
+  padding: 12px 0;
+  border-radius: 999px;
+  border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.14));
+  background: transparent;
+  color: var(--text-primary, #231F1C);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.btn-reset-filter:hover {
+  /* BUG-02 fix: chữ trắng trên --accent-bronze chỉ đạt 3.73:1.
+     Dùng --accent-bronze-dark làm nền để đạt ≥4.5:1. */
+  border-color: var(--accent-bronze-dark, #8A6440);
+  color: #fff;
+  background: var(--accent-bronze-dark, #8A6440);
+}
+
+/* ---------- 5. TOOLBAR (SỐ LƯỢNG + SẮP XẾP) ---------- */
+.shop-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--glass-border, rgba(35, 31, 28, 0.10));
+}
+
+.shop-toolbar__count {
+  color: var(--text-secondary, #6B5F55);
+  font-size: 0.9rem;
+}
+
+.shop-toolbar__count strong {
+  color: var(--text-primary, #231F1C);
+  font-weight: 600;
+}
+
+.shop-toolbar__sort {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #6B5F55);
+}
+
+.shop-toolbar__sort select {
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.12));
+  background: var(--bg-secondary, #F2ECE4);
+  color: var(--text-primary, #231F1C);
+  font-family: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.shop-toolbar__sort select:hover,
+.shop-toolbar__sort select:focus-visible {
+  border-color: var(--accent-bronze, #A67C52);
+}
+
+/* ---------- 6. PRODUCT GRID ----------
+   Layout lưới thuần tuý. Giao diện bên trong mỗi .product-card
+   (nền Soft Sand, bo góc, đổ bóng nhẹ, viền hover Warm Bronze)
+   do assets/css/components/product-card.css đảm nhiệm — nếu
+   bạn là người phụ trách file đó, áp cùng token:
+     background: var(--bg-secondary, #F2ECE4);
+     border-radius: var(--radius-md, 12px);
+     box-shadow: 0 4px 18px rgba(166, 124, 82, 0.10);
+     hover border: 1px solid var(--accent-bronze, #A67C52); */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+}
+
+/* ---------- 7. EMPTY STATE ---------- */
+.shop-empty {
+  text-align: center;
+  padding: 100px 24px;
+  color: var(--text-secondary, #6B5F55);
+  background: var(--bg-secondary, #F2ECE4);
+  border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.10));
+  border-radius: var(--radius-lg, 20px);
+}
+
+.shop-empty svg {
+  color: var(--accent-bronze, #A67C52);
+  opacity: 0.55;
+  margin-bottom: 22px;
+}
+
+.shop-empty h3 {
+  font-family: var(--font-heading, 'Space Grotesk', sans-serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary, #231F1C);
+  margin-bottom: 10px;
+}
+
+.shop-empty p {
+  font-size: 0.92rem;
+  margin-bottom: 26px;
+}
+
+.shop-empty .btn-reset-filter {
+  /* BUG-02 fix: nền mặc định đổi sang --accent-bronze-dark (không
+     chỉ khi hover) để chữ trắng đạt ≥4.5:1, xem tính toán ở đầu file. */
+  width: auto;
+  padding: 12px 30px;
+  margin-top: 0;
+  background: var(--accent-bronze-dark, #8A6440);
+  border-color: transparent;
+  color: #fff;
+}
+
+.shop-empty .btn-reset-filter:hover {
+  /* Vẫn có phản hồi hover dù nền mặc định đã tối — sáng nhẹ lên
+     thay vì đổi màu, giữ nguyên tỷ lệ tương phản an toàn. */
+  filter: brightness(1.08);
+}
+
+/* ---------- 8. PAGINATION ---------- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 56px;
+  flex-wrap: wrap;
+}
+
+.pagination__btn {
+  min-width: 42px;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.12));
+  background: var(--bg-secondary, #F2ECE4);
+  color: var(--text-secondary, #6B5F55);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pagination__btn:hover:not(:disabled):not(.is-active) {
+  border-color: var(--accent-bronze, #A67C52);
+  color: var(--text-primary, #231F1C);
+  box-shadow: 0 2px 10px rgba(166, 124, 82, 0.14);
+}
+
+.pagination__btn.is-active {
+  background: var(--accent-bronze, #A67C52);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+}
+
+.pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------- 9. RESPONSIVE ---------- */
+
+/* Tablet: 3 -> 2 cột, sidebar chuyển thành drawer trượt từ trái */
+@media (max-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .filter-toggle-btn {
+    display: inline-flex;
+  }
+
+  .shop-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .shop-sidebar {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    pointer-events: none;
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: rgba(35, 31, 28, 0.4);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .sidebar-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(320px, 85vw);
+    border-radius: 0;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: none;
+  }
+
+  .sidebar-panel__header {
+    display: flex;
+  }
+
+  .shop-sidebar.is-open {
+    pointer-events: auto;
+  }
+
+  .shop-sidebar.is-open .sidebar-overlay {
+    opacity: 1;
+  }
+
+  .shop-sidebar.is-open .sidebar-panel {
+    transform: translateX(0);
+  }
+}
+
+/* Mobile: 1 cột */
+@media (max-width: 640px) {
+  .shop-page {
+    padding: 0 16px 64px;
+  }
+
+  .shop-intro {
+    padding: 36px 0 26px;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .shop-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .shop-toolbar__sort {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .shop-toolbar__sort select {
+    flex: 1;
+  }
+
+  .shop-empty {
+    padding: 64px 20px;
+  }
+}
+
+/* =========================================================
+   ---------- 10. FIX: HEADER & FOOTER LAYOUT (Hưng) ----------
+   Vấn đề: trên shop.html (và tương tự blog.html, blog-post.html),
+   .header-inner và .footer-grid/.footer-bottom hiện bị dồn hết
+   về góc trái do file navbar.css/footer.css dùng chung (thành
+   viên khác phụ trách) chưa set container/flex cho các khối này
+   ở phạm vi áp dụng hiện tại.
+
+   Đây CHỈ LÀ FIX LAYOUT (không đổi cấu trúc HTML/JS, không đổi
+   màu) — được khai báo trong shop.css để tự sửa ngay trên các
+   trang do Hưng phụ trách, không đụng vào file của người khác.
+   Toàn bộ màu sắc vẫn giữ nguyên bảng Warm Neutrals hiện tại:
+   nền kem #F9F6F0, nền card/footer #F2ECE4, chữ Espresso #231F1C,
+   accent Bronze #A67C52 — khối CSS dưới đây không khai báo màu.
+
+   Đề xuất: nếu Đức Huy đồng bộ trực tiếp các rule này vào
+   navbar.css / footer.css dùng chung, thì phần dưới đây có thể
+   bỏ khỏi shop.css để tránh trùng lặp toàn site.
+
+   CẬP NHẬT: shop.html giờ dùng #navbar-root / #footer-root, bên
+   trong có sẵn HEADER/FOOTER DỰ PHÒNG (fallback) bằng HTML tĩnh —
+   hiển thị khi layout-loader.js không tải được (vd. mở trực tiếp
+   qua file:///). Khi layout-loader.js chạy thành công, nó thay
+   thế nội dung 2 khối root này bằng Navbar/Footer chuẩn của Đức
+   Huy — nếu component đó DÙNG CHUNG các class
+   .header-inner/.main-nav/.header-actions/.footer-grid/.footer-bottom
+   thì khối CSS dưới đây vẫn tự áp dụng đúng cho cả 2 trường hợp,
+   không cần sửa gì thêm. Nếu Navbar/Footer chuẩn dùng tên class
+   khác, khối này chỉ còn tác dụng với bản fallback tĩnh.
+   ========================================================= */
+
+/* Căn giữa khung chứa của Header & Footer trong phạm vi max-width chung */
+.header-inner,
+.footer-grid,
+.footer-bottom {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Header: 3 khối dàn ngang — Logo trái / Menu chính giữa / Actions phải */
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative; /* làm mốc để .main-nav canh giữa tuyệt đối bên dưới */
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+  /* Canh giữa tuyệt đối theo .header-inner, không phụ thuộc độ
+     rộng của logo và cụm actions hai bên (đảm bảo đúng giữa) */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.main-nav a {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text-primary, #231F1C);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Footer: lưới 4 cột cân đối */
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 2fr;
+  gap: 40px;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Responsive: dưới 1024px, menu chính giữa dễ đè lên logo/actions
+   khi header-inner hẹp lại — chuyển về flow thường trong flex để
+   tránh chồng chữ (không đổi hành vi ẩn/hiện menu mobile, việc đó
+   thuộc navbar.css dùng chung) */
+@media (max-width: 1024px) {
+  .main-nav {
+    position: static;
+    transform: none;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* =========================================================
+   ---------- 11. DARK MODE (Hưng) ----------
+   Theo góp ý rà soát của Vũ: shop.css trước đây chỉ viết cho nền
+   sáng, không có bất kỳ selector :root.dark-mode nào — khi bấm
+   đổi theme, trang Cửa hàng vẫn giữ nền kem sáng chói.
+
+   VỀ MẶT KIẾN TRÚC (đề xuất gửi Đức Huy — người giữ variables.css):
+   Vì mọi màu trong shop.css đã dùng var(--bg-primary, ...),
+   var(--text-primary, ...)... nên cách ĐÚNG NHẤT và không trùng
+   lặp là Đức Huy định nghĩa lại các biến này trong variables.css
+   dưới :root.dark-mode { --bg-primary: ...; --text-primary: ...; }
+   — khi đó MỌI trang (kể cả shop) tự đổi màu đúng mà không cần
+   thêm dòng CSS nào ở đây.
+
+   Trong lúc chờ variables.css có bản dark chính thức, khối dưới
+   đây đóng vai trò LƯỚI AN TOÀN: tự override các biến ngay trong
+   phạm vi .shop-page để trang không bị "chói" khi bật dark mode,
+   dù variables.css chưa kịp cập nhật. Khi Đức Huy hoàn thiện bản
+   dark trong variables.css, khối này có thể xoá để tránh 2 nguồn
+   sự thật (single source of truth) về màu dark mode.
+   ========================================================= */
+
+:root.dark-mode .shop-page {
+  --bg-primary: #14110F;
+  --bg-secondary: #201C19;
+  --bg-tertiary: #1A1613;
+  --text-primary: #F5EFE7;
+  --text-secondary: #C9BBAC;
+  --text-muted: #8F8073;
+  --accent-bronze: #C89468;
+  --accent-bronze-text: #D9A97A;
+  --accent-bronze-dark: #A97A50;
+  --glass-border: rgba(245, 239, 231, 0.12);
+}
+
+:root.dark-mode .shop-page,
+:root.dark-mode .sidebar-panel,
+:root.dark-mode .shop-empty {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+:root.dark-mode .sidebar-panel {
+  background: var(--bg-secondary);
+  border-color: var(--glass-border);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+}
+
+:root.dark-mode .filter-toggle-btn,
+:root.dark-mode .shop-toolbar__sort select,
+:root.dark-mode .pagination__btn {
+  background: var(--bg-secondary);
+  border-color: var(--glass-border);
+  color: var(--text-primary);
+}
+
+:root.dark-mode .pagination__btn.is-active {
+  background: var(--accent-bronze);
+  color: #1A1613;
+}
+
+:root.dark-mode .btn-reset-filter {
+  border-color: var(--glass-border);
+  color: var(--text-primary);
+}
+
+:root.dark-mode .btn-reset-filter:hover,
+:root.dark-mode .shop-empty .btn-reset-filter {
+  background: var(--accent-bronze-dark);
+  border-color: transparent;
+  color: #1A1613;
+}
+
+:root.dark-mode .shop-empty {
+  border-color: var(--glass-border);
+}
+
+/* Sidebar drawer overlay trên mobile: giữ độ tối vừa phải, không
+   đổi theo theme vì bản thân overlay luôn là lớp phủ tối */
+:root.dark-mode .sidebar-overlay {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* =========================================================
+   ---------- 12. HEADER — TINH CHỈNH SPACING & TYPOGRAPHY ----------
+   Chỉ áp dụng cho shop.html (vì shop.css chỉ được <link> riêng ở
+   trang này) — KHÔNG chỉnh sửa navbar.css/footer.css/layout-loader.js.
+   shop.css được <link> SAU navbar.css trong <head> của shop.html
+   nên các rule cùng độ đặc trưng (specificity) dưới đây tự động
+   đè lên style mặc định của Navbar mà không cần !important.
+
+   Áp cho CẢ 2 trường hợp có thể xảy ra trên shop.html:
+   (a) HEADER FALLBACK tĩnh do Hưng tự viết trong shop.html
+       (class: site-header, header-inner, logo, main-nav,
+       header-actions, icon-btn) — luôn khớp 100%.
+   (b) NAVBAR CHUẨN dùng chung do layout-loader.js nạp (Đức Huy
+       phụ trách) — theo tên class được cung cấp: .navbar,
+       .navbar__logo, .navbar__links a, .navbar__actions. Nếu tên
+       class thật khác đi, nhóm rule (b) này đơn giản là không
+       khớp gì cả (không gây lỗi) — cần Đức Huy xác nhận lại tên
+       class chính xác để override khớp 100% khi cần.
+   ========================================================= */
+
+/* --- (a) Header fallback tĩnh --- */
+.site-header {
+  padding-top: 18px;
+}
+
+.site-header .logo {
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.site-header .main-nav a {
+  font-size: 16.5px;
+}
+
+.site-header .header-actions .icon-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* --- (b) Navbar chuẩn dùng chung (nếu dùng đúng tên class BEM này) --- */
+.navbar {
+  padding-top: 18px;
+}
+
+.navbar__logo {
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.navbar__links a {
+  font-size: 16.5px;
+}
+
+.navbar__actions svg {
+  width: 22px;
+  height: 22px;
+}
