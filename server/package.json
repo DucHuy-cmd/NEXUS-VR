@@ -1,0 +1,16 @@
+{
+  "name": "nexus-vr-foundation",
+  "version": "1.0.0",
+  "description": "NEXUS VR — Backend Express phục vụ site tĩnh + API Contact",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node --watch app.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "nodemailer": "^6.9.14"
+  }
+}
