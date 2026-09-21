@@ -524,6 +524,25 @@
    thì khối CSS dưới đây vẫn tự áp dụng đúng cho cả 2 trường hợp,
    không cần sửa gì thêm. Nếu Navbar/Footer chuẩn dùng tên class
    khác, khối này chỉ còn tác dụng với bản fallback tĩnh.
+
+   FIX ĐÈ CHỮ (báo cáo mới nhất — ô tìm kiếm đè lên "Liên hệ"):
+   NGUYÊN NHÂN GỐC là kỹ thuật canh giữa .main-nav cũ dùng
+   `position: absolute; left: 50%; transform: translateX(-50%)`.
+   Kỹ thuật này ĐẨY main-nav ra khỏi luồng flex bình thường và
+   canh đúng giữa .header-inner một cách TUYỆT ĐỐI, bất kể cụm
+   .header-actions bên phải rộng bao nhiêu — nên khi header-actions
+   phình to dần qua các lần bổ sung Search bar + nút Giỏ hàng có
+   nhãn + khu Tài khoản, phần "Liên hệ" (mục cuối main-nav, nằm ở
+   rìa phải của khối menu) bắt đầu lấn vào vùng của Search bar.
+   Đây là lỗi cấu trúc, không phải do thiếu 1 dòng CSS.
+
+   CÁCH SỬA: bỏ hẳn position:absolute, để .main-nav quay lại luồng
+   flex bình thường như 1 item ngang hàng với .logo/.header-actions.
+   Với flexbox, các item CÙNG LUỒNG (không có item nào bị đưa ra
+   khỏi luồng bằng absolute/fixed) về mặt kỹ thuật KHÔNG BAO GIỜ
+   chồng lên nhau — chúng chỉ co lại (shrink) hoặc xuống dòng (wrap)
+   khi thiếu chỗ, không thể đè lên nhau. Đây là fix triệt để tận
+   gốc, không phải chỉ né được 1 trường hợp cụ thể.
    ========================================================= */
 
 /* Căn giữa khung chứa của Header & Footer trong phạm vi max-width chung */
@@ -537,24 +556,27 @@
   box-sizing: border-box;
 }
 
-/* Header: 3 khối dàn ngang — Logo trái / Menu chính giữa / Actions phải */
+/* Header: Logo trái — Menu — Search — Giỏ hàng/Tài khoản, TẤT CẢ cùng
+   1 luồng flex bình thường (không absolute) nên không thể đè nhau. */
 .header-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: relative; /* làm mốc để .main-nav canh giữa tuyệt đối bên dưới */
+  gap: 20px;
+  flex-wrap: nowrap;
+}
+
+.logo {
+  flex: 0 0 auto; /* Logo giữ nguyên kích thước, không co không giãn */
 }
 
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 32px;
-  list-style: none;
-  /* Canh giữa tuyệt đối theo .header-inner, không phụ thuộc độ
-     rộng của logo và cụm actions hai bên (đảm bảo đúng giữa) */
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  gap: 28px;
+  flex: 0 1 auto; /* không tự phình to, nhưng co lại được nếu thiếu chỗ */
+  white-space: nowrap; /* các mục menu không tự xuống dòng giữa chừng */
+  min-width: 0;
 }
 
 .main-nav a {
@@ -564,10 +586,32 @@
   color: var(--text-primary, #231F1C);
 }
 
+/* Cụm Search + Giỏ hàng + Tài khoản — luôn nằm gọn bên phải ngoài
+   cùng nhờ .header-inner dùng justify-content: space-between phía
+   trên (không cần margin-left:auto/position gì thêm). */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  flex: 0 1 auto;
+  min-width: 0; /* cho phép ô tìm kiếm bên trong co lại đúng theo
+                   max-width thay vì đẩy tràn ra ngoài header-inner */
+}
+
+/* Ô tìm kiếm: co giãn nhẹ trong khoảng min/max, KHÔNG bao giờ đẩy
+   Giỏ hàng/Tài khoản ra ngoài vùng nhìn thấy. (Màu nền/bo góc/icon
+   của .header-search định nghĩa trong <style> riêng ở shop.html —
+   phần dưới đây CHỈ set kích thước/khả năng co giãn.) */
+.header-search {
+  flex: 1 1 160px;
+  min-width: 100px;
+}
+
+/* Giỏ hàng & Tài khoản: LUÔN giữ nguyên kích thước, không bao giờ
+   bị bóp nhỏ hay tràn — đúng yêu cầu "cố định bên phải ngoài cùng". */
+.header-cart-btn,
+.header-account {
+  flex: 0 0 auto;
 }
 
 /* Footer: lưới 4 cột cân đối */
@@ -585,18 +629,41 @@
   flex-wrap: wrap;
 }
 
-/* Responsive: dưới 1024px, menu chính giữa dễ đè lên logo/actions
-   khi header-inner hẹp lại — chuyển về flow thường trong flex để
-   tránh chồng chữ (không đổi hành vi ẩn/hiện menu mobile, việc đó
-   thuộc navbar.css dùng chung) */
+/* Responsive — đảm bảo TUYỆT ĐỐI không đè chữ ở mọi kích thước:
+   dưới 1024px, header-actions/search dễ bị bóp hẹp -> giảm gap và
+   thu nhỏ dần search bar. Dưới 760px, main-nav được đẩy XUỐNG DÒNG
+   RIÊNG (flex-wrap trên .header-inner) thay vì cố nhồi chung 1 hàng
+   với logo + search + actions — với flexbox, item xuống dòng khác
+   hàng thì tuyệt đối không thể chồng lên item ở hàng trên. */
 @media (max-width: 1024px) {
+  .header-inner {
+    gap: 14px;
+  }
+
   .main-nav {
-    position: static;
-    transform: none;
+    gap: 18px;
   }
 
   .footer-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .header-inner {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
+  .main-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    flex: 1 1 100%;
+  }
+
+  .header-actions {
+    flex: 0 0 auto;
   }
 }
 
@@ -750,4 +817,479 @@
 .navbar__actions svg {
   width: 22px;
   height: 22px;
+}
+
+/* =========================================================
+   ---------- 13. HERO BANNER SLIDER — "Sản phẩm nổi bật" ----------
+   (Hưng bổ sung, chỉ trong phạm vi shop.html/shop.css/shop-
+   controller.js). Nội dung slide do JS render động từ PRODUCTS —
+   phần CSS này chỉ lo layout/hiệu ứng, không chứa nội dung cứng.
+   Màu sắc 100% dùng qua var(--ten-bien, fallback) theo đúng bảng
+   Warm Neutrals hiện tại của trang, đồng bộ .product-card.
+   ========================================================= */
+
+.shop-hero-banner {
+  margin: 28px 0 40px;
+}
+
+.hero-slider {
+  position: relative;
+  border-radius: var(--radius-lg, 20px);
+  overflow: hidden;
+  background: var(--bg-secondary, #F2ECE4);
+  border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.10));
+  box-shadow: 0 8px 30px rgba(166, 124, 82, 0.14);
+}
+
+.hero-slider__track {
+  display: flex;
+  width: 100%;
+  transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform;
+}
+
+/* ---------- Từng slide ---------- */
+.hero-slide {
+  flex: 0 0 100%;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: center;
+  min-height: 320px;
+}
+
+.hero-slide__media {
+  position: relative;
+  height: 100%;
+  min-height: 320px;
+  background: var(--bg-tertiary, #EDE5D8);
+  overflow: hidden;
+}
+
+.hero-slide__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-slide__badge {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: var(--accent-bronze-dark, #8A6440);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.hero-slide__content {
+  padding: 36px 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.hero-slide__eyebrow {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-bronze-text, #7A5B3D);
+}
+
+.hero-slide__title {
+  font-family: var(--font-heading, 'Space Grotesk', sans-serif);
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary, #231F1C);
+}
+
+.hero-slide__desc {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-secondary, #6B5F55);
+  max-width: 42ch;
+}
+
+.hero-slide__price {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.hero-slide__price-current {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary, #231F1C);
+}
+
+.hero-slide__price-old {
+  font-size: 0.95rem;
+  color: var(--text-muted, #726657);
+  text-decoration: line-through;
+}
+
+.hero-slide__cta {
+  margin-top: 8px;
+  padding: 13px 30px;
+  border-radius: 999px;
+  background: var(--accent-bronze, #A67C52);
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.hero-slide__cta:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+/* ---------- Nút điều hướng trái/phải ---------- */
+.hero-slider__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(249, 246, 240, 0.85);
+  backdrop-filter: blur(6px);
+  color: var(--text-primary, #231F1C);
+  cursor: pointer;
+  z-index: 3;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.hero-slider__nav:hover {
+  background: var(--bg-secondary, #F2ECE4);
+  transform: translateY(-50%) scale(1.06);
+}
+
+.hero-slider__nav--prev { left: 18px; }
+.hero-slider__nav--next { right: 18px; }
+
+/* ---------- Dải chấm phân trang ---------- */
+.hero-slider__dots {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 3;
+}
+
+.hero-slider__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: rgba(35, 31, 28, 0.25);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.hero-slider__dot.is-active {
+  background: var(--accent-bronze, #A67C52);
+  transform: scale(1.25);
+}
+
+/* ---------- Thanh tab tên sản phẩm (kiểu CellphoneS) ---------- */
+.hero-slider__tabs {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.hero-slider__tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.hero-slider__tab {
+  flex: 0 0 auto;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.14));
+  background: var(--bg-secondary, #F2ECE4);
+  color: var(--text-secondary, #6B5F55);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.hero-slider__tab:hover {
+  border-color: var(--accent-bronze, #A67C52);
+  color: var(--text-primary, #231F1C);
+}
+
+.hero-slider__tab.is-active {
+  background: var(--accent-bronze, #A67C52);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+  .hero-slide {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-slide__media {
+    min-height: 220px;
+  }
+
+  .hero-slide__content {
+    padding: 28px 28px 32px;
+  }
+}
+
+@media (max-width: 640px) {
+  .shop-hero-banner {
+    margin: 18px 0 28px;
+  }
+
+  .hero-slide__media {
+    min-height: 180px;
+  }
+
+  .hero-slide__content {
+    padding: 22px 18px 26px;
+    gap: 8px;
+  }
+
+  .hero-slide__title {
+    font-size: 1.3rem;
+  }
+
+  .hero-slider__nav {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hero-slider__tabs {
+    margin-top: 10px;
+  }
+}
+
+/* =========================================================
+   ---------- 14. HERO BANNER SLIDER — DARK MODE ----------
+   Cùng nguyên tắc "lưới an toàn" như mục 11: lý tưởng nhất là
+   Đức Huy định nghĩa lại các biến trong variables.css dưới
+   :root.dark-mode; khối dưới đây chỉ đảm bảo slider không bị
+   chói/lệch màu nếu biến chưa có bản dark chính thức.
+   ========================================================= */
+
+:root.dark-mode .hero-slider {
+  background: var(--bg-secondary, #201C19);
+  border-color: var(--glass-border, rgba(245, 239, 231, 0.10));
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+:root.dark-mode .hero-slide__media {
+  background: var(--bg-tertiary, #1A1613);
+}
+
+:root.dark-mode .hero-slide__title,
+:root.dark-mode .hero-slide__price-current {
+  color: var(--text-primary, #F5EFE7);
+}
+
+:root.dark-mode .hero-slide__desc {
+  color: var(--text-secondary, #C9BBAC);
+}
+
+:root.dark-mode .hero-slide__price-old {
+  color: var(--text-muted, #8F8073);
+}
+
+:root.dark-mode .hero-slider__nav {
+  background: rgba(20, 17, 15, 0.75);
+  color: var(--text-primary, #F5EFE7);
+}
+
+:root.dark-mode .hero-slider__nav:hover {
+  background: var(--bg-secondary, #201C19);
+}
+
+:root.dark-mode .hero-slider__dot {
+  background: rgba(245, 239, 231, 0.25);
+}
+
+:root.dark-mode .hero-slider__tab {
+  background: var(--bg-secondary, #201C19);
+  border-color: var(--glass-border, rgba(245, 239, 231, 0.12));
+  color: var(--text-secondary, #C9BBAC);
+}
+
+:root.dark-mode .hero-slider__tab.is-active {
+  color: #1A1613;
+}
+
+/* =========================================================
+   ---------- 15. HEADER — KHU VỰC TÀI KHOẢN / ĐĂNG NHẬP ----------
+   (Hưng bổ sung, theo mẫu ảnh: viên nang bo tròn, nền mờ bán
+   trong suốt, nhãn chữ bên trái + icon người dùng dạng chấm tròn
+   bên phải). Ảnh mẫu dùng nền đỏ — header thực tế của site đang
+   theo bảng Warm Neutrals (kem/đồng/espresso), nên màu được
+   chuyển đổi tương đương sang bảng màu hiện tại của trang thay vì
+   copy nguyên màu đỏ, để không phá vỡ Design System chung.
+   Chỉ áp dụng cho HEADER FALLBACK tĩnh của shop.html (trong
+   #navbar-root) — xem ghi chú ở mục 12.
+   ========================================================= */
+
+.header-account {
+  position: relative;
+}
+
+/* ---- Trạng thái CHƯA đăng nhập ---- */
+.account-login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 16px;
+  border-radius: 999px;
+  background: rgba(35, 31, 28, 0.06);
+  border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.12));
+  color: var(--text-primary, #231F1C);
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.account-login-btn:hover {
+  background: rgba(35, 31, 28, 0.1);
+}
+
+.account-login-btn__icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent-bronze, #A67C52);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+/* ---- Trạng thái ĐÃ đăng nhập ---- */
+.account-user__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.12));
+  background: rgba(35, 31, 28, 0.04);
+  color: var(--text-primary, #231F1C);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  max-width: 180px;
+  transition: background 0.2s ease;
+}
+
+.account-user__trigger:hover {
+  background: rgba(35, 31, 28, 0.08);
+}
+
+.account-user__icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent-bronze, #A67C52);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.account-user__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Dropdown "Đăng xuất" ---- */
+.account-user__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 160px;
+  background: var(--bg-secondary, #F2ECE4);
+  border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.12));
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(166, 124, 82, 0.18);
+  padding: 6px;
+  z-index: 20;
+}
+
+.account-user__logout {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 0.88rem;
+  color: var(--text-primary, #231F1C);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.account-user__logout:hover {
+  background: rgba(166, 124, 82, 0.14);
+}
+
+@media (max-width: 760px) {
+  .account-login-btn__label,
+  .account-user__name {
+    display: none; /* màn hình hẹp: chỉ còn icon tròn, vẫn bấm được */
+  }
+
+  .account-login-btn,
+  .account-user__trigger {
+    padding: 6px;
+  }
+}
+
+/* ---- Dark mode ---- */
+:root.dark-mode .account-login-btn,
+:root.dark-mode .account-user__trigger {
+  background: rgba(245, 239, 231, 0.08);
+  border-color: var(--glass-border, rgba(245, 239, 231, 0.14));
+  color: var(--text-primary, #F5EFE7);
+}
+
+:root.dark-mode .account-login-btn:hover,
+:root.dark-mode .account-user__trigger:hover {
+  background: rgba(245, 239, 231, 0.14);
+}
+
+:root.dark-mode .account-user__menu {
+  background: var(--bg-secondary, #201C19);
+  border-color: var(--glass-border, rgba(245, 239, 231, 0.12));
+}
+
+:root.dark-mode .account-user__logout {
+  color: var(--text-primary, #F5EFE7);
 }
