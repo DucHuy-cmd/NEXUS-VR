@@ -38,12 +38,15 @@
       align-items: center;
       gap: 8px;
       width: 100%;
-      max-width: 320px;
+      max-width: 280px; /* trong khoảng 250-300px theo yêu cầu */
+      min-width: 100px; /* không co nhỏ hơn mức này dù màn hình hẹp */
+      flex-shrink: 1; /* được phép co lại trước tiên khi thiếu chỗ... */
       padding: 9px 16px;
       border-radius: 999px;
       background: #fff;
       border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.14));
       box-shadow: 0 2px 10px rgba(166, 124, 82, 0.08);
+      box-sizing: border-box;
     }
 
     .header-search__icon {
@@ -76,6 +79,7 @@
       background: transparent;
       color: var(--text-primary, #231F1C);
       cursor: pointer;
+      flex-shrink: 0; /* ...còn Giỏ hàng thì KHÔNG bao giờ bị co/tràn */
       transition: background 0.2s ease;
     }
 
@@ -86,11 +90,13 @@
     .header-cart-btn__label {
       font-size: 0.88rem;
       font-weight: 500;
+      white-space: nowrap;
     }
 
     @media (max-width: 760px) {
       .header-search {
-        max-width: 200px;
+        max-width: 160px;
+        min-width: 80px;
       }
 
       .header-cart-btn__label {
@@ -136,6 +142,37 @@
             <span class="header-cart-btn__label">Giỏ hàng</span>
             <span class="cart-badge" id="cartBadge">0</span>
           </button>
+
+          <!-- =========================================================
+               KHU VỰC TÀI KHOẢN / ĐĂNG NHẬP (Hưng bổ sung)
+               2 trạng thái, JS (shop-controller.js) tự bật/tắt bằng
+               thuộc tính [hidden] dựa trên dữ liệu đọc được từ
+               localStorage/sessionStorage (key "currentUser") —
+               CHỈ ĐỌC, không đụng đến trang login.html/logic đăng
+               nhập thật do thành viên khác phụ trách.
+               ========================================================= -->
+          <div class="header-account" id="headerAccount">
+            <!-- Trạng thái CHƯA đăng nhập: mặc định hiển thị -->
+            <a href="login.html" class="account-login-btn" id="accountLoginBtn">
+              <span class="account-login-btn__label">Đăng nhập</span>
+              <span class="account-login-btn__icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+            </a>
+
+            <!-- Trạng thái ĐÃ đăng nhập: ẩn mặc định (hidden), JS hiện khi có currentUser -->
+            <div class="account-user" id="accountUser" hidden>
+              <button type="button" class="account-user__trigger" id="accountUserTrigger" aria-haspopup="true" aria-expanded="false">
+                <span class="account-user__icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                <span class="account-user__name" id="accountUserName">Khách hàng</span>
+              </button>
+              <div class="account-user__menu" id="accountUserMenu" role="menu" hidden>
+                <button type="button" class="account-user__logout" id="accountLogoutBtn" role="menuitem">Đăng xuất</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -219,12 +256,18 @@
             </label>
           </div>
 
-          <!-- Lọc còn hàng -->
+          <!-- Lọc còn hàng / đang giảm giá -->
           <div class="filter-group">
             <h3 class="filter-group__title">Tình trạng</h3>
             <label class="filter-checkbox">
               <input type="checkbox" id="inStockOnly">
               <span>Chỉ hiện sản phẩm còn hàng</span>
+            </label>
+            <!-- Lọc Sale (Hưng bổ sung) — "Sale" = có oldPrice hợp lệ và
+                 oldPrice > price, tính trong shop-controller.js -->
+            <label class="filter-checkbox">
+              <input type="checkbox" id="filter-sale">
+              <span>Chỉ sản phẩm đang Sale</span>
             </label>
           </div>
 
