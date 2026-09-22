@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thanh toán | NEXUS VR</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+
+  <link rel="stylesheet" href="assets/css/components/navbar.css">
+  <link rel="stylesheet" href="assets/css/components/footer.css">
+  <link rel="stylesheet" href="assets/css/components/toast.css">
+  <link rel="stylesheet" href="assets/css/pages/checkout.css">
+</head>
+
+<body data-page="checkout">
+  <div id="navbar-root">
+    <header class="site-header" id="siteHeader">
+      <div class="header-inner">
+        <a href="index.html" class="logo">NEXUS<span>VR</span></a>
+
+        <nav class="main-nav" aria-label="Điều hướng chính">
+          <a href="index.html">Trang chủ</a>
+          <a href="shop.html">Cửa hàng</a>
+          <a href="about.html">Giới thiệu</a>
+          <a href="contact.html">Liên hệ</a>
+        </nav>
+
+        <div class="header-actions">
+          <a class="header-cart-btn" href="cart.html" aria-label="Mở giỏ hàng">
+            <span class="header-cart-btn__label">Giỏ hàng</span>
+            <span class="cart-badge" id="cartBadge">0</span>
+          </a>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <main class="checkout-page">
+    <div class="checkout-container">
+
+      <nav class="checkout-breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html">Trang chủ</a>
+        <span>/</span>
+        <a href="cart.html">Giỏ hàng</a>
+        <span>/</span>
+        <strong>Thanh toán</strong>
+      </nav>
+
+      <div class="checkout-heading">
+        <div>
+          <p class="checkout-eyebrow">NEXUS VR / CHECKOUT</p>
+          <h1>Thanh toán đơn hàng</h1>
+          <p>Điền thông tin nhận hàng và chọn phương thức thanh toán.</p>
+        </div>
+      </div>
+
+      <form class="checkout-layout" id="checkoutForm" novalidate>
+        <div class="checkout-main">
+
+          <section class="checkout-card">
+            <div class="checkout-card__head">
+              <div>
+                <span class="checkout-step">01</span>
+                <h2>Thông tin người nhận</h2>
+              </div>
+            </div>
+
+            <div class="checkout-form-grid">
+              <div class="checkout-field checkout-field--full">
+                <label for="customerName">Họ và tên khách hàng <span>*</span></label>
+                <input id="customerName" name="customerName" type="text"
+                       autocomplete="name" placeholder="Nhập họ và tên" required>
+                <small class="field-error" data-error-for="customerName"></small>
+              </div>
+
+              <div class="checkout-field">
+                <label for="customerPhone">Số điện thoại <span>*</span></label>
+                <input id="customerPhone" name="customerPhone" type="tel"
+                       inputmode="numeric" autocomplete="tel" placeholder="Nhập số điện thoại" required>
+                <small class="field-error" data-error-for="customerPhone"></small>
+              </div>
+
+              <div class="checkout-field">
+                <label for="customerProvince">Tỉnh / Thành phố <span>*</span></label>
+                <select id="customerProvince" name="customerProvince" required>
+                  <option value="">Chọn tỉnh / thành phố</option>
+                  <option>TP. Hồ Chí Minh</option>
+                  <option>Hà Nội</option>
+                  <option>Đà Nẵng</option>
+                  <option>Cần Thơ</option>
+                  <option>Hải Phòng</option>
+                  <option>Đồng Nai</option>
+                  <option>Bình Dương</option>
+                </select>
+                <small class="field-error" data-error-for="customerProvince"></small>
+              </div>
+
+              <div class="checkout-field">
+                <label for="customerWard">Xã / Phường <span>*</span></label>
+                <select id="customerWard" name="customerWard" required disabled>
+                  <option value="">Chọn tỉnh / thành phố trước</option>
+                </select>
+                <small class="field-error" data-error-for="customerWard"></small>
+              </div>
+
+              <div class="checkout-field checkout-field--full">
+                <label for="customerAddress">Địa chỉ cụ thể <span>*</span></label>
+                <input id="customerAddress" name="customerAddress" type="text"
+                       autocomplete="street-address" placeholder="Số nhà, tên đường..." required>
+                <small class="field-error" data-error-for="customerAddress"></small>
+              </div>
+
+              <div class="checkout-field checkout-field--full">
+                <label for="orderNote">Ghi chú đơn hàng</label>
+                <textarea id="orderNote" name="orderNote" rows="4"
+                          placeholder="Ví dụ: Giao hàng giờ hành chính..."></textarea>
+              </div>
+            </div>
+          </section>
+
+          <section class="checkout-card">
+            <div class="checkout-card__head">
+              <div>
+                <span class="checkout-step">02</span>
+                <h2>Phương thức thanh toán</h2>
+              </div>
+            </div>
+
+            <label class="payment-method">
+              <input type="radio" name="paymentMethod" value="qr" checked>
+              <span class="payment-method__radio"></span>
+              <span class="payment-method__content">
+                <strong>Chuyển khoản bằng QR</strong>
+                <small>Quét mã QR để thanh toán đơn hàng.</small>
+              </span>
+            </label>
+
+            <div class="qr-payment" id="qrPayment">
+              <div class="qr-payment__copy">
+                <span class="qr-payment__eyebrow">NEXUS VR PAYMENT</span>
+                <h3>Thanh toán bằng mã QR</h3>
+                <p>Nhấn vào mã QR để mở ảnh lớn, sau đó thực hiện chuyển khoản.</p>
+              </div>
+
+              <button type="button" class="qr-image-button" id="qrImageButton"
+                      aria-label="Mở mã QR thanh toán">
+                <img src="assets/images/payment/mb-qr.jpg"
+                     alt="Mã QR thanh toán VietQR MB"
+                     id="qrImage">
+              </button>
+
+              <p class="qr-hint">Sau khi chuyển khoản, bấm nút xác nhận bên dưới.</p>
+
+              <button type="button" class="checkout-confirm-btn" id="confirmPaymentBtn">
+                XÁC NHẬN ĐÃ THANH TOÁN
+              </button>
+
+              <div class="payment-success" id="paymentSuccess" role="status" aria-live="polite" hidden>
+                <span class="payment-success__icon">✓</span>
+                <div>
+                  <strong>Thanh toán thành công</strong>
+                  <p>Đơn hàng của bạn đã được xác nhận.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <button type="submit" class="place-order-btn" id="placeOrderBtn">
+            ĐẶT HÀNG
+          </button>
+
+          <p class="checkout-back">
+            <a href="cart.html">← Quay lại giỏ hàng</a>
+          </p>
+        </div>
+
+        <aside class="checkout-summary-card">
+          <div class="checkout-summary__head">
+            <span class="checkout-step">03</span>
+            <h2>Đơn hàng của bạn</h2>
+          </div>
+
+          <div class="checkout-items" id="checkoutItems"></div>
+
+          <div class="checkout-summary-lines">
+            <div>
+              <span>Tạm tính</span>
+              <strong id="checkoutSubtotal">0 ₫</strong>
+            </div>
+
+            <div class="checkout-discount" id="checkoutDiscountRow" hidden>
+              <span>Giảm giá <b id="checkoutCouponLabel"></b></span>
+              <strong id="checkoutDiscount">-0 ₫</strong>
+            </div>
+
+            <div>
+              <span>Phí vận chuyển</span>
+              <strong class="checkout-free">Miễn phí</strong>
+            </div>
+          </div>
+
+          <div class="checkout-total">
+            <span>Tổng cộng</span>
+            <div>
+              <span id="checkoutOriginalTotal" class="checkout-original-total" hidden>0 ₫</span>
+              <strong id="checkoutFinalTotal">0 ₫</strong>
+            </div>
+          </div>
+        </aside>
+      </form>
+    </div>
+  </main>
+
+  <div class="qr-lightbox" id="qrLightbox" hidden>
+    <div class="qr-lightbox__backdrop" data-close-qr></div>
+    <div class="qr-lightbox__dialog" role="dialog" aria-modal="true" aria-label="Mã QR thanh toán">
+      <button type="button" class="qr-lightbox__close" id="closeQrButton" aria-label="Đóng">×</button>
+      <img src="assets/images/payment/mb-qr.jpg" alt="Mã QR thanh toán VietQR MB">
+    </div>
+  </div>
+
+  <div id="footer-root">
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a href="index.html" class="logo">NEXUS<span>VR</span></a>
+          <p>Hệ sinh thái thực tế ảo thế hệ mới — mang công nghệ VR cao cấp đến gần hơn với mọi người.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Khám phá</h4>
+          <a href="shop.html">Cửa hàng</a>
+          <a href="about.html">Giới thiệu</a>
+          <a href="contact.html">Liên hệ</a>
+        </div>
+        <div class="footer-col">
+          <h4>Hỗ trợ</h4>
+          <a href="contact.html">Liên hệ</a>
+          <a href="#">Chính sách bảo hành</a>
+          <a href="#">Câu hỏi thường gặp</a>
+        </div>
+        <div class="footer-col">
+          <h4>Nhận tin mới</h4>
+          <form class="newsletter-form" action="#" method="post">
+            <input type="email" placeholder="Email của bạn" required aria-label="Email nhận tin">
+            <button type="submit">Đăng ký</button>
+          </form>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 NEXUS VR. Đồ án minh hoạ — không phải sản phẩm thương mại thật.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="assets/js/data/products-data.js"></script>
+  <script src="assets/js/services/storage-service.js"></script>
+  <script src="assets/js/modules/layout-loader.js"></script>
+  <script src="assets/js/modules/theme-toggle.js"></script>
+  <script src="assets/js/modules/toast.js"></script>
+  <script src="assets/js/modules/validator.js"></script>
+  <script src="assets/js/modules/cart-manager.js"></script>
+  <script src="assets/js/controllers/checkout-controller.js"></script>
+</body>
+</html>
