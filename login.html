@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tài khoản - NEXUS VR</title>
+  <link rel="stylesheet" href="assets/css/pages/login.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <div class="ambient ambient-three"></div>
+
+  <main class="account-shell">
+    <section class="account-card" id="accountCard">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span>NEXUS VR</span>
+      </div>
+
+      <div class="view view-login is-active" id="loginView">
+        <div class="avatar-wrap">
+          <img class="default-avatar" src="assets/images/avatar/default-avatar.png" alt="Avatar mặc định">
+        </div>
+        <p class="eyebrow">TÀI KHOẢN</p>
+        <h1>Chào mừng trở lại</h1>
+        <p class="subtext">Đăng nhập để tiếp tục trải nghiệm NEXUS VR.</p>
+
+        <form id="loginForm" novalidate>
+          <label>Tên tài khoản
+            <input id="loginUsername" name="username" autocomplete="username" required>
+          </label>
+          <label>Mật khẩu
+            <span class="password-box">
+              <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+              <button type="button" class="password-toggle" data-target="loginPassword">Hiện</button>
+            </span>
+          </label>
+
+          <div class="slider-captcha" data-captcha="login">
+            <div class="captcha-track"><span class="captcha-progress"></span><span class="captcha-text">Kéo để xác minh</span><button type="button" class="captcha-knob" aria-label="Kéo để xác minh">›</button></div>
+          </div>
+
+          <label class="terms">
+            <input id="loginTerms" type="checkbox">
+            <span>Tôi đồng ý với <button type="button" class="link-button" data-terms>Điều khoản sử dụng</button></span>
+          </label>
+
+          <button class="primary-btn" type="submit">ĐĂNG NHẬP</button>
+        </form>
+
+        <p class="switch-line">Chưa có tài khoản? <button class="link-button" data-show="register">Đăng ký</button></p>
+        <p class="message" id="loginMessage"></p>
+      </div>
+
+      <div class="view view-register" id="registerView">
+        <p class="eyebrow">NEXUS VR ACCOUNT</p>
+        <h1>Tạo tài khoản</h1>
+        <p class="subtext">Tạo tài khoản để lưu thông tin và đơn hàng của bạn.</p>
+
+        <form id="registerForm" novalidate>
+          <label>Tên tài khoản
+            <input id="registerUsername" name="username" minlength="4" maxlength="30" autocomplete="username" required>
+          </label>
+          <label>Mật khẩu
+            <span class="password-box">
+              <input id="registerPassword" name="password" type="password" minlength="6" autocomplete="new-password" required>
+              <button type="button" class="password-toggle" data-target="registerPassword">Hiện</button>
+            </span>
+          </label>
+          <label>Nhập lại mật khẩu
+            <input id="registerConfirm" type="password" autocomplete="new-password" required>
+          </label>
+
+          <div class="slider-captcha" data-captcha="register">
+            <div class="captcha-track"><span class="captcha-progress"></span><span class="captcha-text">Kéo để xác minh</span><button type="button" class="captcha-knob" aria-label="Kéo để xác minh">›</button></div>
+          </div>
+
+          <label class="terms">
+            <input id="registerTerms" type="checkbox">
+            <span>Tôi đồng ý với <button type="button" class="link-button" data-terms>Điều khoản sử dụng</button></span>
+          </label>
+
+          <button class="primary-btn" type="submit">ĐĂNG KÝ</button>
+        </form>
+
+        <p class="switch-line">Đã có tài khoản? <button class="link-button" data-show="login">Đăng nhập</button></p>
+        <p class="message" id="registerMessage"></p>
+      </div>
+
+      <div class="view view-profile" id="profileView">
+        <p class="eyebrow">BƯỚC 2 / 2</p>
+        <h1>Hoàn tất hồ sơ</h1>
+        <p class="subtext">Thông tin này giúp NEXUS VR chuẩn bị đơn hàng cho bạn.</p>
+
+        <form id="profileForm" novalidate>
+          <div class="profile-avatar-row">
+            <img id="profileAvatarPreview" class="profile-avatar" src="assets/images/avatar/default-avatar.png" alt="Avatar">
+            <div>
+              <strong>Ảnh đại diện</strong>
+              <p class="hint">Chọn ảnh từ máy hoặc dùng avatar mặc định.</p>
+              <label class="upload-btn">Chọn ảnh
+                <input id="avatarUpload" type="file" accept="image/png,image/jpeg,image/webp">
+              </label>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <label>Họ và tên
+              <input id="fullName" required>
+            </label>
+            <label>Ngày tháng năm sinh
+              <input id="birthDate" type="date" max="" required>
+            </label>
+            <label>Giới tính
+              <select id="gender" required>
+                <option value="">Chọn giới tính</option>
+                <option>Nam</option>
+                <option>Nữ</option>
+              </select>
+            </label>
+            <label>Số điện thoại
+              <input id="phone" type="tel" inputmode="tel" required>
+            </label>
+            <label>Quốc gia
+              <select id="country" required>
+                <option>Việt Nam</option>
+                <option>Anh</option>
+                <option>Pháp</option>
+                <option>Nhật Bản</option>
+                <option>Hàn Quốc</option>
+              </select>
+            </label>
+            <label>Tỉnh / Thành phố
+              <select id="province" required></select>
+            </label>
+            <label>Phường / Xã
+              <input id="ward" placeholder="Nhập phường / xã" required>
+            </label>
+            <label class="full">Địa chỉ cụ thể
+              <textarea id="address" rows="3" required placeholder="Số nhà, tên đường..."></textarea>
+            </label>
+          </div>
+
+          <button class="primary-btn" type="submit">HOÀN TẤT HỒ SƠ</button>
+        </form>
+        <p class="message" id="profileMessage"></p>
+      </div>
+
+      <div class="view view-account" id="accountView">
+        <div class="account-avatar-large">
+          <img id="accountAvatar" src="assets/images/avatar/default-avatar.png" alt="Avatar người dùng">
+        </div>
+        <p class="eyebrow">TÀI KHOẢN CỦA BẠN</p>
+        <h1 id="accountName">Người dùng</h1>
+        <p class="subtext" id="accountUsername"></p>
+
+        <div class="profile-summary" id="profileSummary"></div>
+
+        <div class="account-actions">
+          <button class="secondary-btn" id="editProfileBtn" type="button">Chỉnh sửa hồ sơ</button>
+          <button class="primary-btn" id="logoutBtn" type="button">ĐĂNG XUẤT</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="termsDialog">
+    <div class="dialog-card">
+      <button class="dialog-close" type="button" data-close-terms>×</button>
+      <p class="eyebrow">NEXUS VR</p>
+      <h2>Điều khoản sử dụng</h2>
+      <p>Tài khoản được sử dụng để đăng nhập, lưu hồ sơ khách hàng và hỗ trợ quá trình đặt hàng. Thông tin nhập vào nên là thông tin chính xác của người dùng.</p>
+      <p>Đây là bản demo frontend. Dữ liệu tài khoản được lưu trên trình duyệt bằng localStorage; không dùng cơ chế này để lưu dữ liệu nhạy cảm trên hệ thống thực tế.</p>
+      <button class="primary-btn" type="button" data-close-terms>Đã hiểu</button>
+    </div>
+  </dialog>
+
+  <script src="assets/js/controllers/login-controller.js"></script>
+</body>
+</html>
