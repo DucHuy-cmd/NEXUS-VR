@@ -22,10 +22,8 @@
   <link rel="stylesheet" href="assets/css/components/footer.css">
   <link rel="stylesheet" href="assets/css/components/toast.css">
   <link rel="stylesheet" href="assets/css/components/product-card.css">
-  <link rel="stylesheet" href="assets/css/components/cart-drawer.css">
-  <link rel="stylesheet" href="assets/css/components/fx.css">
 
-  <!-- TẦNG 3: PAGE CSS RIÊNG -->
+  <!-- TẦNG 3: PAGE CSS -->
   <link rel="stylesheet" href="assets/css/pages/home.css">
 </head>
 <body data-page="home">
@@ -33,115 +31,132 @@
   <!-- SKIP TO CONTENT -->
   <a href="#main-content" class="skip-link">Bỏ qua tới nội dung chính</a>
 
-  <!-- READING PROGRESS BAR -->
-  <div class="scroll-progress-bar" id="scroll-progress" aria-hidden="true"></div>
-
-  <!-- NAVBAR (Tự động dựng bởi layout-loader.js) -->
+  <!-- NAVBAR (Tự động nạp bởi layout-loader.js) -->
   <div id="navbar-root"></div>
 
-  <!-- MAIN CONTENT: 8 PHẦN CHUẨN THEO ĐẶC TẢ STORYTELLING CAO CẤP -->
+  <!-- MAIN CONTENT: 7 PHẦN CHUẨN PHONG CÁCH APPLE -->
   <main class="home-main" id="main-content">
 
     <!-- =========================================================================
-         SECTION 01: HERO
+         PHẦN 1: HERO
          ========================================================================= -->
     <section class="home-hero" id="hero" aria-label="Giới thiệu NEXUS Vision Pro">
-      <div class="container home-hero__container">
-        <div class="home-hero__content">
-          <h1 class="home-hero__title" data-fx="slide-up">NEXUS Vision Pro</h1>
-          <p class="home-hero__sub" data-fx="slide-up">8K cho mỗi mắt. Thân bọc vải dệt. 420 g.</p>
-          <div class="home-hero__actions" data-fx="slide-up">
+      <div class="wrap home-hero__inner">
+        <div class="home-hero__content" data-fx="reveal">
+          <div class="home-hero__chips">
+            <span class="hero-chip">8K Spatial Engine</span>
+            <span class="hero-chip-divider" aria-hidden="true"></span>
+            <span class="hero-chip">Lightweight 420g</span>
+          </div>
+          <h1 class="home-hero__title">NEXUS Vision Pro</h1>
+          <p class="home-hero__sub">8K cho mỗi mắt. Thân bọc vải dệt cao cấp. 420 g công thái học.</p>
+          <div class="home-hero__actions">
             <a href="shop.html" class="btn btn-primary btn-lg">Khám phá cửa hàng</a>
             <a href="contact.html" class="btn btn-secondary btn-lg">Đặt lịch trải nghiệm</a>
           </div>
         </div>
 
-        <div class="home-hero__media" data-fx="slide-up">
-          <img 
-            src="assets/images/hero/hero-vr-headset-xam.webp" 
-            alt="Kính NEXUS Vision Pro màu xám nhìn chếch 3/4" 
-            class="home-hero__img" 
-            id="hero-main-img"
-            width="1400" 
-            height="931" 
-            fetchpriority="high"
-            onerror="this.onerror=null; this.src='assets/images/placeholder.svg';"
-          >
+        <div class="home-hero__media-wrapper" data-fx="reveal" data-delay="200">
+          <div class="hero-glow-halo" aria-hidden="true"></div>
+          <div class="home-hero__media">
+            <img 
+              src="assets/images/hero/hero-vr-headset-xam.webp" 
+              alt="Kính NEXUS Vision Pro màu xám nhìn chếch 3/4" 
+              class="home-hero__img" 
+              id="hero-main-img"
+              width="1400" 
+              height="931" 
+              fetchpriority="high"
+              onerror="this.onerror=null; this.src='assets/images/placeholder.svg';"
+            >
+          </div>
         </div>
       </div>
     </section>
 
     <!-- =========================================================================
-         SECTION 02: PRODUCT STATEMENT
+         PHẦN 2: TUYÊN BỐ (PRODUCT STATEMENT)
          ========================================================================= -->
-    <section class="home-statement" id="statement" aria-label="Tuyên bố công nghệ">
-      <div class="container-narrow">
-        <div class="home-statement__wrap" data-fx="slide-up">
+    <section class="home-statement" id="statement" aria-label="Tuyên bố công nghệ hiển thị">
+      <div class="wrap text-center">
+        <div class="home-statement__card" data-fx="reveal">
+          <span class="section-eyebrow">CHUẨN MỰC THỊ GIÁC MỚI</span>
           <h2 class="home-statement__lead">7680 × 3840 điểm ảnh cho mỗi mắt.</h2>
-          <p class="home-statement__sub">Chữ nhỏ vẫn đọc được. Đường thẳng vẫn thẳng.</p>
+          <p class="home-statement__sub">Chữ nhỏ vẫn đọc được cực rõ. Đường thẳng tuyệt đối không biến dạng.</p>
         </div>
       </div>
     </section>
 
     <!-- =========================================================================
-         SECTION 03: BENTO HIGHLIGHTS
+         PHẦN 3: BA ĐIỂM NỔI BẬT (BENTO HIGHLIGHTS)
          ========================================================================= -->
     <section class="home-highlights" id="highlights" aria-label="Ba điểm nổi bật công nghệ">
-      <div class="container">
-        <div class="section-header text-center" data-fx="slide-up">
-          <span class="section-eyebrow">KỸ NGHỆ ĐỈNH CAO</span>
-          <h2 class="home-section-title">Chi tiết tạo nên sự khác biệt</h2>
-          <p class="home-section-sub">Từng góc độ được chế tác với sự tĩnh lặng, chính xác và tinh tế.</p>
+      <div class="wrap">
+        <div class="home-section-header text-center" data-fx="reveal">
+          <span class="section-eyebrow">KỸ NGHỆ QUANG HỌC</span>
+          <h2 class="home-section-title">Ba chi tiết định hình trải nghiệm</h2>
+          <p class="home-section-sub">Đột phá về mật độ hiển thị, tần số quét và góc nhìn toàn cảnh.</p>
         </div>
 
         <div class="bento-grid">
           
-          <!-- Large Feature Card: Màn hình 8K (Full width) -->
-          <article class="bento-card bento-card--full" data-fx="slide-up" data-tilt="true">
-            <div class="bento-info">
-              <span class="bento-badge">Thị giác không gian</span>
-              <h3 class="bento-title">8K <span class="bento-title-sub">Mỗi Mắt</span></h3>
-              <p class="bento-desc">Hơn 29 triệu điểm ảnh siêu nhỏ tái hiện văn bản và hình ảnh chân thực tuyệt đối. Triệt tiêu hoàn toàn hiệu ứng cửa lưới màn hình.</p>
-              <div class="bento-metrics">
-                <div class="metric-item">
-                  <span class="metric-val">7680×3840</span>
-                  <span class="metric-lbl">Độ phân giải kép</span>
-                </div>
-                <div class="metric-item">
-                  <span class="metric-val">120 Hz</span>
-                  <span class="metric-lbl">Tần số làm tươi</span>
-                </div>
-              </div>
+          <!-- Thẻ 1: Màn hình 8K -->
+          <article class="bento-card bento-card--large" data-fx="reveal">
+            <div class="bento-card__media">
+              <img 
+                src="assets/images/hero/hero-vr-headset-xam.webp" 
+                alt="Chi tiết mặt trước và thấu kính Obsidian 8K" 
+                class="bento-card__img" 
+                loading="lazy" 
+                width="800" 
+                height="533"
+                onerror="this.onerror=null; this.src='assets/images/placeholder.svg';"
+              >
             </div>
-            <div class="bento-img-wrap">
-              <img src="assets/images/hero/hero-highlight-front.jpg" alt="Mặt kính Obsidian cong và thấu kính quang học 8K" class="bento-img bento-img--front" loading="lazy" width="800" height="533">
-              <div class="bento-view-label">Mặt kính Obsidian cong 3D</div>
+            <div class="bento-card__info">
+              <span class="bento-card__num">8K</span>
+              <h3 class="bento-card__title">Màn hình Micro-OLED</h3>
+              <p class="bento-card__desc">7680 × 3840 điểm ảnh cho mỗi mắt, hiển thị văn bản sắc nét như trên giấy in.</p>
             </div>
           </article>
 
-          <!-- Supporting Card 1: Lifestyle / Con người -->
-          <article class="bento-card" data-fx="slide-up" data-tilt="true">
-            <div class="bento-info">
-              <span class="bento-badge">Trải nghiệm thực tế</span>
-              <h3 class="bento-title">Hòa quyện <span class="bento-title-sub">tự nhiên</span></h3>
-              <p class="bento-desc">Trọng lượng 420g tối ưu hóa phân bổ trọng lực, kết hợp lớp đệm thoáng khí ôm sát khuôn mặt cho cảm giác đeo êm suốt ngày dài.</p>
+          <!-- Thẻ 2: Tần số quét 120Hz -->
+          <article class="bento-card" data-fx="reveal" data-delay="100">
+            <div class="bento-card__media">
+              <img 
+                src="assets/images/hero/hero-vr-headset-trangnau.webp" 
+                alt="Cụm cảm biến và khe thoát nhiệt vi mô 120Hz" 
+                class="bento-card__img" 
+                loading="lazy" 
+                width="600" 
+                height="400"
+                onerror="this.onerror=null; this.src='assets/images/placeholder.svg';"
+              >
             </div>
-            <div class="bento-img-wrap">
-              <img src="assets/images/hero/person-vr.jpg" alt="Trải nghiệm đeo NEXUS Vision Pro trong không gian sống" class="bento-img bento-img--lifestyle" loading="lazy" width="600" height="400">
-              <div class="bento-view-label">Trải nghiệm không gian cá nhân</div>
+            <div class="bento-card__info">
+              <span class="bento-card__num">120 Hz</span>
+              <h3 class="bento-card__title">Tần số quét mượt mà</h3>
+              <p class="bento-card__desc">Chuyển động phản hồi tức thì, hoàn toàn loại bỏ cảm giác chóng mặt khi quay đầu.</p>
             </div>
           </article>
 
-          <!-- Supporting Card 2: 130° FOV & Vật liệu -->
-          <article class="bento-card" data-fx="slide-up" data-tilt="true">
-            <div class="bento-info">
-              <span class="bento-badge">Kỹ nghệ vật liệu</span>
-              <h3 class="bento-title">130° <span class="bento-title-sub">FOV</span></h3>
-              <p class="bento-desc">Hệ thống thấu kính Pancake 3 lớp mở rộng góc nhìn tới tận mép viền, kết hợp dải âm thanh không gian tích hợp ngay trên quai đeo hợp kim.</p>
+          <!-- Thẻ 3: Trường nhìn 130° -->
+          <article class="bento-card" data-fx="reveal" data-delay="200">
+            <div class="bento-card__media">
+              <img 
+                src="assets/images/hero/hero-vr-headset-xanhcam.webp" 
+                alt="Chi tiết quai đeo công thái học và thấu kính siêu rộng" 
+                class="bento-card__img" 
+                loading="lazy" 
+                width="600" 
+                height="400"
+                onerror="this.onerror=null; this.src='assets/images/placeholder.svg';"
+              >
             </div>
-            <div class="bento-img-wrap">
-              <img src="assets/images/hero/hero-highlight-side.jpg" alt="Bản lề hợp kim và quai dệt 3D thoáng khí" class="bento-img bento-img--side" loading="lazy" width="600" height="400">
-              <div class="bento-view-label">Khung hợp kim &amp; Quai dệt 3D</div>
+            <div class="bento-card__info">
+              <span class="bento-card__num">130°</span>
+              <h3 class="bento-card__title">Trường nhìn siêu rộng</h3>
+              <p class="bento-card__desc">Góc nhìn bao quát tự nhiên tới rìa mắt, xóa tan ranh giới viền kính.</p>
             </div>
           </article>
 
@@ -150,107 +165,88 @@
     </section>
 
     <!-- =========================================================================
-         SECTION 04: PINNED PRODUCT STORY (WOW MOMENT)
+         PHẦN 4: KHOẢNH KHẮC CUỘN GHIM (PINNED COLOR STORY)
          ========================================================================= -->
-    <section class="home-scroll-colors" id="scroll-colors" aria-label="Câu chuyện sản phẩm theo nhịp cuộn">
-      <div class="scroll-colors__pin-track" id="scroll-pin-track">
-        <div class="container scroll-colors__container">
+    <section class="home-scroll-pin" id="scroll-pin" aria-label="Khoảnh khắc cuộn đổi màu">
+      <div class="home-scroll-pin__track" id="scroll-pin-track">
+        <div class="wrap home-scroll-pin__inner" data-fx="reveal">
           
-          <div class="scroll-colors__meta" data-fx="slide-up">
-            <span class="scroll-colors__eyebrow" id="scroll-story-chapter">01 — IMMERSIVE</span>
-            <h2 class="scroll-colors__name" id="scroll-color-name">Thị giác thuần khiết</h2>
-            <p class="scroll-colors__desc" id="scroll-story-desc">Màn hình 8K kép tái hiện chi tiết sống động đến từng milimet, xóa nhòa ranh giới giữa thế giới vật lý và kỹ thuật số.</p>
-          </div>
-          
-          <div class="scroll-colors__stage">
-            <div class="home-ambient-halo scroll-ambient-halo" id="scroll-ambient-halo" aria-hidden="true"></div>
-            
-            <img 
-              src="assets/images/hero/hero-highlight-front.jpg" 
-              alt="Chi tiết thấu kính và cảm biến mặt trước NEXUS Vision Pro" 
-              class="scroll-img is-active" 
-              id="scroll-img-front"
-              loading="lazy" 
-              width="1200" 
-              height="800" 
-            >
-            <img 
-              src="assets/images/hero/hero-highlight-top.jpg" 
-              alt="Cụm cảm biến và khe thoát nhiệt vi mô trên đỉnh kính" 
-              class="scroll-img" 
-              id="scroll-img-top"
-              loading="lazy" 
-              width="1200" 
-              height="800" 
-            >
-            <img 
-              src="assets/images/hero/hero-highlight-side.jpg" 
-              alt="Quai dệt thoáng khí và núm xoay điều chỉnh vi mô" 
-              class="scroll-img" 
-              id="scroll-img-side"
-              loading="lazy" 
-              width="1200" 
-              height="800" 
-            >
+          <div class="home-scroll-pin__meta">
+            <span class="home-scroll-pin__eyebrow" id="scroll-pin-chapter">01 — XÁM THAN</span>
+            <h2 class="home-scroll-pin__title" id="scroll-pin-title">Xám Than</h2>
+            <p class="home-scroll-pin__desc" id="scroll-pin-desc">Thân bọc vải dệt tối màu, tĩnh lặng và thanh lịch trong mọi không gian làm việc.</p>
+
+            <!-- Indicator dots -->
+            <div class="home-scroll-pin__dots" role="tablist" aria-label="Các phiên bản màu sắc">
+              <button type="button" class="pin-dot is-active" id="dot-0" role="tab" aria-selected="true" aria-label="Màu Xám Than"></button>
+              <button type="button" class="pin-dot" id="dot-1" role="tab" aria-selected="false" aria-label="Màu Trắng Nâu"></button>
+              <button type="button" class="pin-dot" id="dot-2" role="tab" aria-selected="false" aria-label="Màu Xanh Cam"></button>
+            </div>
           </div>
 
-          <!-- Story Indicator Dots -->
-          <div class="scroll-story__indicators" aria-hidden="true">
-            <span class="story-dot is-active" data-index="0"></span>
-            <span class="story-dot" data-index="1"></span>
-            <span class="story-dot" data-index="2"></span>
+          <div class="home-scroll-pin__stage">
+            <img 
+              src="assets/images/hero/hero-vr-headset-xam.webp" 
+              alt="Kính NEXUS Vision Pro phiên bản Xám Than" 
+              class="scroll-headset-img is-active" 
+              id="pin-img-xam"
+              width="1400" 
+              height="931"
+            >
+            <img 
+              src="assets/images/hero/hero-vr-headset-trangnau.webp" 
+              alt="Kính NEXUS Vision Pro phiên bản Trắng Nâu" 
+              class="scroll-headset-img" 
+              id="pin-img-trangnau"
+              width="1440" 
+              height="954"
+            >
+            <img 
+              src="assets/images/hero/hero-vr-headset-xanhcam.webp" 
+              alt="Kính NEXUS Vision Pro phiên bản Xanh Cam" 
+              class="scroll-headset-img" 
+              id="pin-img-xanhcam"
+              width="1440" 
+              height="948"
+            >
           </div>
 
         </div>
       </div>
 
-      <!-- MOBILE STACKED STORY CARDS (< 768px) -->
-      <div class="container scroll-story__mobile-container" aria-hidden="true">
-        <div class="scroll-story__mobile-cards">
-          <article class="story-mobile-card" data-fx="slide-up">
-            <span class="story-mobile-badge">01 — IMMERSIVE</span>
-            <div class="story-mobile-img-wrap">
-              <img src="assets/images/hero/hero-highlight-front.jpg" alt="Thị giác thuần khiết 8K" loading="lazy" width="600" height="400">
-            </div>
-            <h3 class="story-mobile-title">Thị giác thuần khiết</h3>
-            <p class="story-mobile-desc">Màn hình 8K kép tái hiện chi tiết sống động đến từng milimet, xóa nhòa ranh giới giữa thế giới vật lý và kỹ thuật số.</p>
-          </article>
-
-          <article class="story-mobile-card" data-fx="slide-up">
-            <span class="story-mobile-badge">02 — PRECISE</span>
-            <div class="story-mobile-img-wrap">
-              <img src="assets/images/hero/hero-highlight-top.jpg" alt="Định vị 6-DoF siêu nhạy" loading="lazy" width="600" height="400">
-            </div>
-            <h3 class="story-mobile-title">Định vị 6-DoF siêu nhạy</h3>
-            <p class="story-mobile-desc">Hệ thống cảm biến quang học bắt trọn từng chuyển động vi mô của mắt và bàn tay với độ trễ chuyển động triệt tiêu.</p>
-          </article>
-
-          <article class="story-mobile-card" data-fx="slide-up">
-            <span class="story-mobile-badge">03 — PERSONAL</span>
-            <div class="story-mobile-img-wrap">
-              <img src="assets/images/hero/hero-highlight-side.jpg" alt="Thiết kế may đo riêng bạn" loading="lazy" width="600" height="400">
-            </div>
-            <h3 class="story-mobile-title">Thiết kế may đo riêng bạn</h3>
-            <p class="story-mobile-desc">Vải dệt thoáng khí 3D cùng cơ chế phân bổ trọng lượng công thái học 420g cho cảm giác đeo tĩnh lặng cả ngày dài.</p>
-          </article>
-        </div>
+      <!-- MOBILE STACKED CARDS (< 768px) -->
+      <div class="wrap home-scroll-pin__mobile">
+        <article class="pin-mobile-card" data-fx="reveal">
+          <img src="assets/images/hero/hero-vr-headset-xam.webp" alt="Xám Than" loading="lazy" width="600" height="400">
+          <h3>Xám Than</h3>
+          <p>Thân bọc vải dệt tối màu, tĩnh lặng và thanh lịch.</p>
+        </article>
+        <article class="pin-mobile-card" data-fx="reveal">
+          <img src="assets/images/hero/hero-vr-headset-trangnau.webp" alt="Trắng Nâu" loading="lazy" width="600" height="400">
+          <h3>Trắng Nâu</h3>
+          <p>Sắc thái ấm áp hòa quyện với phong cách kiến trúc kem hiện đại.</p>
+        </article>
+        <article class="pin-mobile-card" data-fx="reveal">
+          <img src="assets/images/hero/hero-vr-headset-xanhcam.webp" alt="Xanh Cam" loading="lazy" width="600" height="400">
+          <h3>Xanh Cam</h3>
+          <p>Điểm nhấn năng động với dải quai thể thao cá tính.</p>
+        </article>
       </div>
     </section>
 
     <!-- =========================================================================
-         SECTION 05: COLORWAY SELECTOR
+         PHẦN 5: CHỌN MÀU (COLORWAY SELECTOR)
          ========================================================================= -->
     <section class="home-colorways" id="colorways" aria-label="Tùy chọn màu sắc và giá bán">
-      <div class="container">
-        <div class="home-colorways__header text-center" data-fx="slide-up">
+      <div class="wrap text-center">
+        <div class="home-colorways__header" data-fx="reveal">
           <span class="section-eyebrow">PHIÊN BẢN CÁ NHÂN HÓA</span>
-          <h2 class="home-section-title">Ba sắc thái. Một kiệt tác.</h2>
+          <h2 class="home-section-title">Chọn màu sắc của bạn</h2>
           <p class="home-colorways__price">89.990.000₫</p>
-          <p class="home-colorways__vat">Đã bao gồm thuế GTGT &amp; bảo hành chính hãng 24 tháng</p>
+          <span class="home-colorways__old-price">Giá niêm yết: 94.990.000₫</span>
         </div>
 
-        <div class="home-colorways__display" data-fx="slide-up">
-          <div class="home-ambient-halo colorway-ambient-halo" id="colorway-ambient-halo" aria-hidden="true"></div>
+        <div class="home-colorways__display" data-fx="reveal" data-delay="100">
           <img 
             src="assets/images/hero/hero-vr-headset-xam.webp" 
             alt="NEXUS Vision Pro Xám Than" 
@@ -262,16 +258,15 @@
           >
         </div>
 
-        <div class="home-colorways__controls" data-fx="slide-up">
-          <div class="color-dots" role="radiogroup" aria-label="Danh sách tùy chọn màu sắc">
+        <div class="home-colorways__controls" data-fx="reveal" data-delay="200">
+          <div class="color-dots" role="radiogroup" aria-label="Tùy chọn màu kính">
             <button 
               type="button" 
               class="color-dot is-active" 
               role="radio" 
               aria-checked="true" 
               aria-label="Màu Xám Than" 
-              data-name="Xám Than" 
-              data-color-tone="gray"
+              data-name="Xám Than"
               data-img="assets/images/hero/hero-vr-headset-xam.webp" 
               style="--dot-color: #9F9FA1;"
             ></button>
@@ -280,9 +275,8 @@
               class="color-dot" 
               role="radio" 
               aria-checked="false" 
-              aria-label="Màu Trắng Ngà" 
-              data-name="Trắng Ngà" 
-              data-color-tone="warm"
+              aria-label="Màu Trắng Nâu" 
+              data-name="Trắng Nâu"
               data-img="assets/images/hero/hero-vr-headset-trangnau.webp" 
               style="--dot-color: #EFEBE5;"
             ></button>
@@ -291,118 +285,72 @@
               class="color-dot" 
               role="radio" 
               aria-checked="false" 
-              aria-label="Màu Xanh Trầm" 
-              data-name="Xanh Trầm" 
-              data-color-tone="blue"
+              aria-label="Màu Xanh Cam" 
+              data-name="Xanh Cam"
               data-img="assets/images/hero/hero-vr-headset-xanhcam.webp" 
               style="--dot-color: #D9E0E9;"
             ></button>
           </div>
           <div class="color-active-label" id="colorway-active-label">Xám Than</div>
-          <div class="home-colorways__cta mt-24">
-            <a href="product.html?id=vr-001" class="btn btn-primary">Đặt hàng ngay</a>
+          <div class="home-colorways__cta">
+            <a href="product.html?id=vr-001" class="btn btn-primary btn-lg">Xem chi tiết & Mua ngay</a>
           </div>
         </div>
       </div>
     </section>
 
     <!-- =========================================================================
-         SECTION 06: SPECIFICATIONS (EDITORIAL COMPARISON)
+         PHẦN 6: SO SÁNH THÔNG SỐ (EDITORIAL COMPARISON)
          ========================================================================= -->
     <section class="home-comparison" id="comparison" aria-label="Bảng so sánh thông số kỹ thuật">
-      <div class="container">
-        <div class="home-comparison__header text-center" data-fx="slide-up">
-          <span class="section-eyebrow">SO SÁNH THIẾT BỊ</span>
-          <h2 class="home-section-title">Chọn cấu hình phù hợp với bạn</h2>
-          <p class="home-section-sub">Được xây dựng trên cùng một nền tảng điện toán không gian tối ưu.</p>
+      <div class="wrap">
+        <div class="home-section-header text-center" data-fx="reveal">
+          <span class="section-eyebrow">SO SÁNH CẤU HÌNH</span>
+          <h2 class="home-section-title">Chọn kính VR phù hợp với bạn</h2>
+          <p class="home-section-sub">Bảng thông số kỹ thuật chi tiết giữa hai dòng kính hàng đầu.</p>
         </div>
 
-        <!-- HIGHLIGHT METRIC LEDGER -->
-        <div class="specs-metrics-grid" data-fx="slide-up">
-          <div class="specs-metric-card">
-            <span class="specs-metric-val">8K</span>
-            <span class="specs-metric-name">Màn hình kép</span>
-            <span class="specs-metric-detail">7680 × 3840 mỗi mắt, Micro-OLED</span>
-          </div>
-          <div class="specs-metric-card">
-            <span class="specs-metric-val">120<span class="specs-metric-unit">Hz</span></span>
-            <span class="specs-metric-name">Tần số quét</span>
-            <span class="specs-metric-detail">Chuyển động mượt mà, triệt tiêu độ trễ</span>
-          </div>
-          <div class="specs-metric-card">
-            <span class="specs-metric-val">130<span class="specs-metric-unit">°</span></span>
-            <span class="specs-metric-name">Trường nhìn FOV</span>
-            <span class="specs-metric-detail">Thấu kính Pancake 3 lớp quang học</span>
-          </div>
-          <div class="specs-metric-card">
-            <span class="specs-metric-val">420<span class="specs-metric-unit">g</span></span>
-            <span class="specs-metric-name">Trọng lượng</span>
-            <span class="specs-metric-detail">Khung hợp kim siêu nhẹ &amp; quai dệt 3D</span>
-          </div>
-        </div>
-        
-        <div class="home-comparison__wrap" id="comparison-mount" data-fx="slide-up">
-          <!-- Bảng so sánh 2 cột được render tự động bởi home-controller.js -->
+        <div class="home-comparison__wrap" id="comparison-mount" data-fx="reveal">
+          <!-- Bảng so sánh được render tự động từ PRODUCTS bởi home-controller.js -->
         </div>
       </div>
     </section>
 
     <!-- =========================================================================
-         SECTION 07: ECOSYSTEM
+         PHẦN 7: SẢN PHẨM PHỤ KIỆN + CTA CUỐI
          ========================================================================= -->
-    <section class="home-accessories" id="accessories" aria-label="Hệ sinh thái và Phụ kiện đi kèm">
-      <div class="container">
-        
-        <div class="home-accessories__header text-center" data-fx="slide-up">
-          <span class="section-eyebrow">HỆ SINH THÁI ĐỒNG BỘ</span>
-          <h2 class="home-section-title">Chế tác để đồng hành</h2>
-          <p class="home-section-sub">Mỗi phụ kiện được thiết kế với chuẩn mực công thái học tối đa cho từng giờ làm việc và trải nghiệm.</p>
+    <section class="home-accessories" id="accessories" aria-label="Hệ sinh thái phụ kiện đi kèm">
+      <div class="wrap">
+        <div class="home-section-header text-center" data-fx="reveal">
+          <span class="section-eyebrow">HỆ SINH THÁI</span>
+          <h2 class="home-section-title">Phụ kiện đi kèm</h2>
+          <p class="home-section-sub">Được thiết kế đồng bộ hoàn hảo với kính NEXUS Vision Pro.</p>
         </div>
 
-        <div class="home-accessories__grid home-accessories__grid--curated" id="accessories-mount" data-fx="slide-up">
-          <!-- Render 4 phụ kiện chính hãng tự động bởi home-controller.js -->
-        </div>
+        <!-- Lưới phụ kiện render tự động từ PRODUCTS bởi home-controller.js -->
+        <div class="product-grid grid-4" id="accessories-mount" data-fx="reveal"></div>
 
-        <div class="home-accessories__action text-center" data-fx="slide-up">
-          <a href="shop.html?category=phu-kien" class="btn btn-secondary btn-lg">Khám phá phụ kiện</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================================
-         SECTION 08: FINAL CTA
-         ========================================================================= -->
-    <section class="home-final-cta" id="final-cta" aria-label="Sẵn sàng trải nghiệm">
-      <div class="container-narrow text-center">
-        <div class="final-cta__box" data-fx="slide-up">
-          <span class="section-eyebrow">TƯƠNG LAI ĐÃ SẴN SÀNG</span>
-          <h2 class="final-cta__headline">Ready to see beyond?</h2>
-          <p class="final-cta__desc">
-            Trải nghiệm trực tiếp không gian điện toán 8K tại showroom NEXUS hoặc đặt mua ngay với chương trình giao hàng và thiết lập cá nhân hóa tận nơi.
-          </p>
-          <div class="final-cta__actions">
-            <a href="shop.html" class="btn btn-primary btn-lg">Khám phá sản phẩm</a>
-            <a href="contact.html" class="btn btn-outline btn-lg">Đặt lịch trải nghiệm</a>
-          </div>
+        <div class="home-accessories__cta text-center" data-fx="reveal">
+          <a href="shop.html" class="btn btn-secondary btn-lg">Xem toàn bộ sản phẩm cửa hàng</a>
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- CHÂN TRANG (Tự động dựng bởi layout-loader.js) -->
+  <!-- CHÂN TRANG (Tự động nạp bởi layout-loader.js) -->
   <div id="footer-root"></div>
 
-  <!-- VENDORS: GSAP & ScrollTrigger cho phần cuộn đổi màu -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- VENDORS OFFLINE: GSAP & ScrollTrigger -->
+  <script src="assets/js/vendors/gsap.min.js"></script>
+  <script src="assets/js/vendors/ScrollTrigger.min.js"></script>
 
   <!-- CORE & DATA -->
   <script src="assets/js/data/products-data.js"></script>
   <script src="assets/js/services/storage-service.js"></script>
-  <script src="assets/js/services/api-service.js"></script>
   <script src="assets/js/modules/toast.js"></script>
   <script src="assets/js/modules/layout-loader.js"></script>
+
   <!-- HOME CONTROLLER -->
   <script src="assets/js/controllers/home-controller.js"></script>
 </body>

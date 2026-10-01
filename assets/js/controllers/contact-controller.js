@@ -1,3 +1,8 @@
+/*
+ * PAGE CONTRACT: docs/pages/contact.md | OWNER: Trường Vũ
+ * Preserve #contact-form and its named field hooks until HTML/CSS/JS are refactored together.
+ * Never persist personal data in localStorage or claim a confirmed appointment without the API.
+ */
 /* ==========================================================================
    NEXUS VR — controllers/contact-controller.js   [PHỤ TRÁCH: Nguyễn Trường Vũ]
    HAUTE SPATIAL SHOWROOM & DUAL-FACED 3D VIP PASS CONTROLLER
@@ -17,20 +22,18 @@
     window.__hauteExperienceInitialized = true;
 
     initAudioSynthesisEngine();
-    initDualFacedVipPass();
-    initSpatialAudioPreview();
-    initPassExportSuite();
-    initHeroPhotoTilt();
-    initHudDualViewTabs();
-    initKineticCausticsPhysics();
     initTimeSlotCapsules();
     initCustomServiceSelect();
     initCharacterCounter();
-    initLiveShowroomClock();
     initFaqAccordion();
     handleUrlPreselection();
     setupConciergeFormValidation();
     initConciergeChannelsHub();
+    initDualFacedVipPass();
+    initPassExportSuite();
+    initKineticCausticsPhysics();
+    initVolumetricReveal();
+    initSensoryHaptics();
   }
 
   /* --------------------------------------------------------------------------
@@ -54,6 +57,27 @@
     window.playLuxuryClick = function () {
       // Intentionally empty no-op: Theo yêu cầu của người dùng, bỏ âm thanh của tất cả các nút
       // như khung giờ, dropdown, accordion, submit... CHỈ GIỮ LẠI âm thanh của tấm thẻ VIP.
+    };
+
+    // Tiếng chạm thủy tinh cường lực siêu nhẹ (Subtle Glass Tick)
+    window.playGlassTick = function() {
+      try {
+        var ctx = getCtx();
+        if (!ctx) return;
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(3200, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.03);
+        
+        gain.gain.setValueAtTime(0.015, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.03);
+      } catch (e) {}
     };
 
     // Âm thanh lật báo chân thực (Newspaper Page Turn / Paper Rustle)
@@ -358,18 +382,20 @@
         currentRotX = targetRotX;
         currentRotY = targetRotY;
         applyCardTransform(currentRotX, currentRotY);
-        physicsRafId = null;
+        physicsRafId = false;
         if (passWrapper) passWrapper.classList.remove("is-tracking");
         return;
       }
-
-      physicsRafId = requestAnimationFrame(renderPhysicsFrame);
+      
+      // physicsRafId = requestAnimationFrame(renderPhysicsFrame);
+      // Đã được gsap.ticker xử lý tự động vòng lặp
     }
 
     function startPhysicsLoop() {
       if (isFlippingAnim) return;
       if (!physicsRafId) {
-        physicsRafId = requestAnimationFrame(renderPhysicsFrame);
+        physicsRafId = true;
+        gsap.ticker.add(renderPhysicsFrame);
       }
     }
 
@@ -416,8 +442,8 @@
 
       if (passWrapper) passWrapper.classList.remove("is-tracking");
       if (physicsRafId) {
-        cancelAnimationFrame(physicsRafId);
-        physicsRafId = null;
+        gsap.ticker.remove(renderPhysicsFrame);
+        physicsRafId = false;
       }
     });
 
@@ -501,130 +527,7 @@
     }, { passive: true });
   }
 
-  /* --------------------------------------------------------------------------
-     2.1 NATIVE WEB AUDIO API SPATIAL AUDIO 360° PREVIEW SYNTHESIZER
-     -------------------------------------------------------------------------- */
-  var spatialAudioState = {
-    isPlaying: false,
-    ctx: null,
-    droneOsc: null,
-    binOsc1: null,
-    binOsc2: null,
-    pannerNode: null,
-    masterGain: null,
-    lfoOsc: null
-  };
 
-  function initSpatialAudioPreview() {
-    var btn = document.getElementById("btn-audio-preview");
-    if (!btn) return;
-
-    btn.addEventListener("click", function () {
-      if (typeof window.playLuxuryClick === "function") window.playLuxuryClick(1350);
-
-      if (spatialAudioState.isPlaying) {
-        stopSpatialAudio();
-      } else {
-        startSpatialAudio();
-      }
-    });
-
-    function startSpatialAudio() {
-      try {
-        var AudioClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioClass) return;
-        if (!spatialAudioState.ctx) spatialAudioState.ctx = new AudioClass();
-        var ctx = spatialAudioState.ctx;
-        if (ctx.state === "suspended") ctx.resume();
-
-        var now = ctx.currentTime;
-
-        // Master Gain với Fade-in 0.8s
-        var master = ctx.createGain();
-        master.gain.setValueAtTime(0.001, now);
-        master.gain.exponentialRampToValueAtTime(0.08, now + 0.8);
-        master.connect(ctx.destination);
-        spatialAudioState.masterGain = master;
-
-        // Drone âm trầm 55Hz (Nốt A1) ấm áp tạo cảm giác không gian phòng lounge cách âm
-        var drone = ctx.createOscillator();
-        var droneGain = ctx.createGain();
-        drone.type = "sine";
-        drone.frequency.setValueAtTime(55, now);
-        droneGain.gain.setValueAtTime(0.6, now);
-        drone.connect(droneGain);
-        droneGain.connect(master);
-        drone.start(now);
-        spatialAudioState.droneOsc = drone;
-
-        // Binaural Beat: 2 tần số lệch nhau 4Hz (432Hz & 436Hz)
-        var bin1 = ctx.createOscillator();
-        var bin2 = ctx.createOscillator();
-        bin1.type = "sine";
-        bin2.type = "sine";
-        bin1.frequency.setValueAtTime(432, now);
-        bin2.frequency.setValueAtTime(436, now);
-
-        if (ctx.createStereoPanner) {
-          var panner = ctx.createStereoPanner();
-          panner.pan.setValueAtTime(0, now);
-
-          var lfo = ctx.createOscillator();
-          var lfoGain = ctx.createGain();
-          lfo.frequency.setValueAtTime(0.15, now);
-          lfoGain.gain.setValueAtTime(0.7, now);
-          lfo.connect(panner.pan);
-          lfo.start(now);
-          spatialAudioState.lfoOsc = lfo;
-
-          bin1.connect(panner);
-          bin2.connect(panner);
-          panner.connect(master);
-          spatialAudioState.pannerNode = panner;
-        } else {
-          bin1.connect(master);
-          bin2.connect(master);
-        }
-
-        bin1.start(now);
-        bin2.start(now);
-        spatialAudioState.binOsc1 = bin1;
-        spatialAudioState.binOsc2 = bin2;
-
-        spatialAudioState.isPlaying = true;
-        btn.classList.add("is-playing");
-        var btnText = btn.querySelector(".audio-btn-text");
-        if (btnText) btnText.textContent = "Đang phát 360° (Bấm dừng)";
-
-        setTimeout(function () {
-          if (spatialAudioState.isPlaying) stopSpatialAudio();
-        }, 35000);
-      } catch (err) {
-        console.warn("[SpatialAudio] Error:", err);
-      }
-    }
-
-    function stopSpatialAudio() {
-      try {
-        var ctx = spatialAudioState.ctx;
-        if (ctx && spatialAudioState.masterGain) {
-          var now = ctx.currentTime;
-          spatialAudioState.masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
-          setTimeout(function () {
-            if (spatialAudioState.droneOsc) { spatialAudioState.droneOsc.stop(); spatialAudioState.droneOsc.disconnect(); }
-            if (spatialAudioState.binOsc1) { spatialAudioState.binOsc1.stop(); spatialAudioState.binOsc1.disconnect(); }
-            if (spatialAudioState.binOsc2) { spatialAudioState.binOsc2.stop(); spatialAudioState.binOsc2.disconnect(); }
-            if (spatialAudioState.lfoOsc) { spatialAudioState.lfoOsc.stop(); spatialAudioState.lfoOsc.disconnect(); }
-          }, 550);
-        }
-      } catch (e) {}
-
-      spatialAudioState.isPlaying = false;
-      btn.classList.remove("is-playing");
-      var btnText = btn.querySelector(".audio-btn-text");
-      if (btnText) btnText.textContent = "Nghe thử Spatial Audio";
-    }
-  }
 
   /* --------------------------------------------------------------------------
      2.2 VIP PASS DIGITAL EXPORT SUITE (CAMERA FLASH, SHUTTER & VOUCHER MODAL)
@@ -756,7 +659,7 @@
             if (modalCopyText) modalCopyText.textContent = "Sao Chép Mã Vé";
           }, 2000);
         }).catch(function () {
-          alert("Mã vé: " + code);
+          showNotification("Mã vé: " + code, "info");
         });
       });
     }
@@ -768,102 +671,7 @@
     });
   }
 
-  /* --------------------------------------------------------------------------
-     3. HERO PHOTO MONOLITH 3D PARALLAX TILT & SPECULAR GLARE
-     -------------------------------------------------------------------------- */
-  function initHeroPhotoTilt() {
-    var monolith = document.getElementById("hero-photo-card");
-    var halo = document.getElementById("hero-optical-halo");
-    if (!monolith) return;
 
-    var MAX_HERO_TILT = 5;
-
-    monolith.addEventListener("mousemove", function (e) {
-      var rect = monolith.getBoundingClientRect();
-      var x = e.clientX - rect.left;
-      var y = e.clientY - rect.top;
-
-      var normX = (x / rect.width) * 2 - 1;
-      var normY = (y / rect.height) * 2 - 1;
-
-      var rY = normX * MAX_HERO_TILT;
-      var rX = -normY * MAX_HERO_TILT;
-
-      monolith.style.transform = 
-        "rotateX(" + rX.toFixed(2) + "deg) " +
-        "rotateY(" + rY.toFixed(2) + "deg) " +
-        "scale3d(1.02, 1.02, 1.02)";
-
-      if (halo) {
-        halo.style.transform = 
-          "rotateX(" + (rX * 0.7).toFixed(2) + "deg) " +
-          "rotateY(" + (rY * 0.7).toFixed(2) + "deg) " +
-          "scale3d(1.04, 1.04, 1.04)";
-      }
-
-      monolith.style.setProperty("--mouse-x", x + "px");
-      monolith.style.setProperty("--mouse-y", y + "px");
-    });
-
-    monolith.addEventListener("mouseleave", function () {
-      monolith.style.transform = "rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
-      if (halo) halo.style.transform = "rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
-    });
-  }
-
-  /* --------------------------------------------------------------------------
-     4. HUD DUAL-VIEW TABS (BẢN ĐỒ VỆ TINH & KHÔNG GIAN SHOWROOM 360°)
-     -------------------------------------------------------------------------- */
-  function initHudDualViewTabs() {
-    var tabMap = document.getElementById("tab-map-view");
-    var tabLounge = document.getElementById("tab-lounge-view");
-    var panelMap = document.getElementById("panel-map-view");
-    var panelLounge = document.getElementById("panel-lounge-view");
-
-    if (!tabMap || !tabLounge || !panelMap || !panelLounge) return;
-
-    function switchTab(target) {
-      if (typeof window.playLuxuryClick === "function") window.playLuxuryClick(1250);
-
-      if (target === "map") {
-        tabMap.classList.add("is-active");
-        tabMap.setAttribute("aria-selected", "true");
-        tabLounge.classList.remove("is-active");
-        tabLounge.setAttribute("aria-selected", "false");
-
-        panelMap.classList.add("is-active");
-        panelLounge.classList.remove("is-active");
-      } else {
-        tabLounge.classList.add("is-active");
-        tabLounge.setAttribute("aria-selected", "true");
-        tabMap.classList.remove("is-active");
-        tabMap.setAttribute("aria-selected", "false");
-
-        panelLounge.classList.add("is-active");
-        panelMap.classList.remove("is-active");
-      }
-    }
-
-    tabMap.addEventListener("click", function () { switchTab("map"); });
-    tabLounge.addEventListener("click", function () { switchTab("lounge"); });
-
-    // Tương tác Hotspot 360 Showroom trên cả Desktop và Touch Mobile
-    var hotspots = document.querySelectorAll(".lounge-hotspot");
-    hotspots.forEach(function (hs) {
-      hs.addEventListener("click", function (e) {
-        e.stopPropagation();
-        if (typeof window.playLuxuryClick === "function") window.playLuxuryClick(1500);
-
-        var wasOpen = hs.classList.contains("is-open");
-        hotspots.forEach(function (h) { h.classList.remove("is-open"); });
-        if (!wasOpen) hs.classList.add("is-open");
-      });
-    });
-
-    document.addEventListener("click", function () {
-      hotspots.forEach(function (h) { h.classList.remove("is-open"); });
-    });
-  }
 
   /* --------------------------------------------------------------------------
      4.2 LUXURY CONCIERGE CHANNELS HUB (HOTLINE, SECURE EMAIL, FLAGSHIP LOCATION)
@@ -916,27 +724,7 @@
       });
     });
 
-    var mapScrollBtn = document.getElementById("btn-scroll-to-map");
-    if (mapScrollBtn) {
-      mapScrollBtn.addEventListener("click", function (e) {
-        e.preventDefault();
-        if (typeof window.playLuxuryClick === "function") {
-          window.playLuxuryClick(1250);
-        }
-
-        var tabMap = document.getElementById("tab-map-view");
-        if (tabMap && !tabMap.classList.contains("is-active")) {
-          tabMap.click();
-        }
-
-        var targetSection = document.getElementById("showroom-map");
-        if (targetSection) {
-          targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      });
-    }
-
-    var primaryBtns = document.querySelectorAll(".concierge-channels-hub .channel-btn--primary:not(#btn-scroll-to-map)");
+    var primaryBtns = document.querySelectorAll(".channel-btn--primary, .map-footer-btn");
     primaryBtns.forEach(function (btn) {
       btn.addEventListener("click", function () {
         if (typeof window.playLuxuryClick === "function") {
@@ -964,7 +752,10 @@
       targetX = -normX * 50;
       targetY = -normY * 50;
 
-      if (!rafId) rafId = requestAnimationFrame(renderCausticLoop);
+      if (!rafId) {
+        rafId = true;
+        gsap.ticker.add(renderCausticLoop);
+      }
     }, { passive: true });
 
     function renderCausticLoop() {
@@ -974,12 +765,28 @@
       canvas.style.setProperty("--caustic-drift-x", currentX.toFixed(2) + "px");
       canvas.style.setProperty("--caustic-drift-y", currentY.toFixed(2) + "px");
 
-      if (Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05) {
-        rafId = requestAnimationFrame(renderCausticLoop);
-      } else {
-        rafId = null;
+      if (Math.abs(targetX - currentX) <= 0.05 && Math.abs(targetY - currentY) <= 0.05) {
+        gsap.ticker.remove(renderCausticLoop);
+        rafId = false;
       }
     }
+  }
+
+  /* --------------------------------------------------------------------------
+     VIP CARD FORM-DRIVEN SHIMMER / LIGHT REFLECTION SWEEP
+     -------------------------------------------------------------------------- */
+  var shimmerDebounceTimer = null;
+  function triggerPassShimmer() {
+    if (shimmerDebounceTimer) clearTimeout(shimmerDebounceTimer);
+    shimmerDebounceTimer = setTimeout(function () {
+      var shimmers = document.querySelectorAll(".pass-form-shimmer");
+      if (!shimmers || !shimmers.length) return;
+      shimmers.forEach(function (el) {
+        el.classList.remove("is-active");
+        void el.offsetWidth; // Force DOM reflow to restart CSS keyframe animation
+        el.classList.add("is-active");
+      });
+    }, 90);
   }
 
   /* --------------------------------------------------------------------------
@@ -1016,6 +823,8 @@
         if (passTimeSlot && timeLabelMap[slot]) {
           passTimeSlot.textContent = timeLabelMap[slot];
         }
+
+        triggerPassShimmer();
       });
     });
   }
@@ -1071,6 +880,8 @@
 
       nativeSelect.value = val;
       nativeSelect.dispatchEvent(new Event("change", { bubbles: true }));
+
+      triggerPassShimmer();
 
       closeMenu();
       triggerBtn.focus();
@@ -1130,28 +941,7 @@
     update();
   }
 
-  /* --------------------------------------------------------------------------
-     9. LIVE SHOWROOM GMT+7 CLOCK
-     -------------------------------------------------------------------------- */
-  function initLiveShowroomClock() {
-    var clockEl = document.getElementById("hud-live-clock");
-    if (!clockEl) return;
 
-    function tick() {
-      var now = new Date();
-      var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-      var vnTime = new Date(utc + (3600000 * 7));
-
-      var hours = String(vnTime.getHours()).padStart(2, "0");
-      var minutes = String(vnTime.getMinutes()).padStart(2, "0");
-      var seconds = String(vnTime.getSeconds()).padStart(2, "0");
-
-      clockEl.textContent = hours + ":" + minutes + ":" + seconds + " ICT";
-    }
-
-    setInterval(tick, 1000);
-    tick();
-  }
 
   /* --------------------------------------------------------------------------
      10. EDITORIAL FAQ ACCORDION ENGINE
@@ -1176,7 +966,6 @@
       if (!trigger || !content) return;
 
       trigger.addEventListener("click", function () {
-        if (typeof window.playLuxuryClick === "function") window.playLuxuryClick(1050);
         var isActive = item.classList.contains("is-active");
 
         items.forEach(function (other) {
@@ -1211,9 +1000,7 @@
       }
 
       if (target) target.click();
-    } catch (err) {
-      console.warn("[ContactController] URL parameter error:", err);
-    }
+    } catch (err) {}
   }
 
   /* --------------------------------------------------------------------------
@@ -1224,10 +1011,14 @@
     var submitBtn = document.getElementById("contact-submit-btn");
     if (!form || !submitBtn) return;
 
+    var validCheckSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    var invalidWarningSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+
     var fields = {
       name: {
         el: document.getElementById("contact-name"),
         errorEl: document.getElementById("name-error"),
+        statusEl: document.getElementById("name-status"),
         validate: function (v) {
           if (!v.trim()) return "Vui lòng nhập họ và tên của quý khách.";
           if (typeof window.Validator !== "undefined" && typeof window.Validator.isValidName === "function") {
@@ -1241,6 +1032,7 @@
       email: {
         el: document.getElementById("contact-email"),
         errorEl: document.getElementById("email-error"),
+        statusEl: document.getElementById("email-status"),
         validate: function (v) {
           if (!v.trim()) return "Vui lòng nhập địa chỉ email.";
           if (typeof window.Validator !== "undefined" && typeof window.Validator.isValidEmail === "function") {
@@ -1254,6 +1046,7 @@
       phone: {
         el: document.getElementById("contact-phone"),
         errorEl: document.getElementById("phone-error"),
+        statusEl: document.getElementById("phone-status"),
         validate: function (v) {
           if (!v.trim()) return "Vui lòng cung cấp số điện thoại liên hệ.";
           if (typeof window.Validator !== "undefined" && typeof window.Validator.isValidPhoneVN === "function") {
@@ -1267,6 +1060,7 @@
       message: {
         el: document.getElementById("contact-message"),
         errorEl: document.getElementById("message-error"),
+        statusEl: document.getElementById("message-status"),
         validate: function (v) {
           if (!v.trim()) return "Vui lòng chia sẻ lời nhắn hoặc nhu cầu trải nghiệm.";
           if (v.trim().length < 8) return "Lời nhắn cần ít nhất 8 ký tự để Concierge chuẩn bị chu đáo.";
@@ -1275,39 +1069,59 @@
       }
     };
 
-    function validateField(name) {
+    function validateField(name, isBlur) {
       var field = fields[name];
       if (!field || !field.el) return true;
-      var error = field.validate(field.el.value);
-      if (field.errorEl) {
-        field.errorEl.textContent = error || "";
+      var val = field.el.value;
+      var groupEl = field.el.closest(".c-field-group");
+
+      if (!val.trim() && !isBlur) {
+        if (groupEl) groupEl.classList.remove("is-valid", "is-invalid");
+        if (field.statusEl) field.statusEl.innerHTML = "";
+        if (field.errorEl) field.errorEl.textContent = "";
+        return false;
       }
-      return !error;
+
+      var error = field.validate(val);
+      if (error) {
+        if (groupEl) {
+          groupEl.classList.remove("is-valid");
+          groupEl.classList.add("is-invalid");
+        }
+        if (field.statusEl) field.statusEl.innerHTML = invalidWarningSvg;
+        if (field.errorEl) field.errorEl.textContent = error;
+        return false;
+      } else {
+        if (groupEl) {
+          groupEl.classList.remove("is-invalid");
+          groupEl.classList.add("is-valid");
+        }
+        if (field.statusEl) field.statusEl.innerHTML = validCheckSvg;
+        if (field.errorEl) field.errorEl.textContent = "";
+        return true;
+      }
     }
 
     Object.keys(fields).forEach(function (name) {
       var field = fields[name];
       if (!field || !field.el) return;
       field.el.addEventListener("blur", function () {
-        validateField(name);
+        validateField(name, true);
       });
       field.el.addEventListener("input", function () {
-        if (field.errorEl && field.errorEl.textContent) {
-          validateField(name);
-        }
+        validateField(name, false);
+        triggerPassShimmer();
       });
     });
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
 
-      if (typeof window.playLuxuryClick === "function") window.playLuxuryClick(1500);
-
       var isValid = true;
       var firstInvalidField = null;
 
       Object.keys(fields).forEach(function (name) {
-        var passed = validateField(name);
+        var passed = validateField(name, true);
         if (!passed) {
           isValid = false;
           if (!firstInvalidField) firstInvalidField = fields[name].el;
@@ -1322,30 +1136,19 @@
 
       var originalBtnHtml = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="btn-confirm-text">ĐANG XÁC THỰC THẺ TIẾP ĐÓN VIP...</span>';
-
-      var formData = {
-        name: fields.name.el.value.trim(),
-        email: fields.email.el.value.trim(),
-        phone: fields.phone.el.value.trim(),
-        service: (document.getElementById("contact-service") || {}).value || "showroom-test",
-        time_slot: (document.getElementById("contact-time-slot") || {}).value || "morning",
-        message: fields.message.el.value.trim(),
-        timestamp: new Date().toISOString()
-      };
+      submitBtn.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span><span class="btn-confirm-text">ĐANG GỬI YÊU CẦU...</span>';
 
       setTimeout(function () {
-        try {
-          var saved = JSON.parse(localStorage.getItem("nexus_appointments") || "[]");
-          saved.unshift(formData);
-          localStorage.setItem("nexus_appointments", JSON.stringify(saved.slice(0, 50)));
-        } catch (err) {
-          console.warn("[Contact] LocalStorage error:", err);
-        }
-
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnHtml;
         form.reset();
+
+        document.querySelectorAll(".c-field-group").forEach(function (grp) {
+          grp.classList.remove("is-valid", "is-invalid");
+        });
+        document.querySelectorAll(".c-input-status").forEach(function (st) {
+          st.innerHTML = "";
+        });
 
         var counter = document.getElementById("message-char-count");
         if (counter) counter.textContent = "0 / 500";
@@ -1353,20 +1156,151 @@
         var defaultCapsule = document.querySelector('.c-capsule-btn[data-slot="morning"]');
         if (defaultCapsule) defaultCapsule.click();
 
-        showNotification(
-          "Thẻ Tiếp Đón VIP của quý khách đã được kích hoạt thành công! Concierge riêng sẽ gọi điện xác nhận trong vòng 15 phút.",
-          "success"
-        );
+        showNotification("Yêu cầu đã được ghi nhận trong bản demo; chưa gửi tới hệ thống.", "info");
       }, 950);
     });
+  }
+
+  /* --------------------------------------------------------------------------
+     13. DIRECT CONTACT DOCK & CHANNELS HUB (COPY TO CLIPBOARD & ACTIONS)
+     -------------------------------------------------------------------------- */
+  function initConciergeChannelsHub() {
+    var copyButtons = document.querySelectorAll(".channel-btn--copy");
+    var checkSvgHtml = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+    copyButtons.forEach(function (btn) {
+      var initialSvgEl = btn.querySelector("svg");
+      var originalIconSvg = initialSvgEl ? initialSvgEl.outerHTML : "";
+      var textSpan = btn.querySelector(".copy-text");
+      var originalText = textSpan ? textSpan.textContent.trim() : "Sao chép";
+      var copyTimer = null;
+
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        var targetSelector = btn.getAttribute("data-copy-target");
+        if (!targetSelector) return;
+        var targetEl = document.querySelector(targetSelector);
+        if (!targetEl) return;
+
+        var textToCopy = targetEl.innerText || targetEl.textContent || "";
+        textToCopy = textToCopy.trim();
+        if (!textToCopy) return;
+
+        function handleSuccess() {
+          if (copyTimer) clearTimeout(copyTimer);
+          btn.classList.add("is-copied");
+
+          var currentSvg = btn.querySelector("svg");
+          if (currentSvg) {
+            currentSvg.outerHTML = checkSvgHtml;
+          }
+          if (textSpan) textSpan.textContent = "Đã lưu! ✓";
+
+          showNotification("Đã sao chép: " + textToCopy, "success");
+
+          copyTimer = setTimeout(function () {
+            btn.classList.remove("is-copied");
+            var revertSvg = btn.querySelector("svg");
+            if (revertSvg && originalIconSvg) {
+              revertSvg.outerHTML = originalIconSvg;
+            }
+            if (textSpan) textSpan.textContent = originalText;
+          }, 1500);
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(textToCopy).then(handleSuccess).catch(function () {
+            fallbackCopy(textToCopy, handleSuccess);
+          });
+        } else {
+          fallbackCopy(textToCopy, handleSuccess);
+        }
+      });
+    });
+
+    // Gestalt Reactive Anchoring: Physical Dock Showroom Card <-> Google Maps Card
+    var showroomCard = document.querySelector(".channel-card--location");
+    var mapCard = document.querySelector(".dock-map-card");
+
+    if (showroomCard && mapCard) {
+      showroomCard.addEventListener("mouseenter", function () {
+        mapCard.classList.add("is-anchored-active");
+      });
+      showroomCard.addEventListener("mouseleave", function () {
+        mapCard.classList.remove("is-anchored-active");
+      });
+
+      mapCard.addEventListener("mouseenter", function () {
+        showroomCard.classList.add("is-anchored-active");
+      });
+      mapCard.addEventListener("mouseleave", function () {
+        showroomCard.classList.remove("is-anchored-active");
+      });
+    }
+
+    function fallbackCopy(text, callback) {
+      try {
+        var textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        callback();
+      } catch (err) {}
+    }
   }
 
   function showNotification(msg, type) {
     if (typeof window.showToast === "function") {
       window.showToast(msg, type);
-    } else {
-      alert(msg);
     }
+  }
+
+  /* --------------------------------------------------------------------------
+     BƯỚC 1: VOLUMETRIC REVEAL & KINETIC VARIABLE TYPOGRAPHY
+     -------------------------------------------------------------------------- */
+  function initVolumetricReveal() {
+    var kineticTitle = document.getElementById("kinetic-title");
+    
+    if (kineticTitle) {
+      
+      if (typeof window.gsap !== "undefined") {
+        window.gsap.fromTo(kineticTitle, 
+          { 
+            fontVariationSettings: "'wght' 200", 
+            rotationX: 45, 
+            opacity: 0,
+            y: 30
+          }, 
+          { 
+            fontVariationSettings: "'wght' 800", 
+            rotationX: 0, 
+            opacity: 1,
+            y: 0,
+            duration: 1.5, 
+            ease: "back.out(1.7)",
+            delay: 0.2
+          }
+        );
+      }
+    }
+  }
+
+  /* --------------------------------------------------------------------------
+     BƯỚC 2: CHROMATIC GLASS & SENSORY HAPTICS
+     -------------------------------------------------------------------------- */
+  function initSensoryHaptics() {
+    var cards = document.querySelectorAll(".channel-card");
+    cards.forEach(function(card) {
+      card.addEventListener("mouseenter", function() {
+        if (typeof window.playGlassTick === "function") {
+          window.playGlassTick();
+        }
+      });
+    });
   }
 
 })();

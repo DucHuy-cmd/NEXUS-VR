@@ -1,0 +1,2 @@
+# assets/js/controllers
+Thư mục chứa các file điều khiển logic cho từng trang (home-controller.js, about-controller.js, contact-controller.js, shop-controller.js, product-controller.js, checkout-controller.js)

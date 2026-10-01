@@ -1,273 +1,452 @@
 /* =========================================================
-   NEXUS VR — components/navbar.css   [PHỤ TRÁCH: Đức Huy]
-   TẦNG 2 - COMPONENTS
-
-   [FIX #1] Selector "body.light-mode" đổi thành ":root.dark-mode"
-   (xem giải thích chi tiết trong assets/css/variables.css).
-   [FIX #3] Thêm CSS cho nút Hamburger + panel menu mobile — trước
-   đây .navbar__links bị display:none hoàn toàn dưới 900px mà
-   không có cách nào khác để mở, khiến menu biến mất trên di động.
-   [FIX #4] Thêm outline rõ ràng khi focus bằng bàn phím (Tab) cho
-   nút icon và nút hamburger, phục vụ accessibility.
+   NEXUS VR — components/navbar.css
+   TẦNG 2 - COMPONENTS: GLOBAL NAVBAR
+   Concept: Quiet Luxury / Warm Minimalist Tech
    ========================================================= */
 
+#navbar-root {
+  min-height: 72px;
+  display: block;
+}
+
 .navbar {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  padding: 22px 0; transition: all .35s ease;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 20px 0;
+  background-color: transparent;
+  transition: padding var(--dur-base) var(--ease-out),
+              background-color var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
 }
+
 .navbar.scrolled {
-  padding: 14px 0;
-  background: rgba(249,246,240,0.72); /* Warm Cream mờ, thay cho đen mờ cũ */
-  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--glass-border);
-}
-:root.dark-mode .navbar.scrolled { background: rgba(35,31,28,0.72); } /* bản Warm Dark */
-.navbar__inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; position: relative; }
-.navbar__logo { font-family: var(--font-head); font-weight: 700; font-size: 20px; display: flex; align-items: center; gap: 9px; }
-.navbar__logo-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent-gradient); box-shadow: 0 0 10px var(--accent-cyan); }
-.navbar__links { display: flex; gap: 30px; }
-.navbar__links a { font-size: 14.5px; color: var(--text-secondary); font-weight: 500; position: relative; padding: 4px 0; transition: color .25s; }
-.navbar__links a:hover, .navbar__links a.is-active { color: var(--text-primary); }
-.navbar__links a.is-active::after { content:''; position:absolute; left:0; right:0; bottom:-4px; height:2px; background: var(--accent-gradient); border-radius: 2px; }
-.navbar__actions { display: flex; align-items: center; gap: 16px; }
-
-.navbar__icon-btn {
-  width: 38px; height: 38px; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--glass-bg); border: 1px solid var(--glass-border);
-  cursor: pointer; color: var(--text-secondary); transition: all .25s; position: relative;
-  padding: 8px;
-  font-size: 15px; /* để icon trong <button> giữ đúng cỡ như trước khi là <div> */
-}
-.navbar__icon-btn:hover { color: var(--accent-cyan); border-color: var(--accent-cyan); }
-
-/* ---------------------------------------------------------
-   NÚT CHUYỂN ĐỔI THEME SÁNG/TỐI (SUN & MOON MORPHING)
-   --------------------------------------------------------- */
-.navbar__theme-btn {
-  overflow: hidden;
-  position: relative;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 12px 0;
+  background-color: rgba(249, 246, 240, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(35, 31, 28, 0.04);
 }
 
-.navbar__theme-btn:hover {
-  transform: scale(1.1);
-  border-color: var(--accent-bronze, #C79A6E);
-  box-shadow: 0 0 16px rgba(199, 154, 110, 0.4);
-  color: var(--accent-bronze, #C79A6E);
-}
-
-.theme-icon-box {
-  position: relative;
-  width: 20px;
-  height: 20px;
+.navbar__inner {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  justify-content: space-between;
+  gap: 24px;
+  position: relative;
 }
 
-.navbar__theme-btn:hover .theme-icon-box {
-  transform: rotate(25deg);
+/* ---- BRAND LOGO ---- */
+.navbar__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  text-decoration: none;
+  flex-shrink: 0;
 }
 
-.theme-icon {
+.navbar__logo-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  box-shadow: 0 0 10px rgba(166, 124, 82, 0.5);
+  display: inline-block;
+  transition: transform var(--dur-base) var(--ease-spring);
+}
+.navbar__logo:hover .navbar__logo-dot {
+  transform: scale(1.4);
+}
+
+.navbar__logo-text {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.navbar__logo-sub {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* ---- DESKTOP NAV LINKS ---- */
+.navbar__nav {
+  display: flex;
+  align-items: center;
+}
+
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar__links a {
+  font-family: var(--font-head);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  position: relative;
+  padding: 6px 0;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.navbar__links a::after {
+  content: '';
   position: absolute;
-  width: 19px;
-  height: 19px;
-  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform var(--dur-base) var(--ease-out);
 }
 
-/* NỀN SÁNG: HIỆN MẶT TRỜI VÀNG ẤM */
-.theme-icon--sun {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
-  color: #A6734B;
+.navbar__links a:hover,
+.navbar__links a.is-active {
+  color: var(--text-primary);
 }
 
-.theme-icon--moon {
-  opacity: 0;
-  transform: scale(0.3) rotate(90deg);
-  color: #DFC19B;
+.navbar__links a.is-active::after,
+.navbar__links a:hover::after {
+  transform: scaleX(1);
 }
 
-/* NỀN TỐI: HIỆN MẶT TRĂNG & SAO KHÔNG GIAN */
-:root.dark-mode .theme-icon--sun {
-  opacity: 0;
-  transform: scale(0.3) rotate(-90deg);
+/* ---- NAVBAR ACTIONS & TOOLS ---- */
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-:root.dark-mode .theme-icon--moon {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
+/* Live Search */
+.navbar__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(35, 31, 28, 0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px 6px 12px;
+  transition: all var(--dur-fast) var(--ease-out);
+  width: 170px;
 }
 
-.theme-star {
-  animation: themeStarTwinkle 2.2s infinite ease-in-out;
-}
-.theme-star--2 {
-  animation-delay: 1.1s;
-}
-
-@keyframes themeStarTwinkle {
-  0%, 100% { opacity: 0.3; transform: scale(0.8); }
-  50% { opacity: 1; transform: scale(1.3); }
+.navbar__search:focus-within {
+  width: 220px;
+  background: var(--bg-primary);
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(166, 124, 82, 0.12);
 }
 
-.navbar__theme-btn.is-animating .theme-icon-box {
-  animation: themeBtnSpinPop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+.navbar__search-icon {
+  color: var(--text-muted);
+  margin-right: 8px;
+  flex-shrink: 0;
 }
 
-@keyframes themeBtnSpinPop {
-  0% { transform: scale(0.9) rotate(0deg); }
-  50% { transform: scale(1.3) rotate(190deg); }
-  100% { transform: scale(1) rotate(360deg); }
-}
-
-/* ---------------------------------------------------------
-   ANIMATION ICON GIỎ HÀNG & USER
-   --------------------------------------------------------- */
-.navbar__icon-btn[title="Giỏ hàng"]:hover {
-  animation: cartWobble 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97);
-}
-
-@keyframes cartWobble {
-  0%, 100% { transform: rotate(0deg) scale(1.08); }
-  25% { transform: rotate(-8deg) scale(1.08); }
-  75% { transform: rotate(8deg) scale(1.08); }
-}
-
-.navbar__icon-btn:hover .navbar__cart-badge {
-  animation: badgeSpring 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes badgeSpring {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.35); }
-  100% { transform: scale(1); }
-}
-
-/* ---------------------------------------------------------
-   VIEW TRANSITIONS API CHO CHUYỂN ĐỔI SÁNG/TỐI SIÊU MƯỢT (60/120 FPS)
-   --------------------------------------------------------- */
-::view-transition-group(root) {
-  animation-duration: 0.46s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translateZ(0);
-}
-
-::view-transition-old(root) {
-  z-index: 1;
-}
-
-::view-transition-new(root) {
-  z-index: 999999;
-  will-change: clip-path;
-}
-
-/* Đóng băng tạm thời CSS transitions trên DOM trong khoảnh khắc chụp snapshot để chống giật khung hình */
-.theme-switching-instant *:not(.navbar__theme-btn):not(.theme-icon-box):not(.theme-icon):not(.theme-star) {
-  transition: none !important;
-}
-
-/* Fallback siêu nhẹ cho trình duyệt không hỗ trợ View Transition (Firefox / Safari cũ) - Không dùng selector * */
-.theme-fallback-fade,
-.theme-fallback-fade body,
-.theme-fallback-fade .contact-page-root,
-.theme-fallback-fade .caustic-canvas,
-.theme-fallback-fade .navbar {
-  transition: background-color 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-              color 0.28s ease !important;
-}
-.navbar__cart-badge {
-  position: absolute; top: -6px; right: -6px; background: var(--accent-gradient-solid);
-  color: #fff; font-size: 10px; font-weight: 700; width: 17px; height: 17px;
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-}
-.navbar__user-pill {
-  display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 500;
-  padding: 8px 14px; border-radius: 100px; background: var(--glass-bg); border: 1px solid var(--glass-border);
-}
-
-/* [FIX #4] Viền focus rõ ràng khi điều hướng bằng phím Tab —
-   trước đây <div> không nhận được focus nên không cần, giờ là
-   <button> thật nên phải có trạng thái :focus-visible. */
-.navbar__icon-btn:focus-visible,
-.navbar__hamburger:focus-visible,
-.navbar__links a:focus-visible {
-  outline: 2px solid var(--accent-cyan);
-  outline-offset: 2px;
-}
-
-.navbar__search { position: relative; }
 .navbar__search input {
-  width: 210px; padding: 9px 14px; border-radius: 8px;
-  border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-primary);
-  font-size: 13.5px;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text-primary);
 }
-.navbar__search input:focus { outline: none; border-color: var(--accent-cyan); }
-.search-dropdown {
-  position: absolute; top: calc(100% + 10px); left: 0; right: 0;
-  background: var(--bg-secondary); border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 20px 45px rgba(35,31,28,.18);
-  display: none; z-index: 50;
-}
-.search-dropdown.is-open { display: block; }
-.search-dropdown a { display: flex; align-items: center; gap: 12px; padding: 10px 14px; transition: background .2s; }
-.search-dropdown a:hover { background: var(--glass-bg); }
-.search-dropdown .thumb { width: 36px; height: 36px; border-radius: 8px; background: var(--bg-tertiary); flex-shrink: 0; }
-.search-dropdown .name { font-size: 13.5px; font-weight: 500; }
-.search-dropdown .price { font-size: 12px; color: var(--accent-cyan); }
-.search-dropdown .empty { padding: 16px; font-size: 13px; color: var(--text-muted); text-align: center; }
 
-/* ---------------------------------------------------------
-   [FIX #3] HAMBURGER MENU (mobile)
-   - Ẩn trên desktop (>900px), chỉ hiện dưới 900px.
-   - 3 gạch (span) tự xoay thành dấu X khi menu đang mở
-     (nhờ class .is-active do JS gắn — xem layout-loader.js).
-   --------------------------------------------------------- */
+.navbar__search input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Search Dropdown */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 280px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-elevated);
+  padding: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: all var(--dur-fast) var(--ease-out);
+  z-index: 100;
+}
+
+.search-dropdown.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.search-dropdown__empty {
+  padding: 12px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.search-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.search-dropdown__item:hover {
+  background-color: var(--bg-secondary);
+}
+
+.search-dropdown__thumb {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: var(--radius-xs);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.search-dropdown__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-dropdown__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.search-dropdown__price {
+  font-size: 0.78rem;
+  color: var(--accent-deep);
+  font-weight: 500;
+}
+
+/* Icon Buttons (Cart, Profile) */
+.navbar__icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(35, 31, 28, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.navbar__icon-btn:hover {
+  background: var(--bg-elevated);
+  border-color: rgba(35, 31, 28, 0.2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-subtle);
+}
+
+.navbar__cart-btn:hover svg {
+  transform: scale(1.06);
+}
+
+.navbar__cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: var(--text-primary);
+  color: #FFFFFF;
+  font-family: var(--font-head);
+  font-size: 10.5px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform var(--dur-base) var(--ease-spring);
+}
+
+.navbar__cart-badge.has-items {
+  background-color: var(--accent);
+}
+
+/* User Pill / Profile */
+.navbar__user-pill-wrap {
+  position: relative;
+}
+
+.navbar__user-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(35, 31, 28, 0.04);
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.navbar__user-pill:hover {
+  background: var(--bg-elevated);
+  border-color: rgba(35, 31, 28, 0.2);
+  transform: translateY(-2px);
+}
+
+.navbar__user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 160px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-elevated);
+  padding: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: all var(--dur-fast) var(--ease-out);
+  z-index: 100;
+}
+
+.navbar__user-pill-wrap:hover .navbar__user-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.navbar__user-dropdown a {
+  display: block;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.navbar__user-dropdown a:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* ---- MOBILE HAMBURGER BUTTON ---- */
 .navbar__hamburger {
   display: none;
-  flex-direction: column; align-items: center; justify-content: center;
-  gap: 5px; width: 38px; height: 38px; border-radius: 10px;
-  background: var(--glass-bg); border: 1px solid var(--glass-border);
-  cursor: pointer; padding: 0; flex-shrink: 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(35, 31, 28, 0.04);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 0;
+  z-index: 1002;
 }
-.navbar__hamburger span {
-  display: block; width: 18px; height: 2px; border-radius: 2px;
-  background: var(--text-primary);
-  transition: transform .25s ease, opacity .2s ease;
+
+.navbar__hamburger .bar {
+  width: 18px;
+  height: 1.8px;
+  background-color: var(--text-primary);
+  border-radius: 2px;
+  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
 }
-.navbar__hamburger.is-active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.navbar__hamburger.is-active span:nth-child(2) { opacity: 0; }
-.navbar__hamburger.is-active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-@media (max-width: 900px) {
-  .navbar__search { display: none; }
-  .navbar__hamburger { display: flex; }
+.navbar__hamburger.is-active .bar-1 {
+  transform: translateY(3.4px) rotate(45deg);
+}
 
-  /* .navbar__links giờ là 1 panel thả xuống, ẩn/hiện bằng
-     opacity + visibility (không dùng display:none) để có
-     animation mượt khi mở/đóng. */
+.navbar__hamburger.is-active .bar-2 {
+  transform: translateY(-3.4px) rotate(-45deg);
+}
+
+/* ---- RESPONSIVE BREAKPOINTS ---- */
+@media (max-width: 960px) {
+  .navbar__search {
+    display: none;
+  }
+
+  .navbar__hamburger {
+    display: inline-flex;
+  }
+
   .navbar__links {
-    flex-direction: column; gap: 4px;
-    position: absolute; top: calc(100% + 12px); left: 0; right: 0;
-    background: var(--bg-secondary); border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md); padding: 14px;
-    box-shadow: 0 20px 45px rgba(35,31,28,.18);
-    opacity: 0; visibility: hidden; transform: translateY(-8px);
-    transition: opacity .25s ease, transform .25s ease, visibility .25s;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100vh;
+    background-color: rgba(249, 246, 240, 0.98);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-16px);
+    transition: all var(--dur-base) var(--ease-out);
   }
+
   .navbar__links.is-open {
-    opacity: 1; visibility: visible; transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
   }
-  .navbar__links a { display: block; padding: 10px 8px; }
+
+  .navbar__links a {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  body.menu-locked {
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 14px 0;
+  }
+  .navbar__logo-sub {
+    display: none;
+  }
 }

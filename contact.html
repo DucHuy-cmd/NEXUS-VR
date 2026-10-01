@@ -1,14 +1,22 @@
 <!DOCTYPE html>
-<html lang="vi" class="dark-mode">
+<!--
+  PAGE CONTRACT: docs/pages/contact.md
+  OWNER: Trường Vũ. Chỉ sửa contact.html cùng contact.css/contact-controller.js.
+  FORM HOOKS: #contact-form, #contact-name, #contact-email, #contact-phone,
+  #contact-service, #contact-time-slot, #contact-message, #contact-submit-btn.
+  Không hứa xác nhận đặt lịch hoặc lưu thông tin cá nhân khi API chưa hoàn thiện.
+-->
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Liên hệ NEXUS VR để được tư vấn sản phẩm, tìm showroom hoặc gửi yêu cầu trải nghiệm.">
+  <meta name="theme-color" content="#F8F5F0">
   <title>NEXUS VR — Không Gian Trải Nghiệm & Showroom Flagship</title>
-  <!-- [PHỤ TRÁCH: Nguyễn Trường Vũ — Lead UI/UX & Creative Front-end Developer] -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,600;1,700&family=Playfair+Display:ital,wght@1,400;1,600;1,700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- FOUNDATION STYLES -->
   <link rel="stylesheet" href="assets/css/variables.css">
@@ -23,6 +31,7 @@
 
   <!-- BESPOKE HAUTE SPATIAL SHOWROOM STYLES -->
   <link rel="stylesheet" href="assets/css/pages/contact.css">
+  <link rel="stylesheet" href="assets/css/components/fx.css"> <!-- [FX ENGINE] -->
 </head>
 <body data-page="contact">
 
@@ -42,232 +51,42 @@
   <div id="navbar-root"></div>
 
   <!-- MAIN VIEWPORT -->
-  <main class="contact-page-root">
+  <main class="contact-page-root" id="main-content">
     <div class="contact-container">
 
       <!-- =======================================================
-           5. HERO SECTION (EDITORIAL SPATIAL CINEMA & OPTICAL LOUPE)
+           ZONE 1: TOP HEADER CLUSTER (CONCIERGE & SHOWROOM SUPPORT)
            ======================================================= -->
-      <section class="hero-editorial-section" aria-label="Không gian trải nghiệm VR Flagship">
-        <!-- Chữ watermark nền khổng lồ chìm bên dưới -->
-        <div class="hero-watermark-bg" aria-hidden="true">
-          <span>FLAGSHIP 8K</span>
+      <header class="contact-header-cluster volumetric-header" id="volumetric-header" aria-label="Tiêu đề trang liên hệ và đặt lịch hẹn">
+        <div class="contact-header-eyebrow">
+          <span class="tag-bracket">[</span>
+          <span class="beacon-pulse beacon-pulse--header" aria-hidden="true"></span>
+          <span class="tag-label">TƯ VẤN SẢN PHẨM &amp; TRẢI NGHIỆM SHOWROOM</span>
+          <span class="tag-bracket">]</span>
         </div>
-
-        <div class="hero-layout-grid">
-          <!-- CỘT TRÁI: TYPOGRAPHY ĐIỆN ẢNH & BỘ ĐIỀU BIẾN ÁNH SÁNG -->
-          <div class="hero-text-cluster">
-            <div class="hero-sur-tag">
-              <span class="tag-bracket">[</span>
-              <span class="tag-label">SHOWROOM QUANG HỌC CHUẨN MỰC</span>
-              <span class="tag-bracket">]</span>
-            </div>
-
-            <h1 class="hero-editorial-title">
-              <span class="title-primary">KHÔNG GIAN TRẢI NGHIỆM</span>
-              <span class="title-italic">Thực Tế Ảo Flagship</span>
-            </h1>
-
-            <p class="hero-manifesto">
-              Điểm chạm vật lý và kỹ thuật số tinh tế của NEXUS VR tại Phố đi bộ Nguyễn Huệ. Nơi công nghệ hiển thị 8K võng mạc giao thoa cùng chuẩn mực tiếp đón thượng hạng và dịch vụ cân chỉnh quang học chuyên sâu cho từng cá nhân.
-            </p>
-
-            <!-- HERO CTA SUITE: ĐẶT LỊCH TIẾP ĐÓN RIÊNG (HIỂN THỊ NGAY ĐẦU TRANG) -->
-            <div class="hero-cta-suite">
-              <a href="#booking-section" class="btn-luxe-cta" id="hero-booking-btn">
-                <span class="btn-luxe-cta__bg"></span>
-                <span class="btn-luxe-cta__txt">Đặt Lịch Tiếp Đón Riêng</span>
-                <svg class="btn-luxe-cta__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </a>
-
-              <div class="hero-status-beacon" title="Showroom đang mở cửa đón khách">
-                <span class="beacon-orb"></span>
-                <span class="beacon-text">Flagship Q.1 đang đón khách • 09:00 — 21:30</span>
-              </div>
-            </div>
-
-            <!-- DẢI THÔNG SỐ TỐC ĐỘ CAO -->
-            <div class="hero-specs-row">
-              <div class="spec-cell">
-                <span class="spec-cell__val">45'</span>
-                <span class="spec-cell__sub">Phút riêng tư</span>
-              </div>
-              <div class="spec-cell-sep" aria-hidden="true"></div>
-              <div class="spec-cell">
-                <span class="spec-cell__val">1 : 1</span>
-                <span class="spec-cell__sub">Chuyên gia đồng hành</span>
-              </div>
-              <div class="spec-cell-sep" aria-hidden="true"></div>
-              <div class="spec-cell">
-                <span class="spec-cell__val">0.1mm</span>
-                <span class="spec-cell__sub">Đo chuẩn IPD mắt</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- CỘT PHẢI: KHUNG ẢNH 3D, HÀO QUANG VÀ KÍNH SOI QUANG HỌC 8K -->
-          <div class="hero-visual-stage">
-            <div class="stage-perspective-wrap">
-              <!-- VẦNG HÀO QUANG QUANG HỌC THÍCH ỨNG THEO THEME -->
-              <div class="stage-optical-halo" id="hero-optical-halo" aria-hidden="true"></div>
-
-              <!-- KHUNG KÍNH NỔI 3D MONOLITH -->
-              <div class="stage-glass-monolith" id="hero-photo-card">
-                <div class="monolith-inner">
-                  <img 
-                    src="assets/images/products/person-vr.jpg" 
-                    alt="Khách hàng trải nghiệm kính thực tế ảo NEXUS Vision Pro 8K tại Showroom Flagship" 
-                    class="monolith-img" 
-                    loading="eager"
-                  >
-                  <!-- Specular Glare phản quang theo chuột -->
-                  <div class="monolith-specular" id="photo-specular-glare" aria-hidden="true"></div>
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        <h1 class="contact-header-title">
+          <span class="title-primary kinetic-type" id="kinetic-title">LIÊN HỆ &amp; TƯ VẤN</span>
+          <span class="title-italic">NEXUS VR</span>
+        </h1>
+        <p class="contact-header-desc">
+          Gọi, gửi email hoặc ghé showroom để nhận tư vấn sản phẩm và hỗ trợ trải nghiệm NEXUS VR.
+        </p>
+      </header>
 
       <!-- =======================================================
-           6. CHƯƠNG TRÌNH ĐÓN TIẾP 45 PHÚT ĐA GIÁC QUAN
-              (THE 45-MINUTE SENSORY PROTOCOL & SPATIAL AUDIO)
+           ZONE 2: PRIMARY CONTACT DOCK (ABOVE THE FOLD)
+           3 Large Prominent Cards + Integrated Compact Google Maps
            ======================================================= -->
-      <section class="sensory-protocol-section" aria-label="Lịch trình đón tiếp 45 phút đa giác quan">
-        <header class="sensory-header">
-          <div class="sensory-header__badge">
-            <span>QUY TRÌNH TIẾP ĐÓN VIP</span>
-          </div>
-          <h2 class="sensory-header__title">Hành Trình 45 Phút Đa Giác Quan</h2>
-          <p class="sensory-header__desc">
-            Không đơn thuần là thử kính. Đây là nghi thức thưởng lãm không gian số được thiết kế riêng cho từng vị khách danh dự.
-          </p>
-        </header>
+      <section class="direct-contact-dock chromatic-dock" id="contact-channels" aria-label="Kênh liên hệ trực tiếp thượng hạng">
+        <div class="dock-layout-grid">
+          <!-- CỘT TRÁI: 3 THẺ LIÊN HỆ TRỰC DIỆN -->
+          <div class="dock-cards-col chromatic-group">
 
-        <!-- DẢI TIẾN TRÌNH 4 BƯỚC ĐỘC BẢN VỚI TƯƠNG TÁC GIÃN NỞ -->
-        <div class="sensory-stepper-grid">
-
-          <!-- BƯỚC 01 -->
-          <div class="sensory-card" data-phase="1">
-            <div class="sensory-card__head">
-              <span class="sensory-num">01</span>
-              <span class="sensory-duration">10 PHÚT</span>
-            </div>
-            <div class="sensory-card__body">
-              <div class="sensory-icon-wrap">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-                  <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-                  <line x1="6" y1="1" x2="6" y2="4"></line>
-                  <line x1="10" y1="1" x2="10" y2="4"></line>
-                  <line x1="14" y1="1" x2="14" y2="4"></line>
-                </svg>
-              </div>
-              <h3 class="sensory-title">Sảnh Đón Tiếp VIP & Trà Thủ Công</h3>
-              <p class="sensory-text">Thư giãn với trà thượng hạng trong không gian nội thất tối giản ấm áp, tách biệt hoàn toàn khỏi nhịp sống ồn ào.</p>
-            </div>
-            <div class="sensory-line-track">
-              <div class="sensory-line-progress"></div>
-            </div>
-          </div>
-
-          <!-- BƯỚC 02 -->
-          <div class="sensory-card" data-phase="2">
-            <div class="sensory-card__head">
-              <span class="sensory-num">02</span>
-              <span class="sensory-duration">10 PHÚT</span>
-            </div>
-            <div class="sensory-card__body">
-              <div class="sensory-icon-wrap">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="3"></circle>
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
-              </div>
-              <h3 class="sensory-title">Căn Chỉnh Quang Học IPD Võng Mạc</h3>
-              <p class="sensory-text">Máy quét sinh trắc học căn chỉnh khoảng cách đồng tử chính xác 0.1mm, lắp thấu kính cận thị từ tính cá nhân hóa.</p>
-            </div>
-            <div class="sensory-line-track">
-              <div class="sensory-line-progress"></div>
-            </div>
-          </div>
-
-          <!-- BƯỚC 03: TÍCH HỢP TRÌNH DIỄN ÂM THANH KHÔNG GIAN BINAURAL -->
-          <div class="sensory-card sensory-card--audio" data-phase="3">
-            <div class="sensory-card__head">
-              <span class="sensory-num">03</span>
-              <span class="sensory-duration">15 PHÚT</span>
-            </div>
-            <div class="sensory-card__body">
-              <div class="sensory-icon-wrap">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-              </div>
-              <h3 class="sensory-title">Du Hành Không Gian 8K Standalone</h3>
-              <p class="sensory-text">Đắm chìm vào thế giới ảo siêu thực với 23 triệu điểm ảnh võng mạc kết hợp trường âm thanh vòm Spatial Audio 360°.</p>
-
-              <!-- NÚT NGHE THỬ KHÔNG GIAN ÂM THANH 3D BINAURAL NATIVE -->
-              <button type="button" class="btn-audio-preview" id="btn-audio-preview" aria-label="Nghe thử trường âm thanh không gian 8K">
-                <span class="audio-btn-icon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                </span>
-                <span class="audio-btn-text">Nghe thử Spatial Audio</span>
-                <div class="audio-wave-bars" id="audio-wave-bars" aria-hidden="true">
-                  <span></span><span></span><span></span><span></span><span></span>
-                </div>
-              </button>
-            </div>
-            <div class="sensory-line-track">
-              <div class="sensory-line-progress"></div>
-            </div>
-          </div>
-
-          <!-- BƯỚC 04 -->
-          <div class="sensory-card" data-phase="4">
-            <div class="sensory-card__head">
-              <span class="sensory-num">04</span>
-              <span class="sensory-duration">10 PHÚT</span>
-            </div>
-            <div class="sensory-card__body">
-              <div class="sensory-icon-wrap">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                </svg>
-              </div>
-              <h3 class="sensory-title">Cố Vấn May Đo & Khắc Tên Laser</h3>
-              <p class="sensory-text">Chuyên viên tư vấn phương án cá nhân hóa đệm da cừu và đăng ký khắc laser độc bản cho phiên bản sở hữu.</p>
-            </div>
-            <div class="sensory-line-track">
-              <div class="sensory-line-progress"></div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- =======================================================
-             KHỐI KÊNH KẾT NỐI TRỰC TIẾP LUXURY CONCIERGE CHANNELS DOCK
-             ======================================================= -->
-        <div class="concierge-channels-hub" aria-label="Kênh liên hệ trực tiếp thượng hạng">
-          <div class="channels-hub-header">
-            <div class="channels-hub-tag">
-              <span class="live-pulse-dot"></span>
-              <span>KÊNH KẾT NỐI TRỰC TIẾP • ĐẶC QUYỀN VIP</span>
-            </div>
-            <h3 class="channels-hub-title">Liên Hệ Trực Tiếp Với Đội Ngũ Concierge</h3>
-            <p class="channels-hub-desc">Hỗ trợ khẩn cấp 24/7, tiếp nhận yêu cầu đặt lịch may đo độc bản và hướng dẫn tham quan Flagship Sky Lounge.</p>
-          </div>
-
-          <div class="channels-grid">
-            <!-- KÊNH 01: ĐƯỜNG DÂY NÓNG 24/7 -->
+            <!-- KÊNH 01: HOTLINE TIẾP ĐÓN RIÊNG -->
             <article class="channel-card channel-card--hotline" data-channel="phone">
               <div class="channel-card__top">
                 <span class="channel-code">KÊNH 01 • VOICE HUD</span>
-                <span class="channel-status-beacon" title="Đang trực tuyến">
+                <span class="channel-status-beacon" title="Đang trực tuyến 24/7">
                   <span class="beacon-pulse"></span>
                   <span class="beacon-label">TRỰC TUYẾN 24/7</span>
                 </span>
@@ -281,22 +100,22 @@
                 <div class="channel-info">
                   <span class="channel-label">HOTLINE TIẾP ĐÓN RIÊNG</span>
                   <a href="tel:0889378929" class="channel-val channel-val--phone" id="contact-hotline-val" aria-label="Gọi hotline 0889 378 929">0889 378 929</a>
-                  <p class="channel-sub">Tiếp nhận cuộc gọi tức thì • Hỗ trợ kỹ thuật VR cao cấp</p>
+                  <p class="channel-sub">Tiếp nhận cuộc gọi tức thì • Hỗ trợ kỹ thuật VR &amp; tư vấn may đo độc bản</p>
                 </div>
               </div>
               <div class="channel-card__actions">
-                <a href="tel:0889378929" class="channel-btn channel-btn--primary">
+                <a href="tel:0889378929" class="channel-btn channel-btn--primary" data-fx="magnetic">
                   <span>Gọi Ngay</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                 </a>
                 <button type="button" class="channel-btn channel-btn--copy" data-copy-target="#contact-hotline-val" data-label="Sao chép" aria-label="Sao chép số hotline">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                   <span class="copy-text">Sao chép</span>
                 </button>
               </div>
             </article>
 
-            <!-- KÊNH 02: HỘP THƯ TIẾP ĐÓN CONCIERGE -->
+            <!-- KÊNH 02: HỘP THƯ CONCIERGE BẢO MẬT -->
             <article class="channel-card channel-card--mail" data-channel="email">
               <div class="channel-card__top">
                 <span class="channel-code">KÊNH 02 • SECURE MAIL</span>
@@ -315,28 +134,28 @@
                 <div class="channel-info">
                   <span class="channel-label">CONCIERGE MAIL</span>
                   <a href="mailto:vu03032007@gmail.com" class="channel-val channel-val--email" id="contact-email-val" aria-label="Gửi email vu03032007@gmail.com">vu03032007@gmail.com</a>
-                  <p class="channel-sub">Hồ sơ đối tác, báo giá may đo &amp; hỗ trợ bảo hành quốc tế</p>
+                  <p class="channel-sub">Hồ sơ đối tác, báo giá dự án doanh nghiệp &amp; hỗ trợ bảo hành chính hãng</p>
                 </div>
               </div>
               <div class="channel-card__actions">
-                <a href="mailto:vu03032007@gmail.com" class="channel-btn channel-btn--primary">
+                <a href="mailto:vu03032007@gmail.com" class="channel-btn channel-btn--primary" data-fx="magnetic">
                   <span>Gửi Thư</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </a>
                 <button type="button" class="channel-btn channel-btn--copy" data-copy-target="#contact-email-val" data-label="Sao chép" aria-label="Sao chép địa chỉ email">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                   <span class="copy-text">Sao chép</span>
                 </button>
               </div>
             </article>
 
-            <!-- KÊNH 03: TỔ HỢP FLAGSHIP SKY LOUNGE -->
+            <!-- KÊNH 03: ĐỊA ĐIỂM FLAGSHIP SKY LOUNGE -->
             <article class="channel-card channel-card--location" data-channel="location">
               <div class="channel-card__top">
                 <span class="channel-code">KÊNH 03 • PHYSICAL DOCK</span>
                 <span class="channel-status-beacon" title="Đang mở cửa đón khách">
                   <span class="beacon-pulse"></span>
-                  <span class="beacon-label">MỞ CỬA 09:00 - 21:00</span>
+                  <span class="beacon-label">MỞ CỬA 09:00 — 21:30</span>
                 </span>
               </div>
               <div class="channel-card__mid">
@@ -347,29 +166,80 @@
                   </svg>
                 </div>
                 <div class="channel-info">
-                  <span class="channel-label">FLAGSHIP SKY LOUNGE</span>
+                  <span class="channel-label">FLAGSHIP SHOWROOM</span>
                   <span class="channel-val channel-val--location" id="contact-address-val">Nguyễn Huệ, Quận 1, TP. HCM</span>
-                  <p class="channel-sub">Penthouse Tầng 28 • Trải nghiệm thực tế riêng tư 1:1</p>
+                  <p class="channel-sub">Penthouse Tầng 28 • Trải nghiệm thực tế riêng tư 1:1, đo IPD miễn phí</p>
                 </div>
               </div>
               <div class="channel-card__actions">
-                <a href="#showroom-map" class="channel-btn channel-btn--primary" id="btn-scroll-to-map">
-                  <span>Bản Đồ Vệ Tinh</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-                </a>
-                <a href="https://maps.google.com/?q=Nguyen+Hue+District+1+Ho+Chi+Minh+City" target="_blank" rel="noopener noreferrer" class="channel-btn channel-btn--copy" aria-label="Mở Google Maps">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                <a href="https://maps.google.com/?q=Ph%E1%BB%91+%C4%91i+b%E1%BB%99+Nguy%E1%BB%85n+Hu%E1%BB%87,+Qu%E1%BA%ADn+1,+H%E1%BB%93+Ch%C3%AD+Minh" target="_blank" rel="noopener noreferrer" class="channel-btn channel-btn--primary" aria-label="Mở Google Maps chỉ đường" data-fx="magnetic">
                   <span>Chỉ Đường</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 </a>
+                <button type="button" class="channel-btn channel-btn--copy" data-copy-target="#contact-address-val" data-label="Sao chép" aria-label="Sao chép địa chỉ showroom">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <span class="copy-text">Sao chép</span>
+                </button>
               </div>
             </article>
+
           </div>
+
+          <!-- CỘT PHẢI: BẢN ĐỒ VỆ TINH COMPACT GOOGLE MAPS (SPATIAL CONTEXT TỨC THÌ) -->
+          <div class="dock-map-card" aria-label="Bản đồ định vị không gian Showroom Flagship">
+            <div class="map-card-head">
+              <div class="map-head-title-wrap">
+                <span class="pin-dot-active"></span>
+                <span class="map-card-title">NEXUS TOWER FLAGSHIP</span>
+              </div>
+              <span class="map-badge-hours">
+                <span class="beacon-pulse beacon-pulse--sm" aria-hidden="true"></span>
+                09:00 — 21:30
+              </span>
+            </div>
+
+            <div class="map-card-viewport">
+              <iframe 
+                class="compact-map-iframe"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.517826543169!2d106.70175557585093!3d10.771594959281734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f4165689169%3A0x6b87640a455a73e4!2zUGjhu5EgxJFpIGLhu5kgTmd1eeG7hW4gSHXhu4csIELhur9uIE5naMOpLCBRdeG6rW4gMSwgSOG7kyBDaMOtIE1pbmgsIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1710777600000!5m2!1svi!2s" 
+                width="100%" 
+                height="100%" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade" 
+                title="Bản đồ vị trí Flagship Showroom NEXUS VR Nguyễn Huệ Quận 1">
+              </iframe>
+
+              <div class="map-floating-badge">
+                <span class="badge-icon">📍</span>
+                <span class="badge-text">Phố đi bộ Nguyễn Huệ, P. Bến Nghé, Quận 1</span>
+              </div>
+            </div>
+
+            <div class="map-card-footer">
+              <div class="map-footer-info">
+                <span class="info-k">BÃI ĐỖ XE:</span>
+                <span class="info-v">Hầm B1/B2 an ninh cao cho Ô tô &amp; Xe máy</span>
+              </div>
+              <a 
+                href="https://maps.google.com/?q=Ph%E1%BB%91+%C4%91i+b%E1%BB%99+Nguy%E1%BB%85n+Hu%E1%BB%87,+Qu%E1%BA%ADn+1,+H%E1%BB%93+Ch%C3%AD+Minh" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="map-footer-btn"
+                aria-label="Mở ứng dụng Google Maps điều hướng"
+              >
+                <span>Mở Google Maps</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              </a>
+            </div>
+          </div>
+
         </div>
       </section>
 
       <!-- =======================================================
-           7. KHỐI TRUNG TÂM: ĐẶT LỊCH CONCIERGE & THẺ VIP PASS 3D 2 MẶT
-              (ID: booking-section)
+           ZONE 3: SECONDARY CONTACT - APPOINTMENT BOOKING
+           (Bespoke Concierge Form + Dual-Faced 3D VIP Pass)
            ======================================================= -->
       <section class="booking-cockpit-section" id="booking-section" aria-label="Đặt lịch trải nghiệm và phát hành Thẻ Tiếp Đón VIP">
         <div class="cockpit-grid">
@@ -399,10 +269,11 @@
                     id="contact-name" 
                     name="name" 
                     class="c-line-input" 
-                    placeholder="Ví dụ: Nguyễn Trường Vũ" 
+                    placeholder="Ví dụ: Hoàng Long" 
                     autocomplete="name" 
                     required
                   >
+                  <span class="c-input-status" id="name-status" aria-hidden="true"></span>
                   <div class="c-underline-glow"></div>
                 </div>
                 <span class="c-error" id="name-error" aria-live="polite"></span>
@@ -422,6 +293,7 @@
                       autocomplete="email" 
                       required
                     >
+                    <span class="c-input-status" id="email-status" aria-hidden="true"></span>
                     <div class="c-underline-glow"></div>
                   </div>
                   <span class="c-error" id="email-error" aria-live="polite"></span>
@@ -439,6 +311,7 @@
                       autocomplete="tel" 
                       required
                     >
+                    <span class="c-input-status" id="phone-status" aria-hidden="true"></span>
                     <div class="c-underline-glow"></div>
                   </div>
                   <span class="c-error" id="phone-error" aria-live="polite"></span>
@@ -517,17 +390,23 @@
                 <div class="c-capsules-grid" id="time-slot-capsules" role="radiogroup" aria-label="Khung giờ trải nghiệm showroom">
                   <input type="hidden" name="time_slot" id="contact-time-slot" value="morning">
                   <button type="button" class="c-capsule-btn is-active" data-slot="morning" role="radio" aria-checked="true">
-                    <span class="c-capsule-dot"></span>
+                    <span class="c-capsule-dot">
+                      <svg class="c-capsule-check" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
                     <span class="c-capsule-label">Buổi Sáng</span>
                     <span class="c-capsule-time">09:00 — 12:00</span>
                   </button>
                   <button type="button" class="c-capsule-btn" data-slot="afternoon" role="radio" aria-checked="false">
-                    <span class="c-capsule-dot"></span>
+                    <span class="c-capsule-dot">
+                      <svg class="c-capsule-check" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
                     <span class="c-capsule-label">Buổi Chiều</span>
                     <span class="c-capsule-time">14:00 — 17:00</span>
                   </button>
                   <button type="button" class="c-capsule-btn" data-slot="evening" role="radio" aria-checked="false">
-                    <span class="c-capsule-dot"></span>
+                    <span class="c-capsule-dot">
+                      <svg class="c-capsule-check" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
                     <span class="c-capsule-label">Buổi Tối</span>
                     <span class="c-capsule-time">18:00 — 21:00</span>
                   </button>
@@ -550,6 +429,7 @@
                     placeholder="Ví dụ: Cung cấp độ cận/loạn thị để kỹ thuật viên chuẩn bị thấu kính trước, số lượng người đi cùng..."
                     required
                   ></textarea>
+                  <span class="c-input-status c-input-status--textarea" id="message-status" aria-hidden="true"></span>
                   <div class="c-underline-glow"></div>
                 </div>
                 <span class="c-error" id="message-error" aria-live="polite"></span>
@@ -557,7 +437,7 @@
 
               <!-- NÚT XÁC NHẬN CONCIERGE -->
               <div class="c-action-wrap">
-                <button type="submit" class="btn-concierge-confirm" id="contact-submit-btn">
+                <button type="submit" class="btn-concierge-confirm" id="contact-submit-btn" data-fx="magnetic">
                   <span class="btn-sheen-shine" aria-hidden="true"></span>
                   <span class="btn-confirm-text">XÁC NHẬN LỊCH TIẾP ĐÓN VIP</span>
                   <svg class="btn-confirm-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -597,7 +477,7 @@
               </div>
 
               <!-- KHUNG CHỨA THẺ 3D FLIPPABLE -->
-              <div class="vip-pass-card-wrapper" id="vip-pass-wrapper">
+              <div class="vip-pass-card-wrapper" id="vip-pass-wrapper" data-cursor="view">
                 <div class="vip-pass-card" id="vip-pass-card">
 
                   <!-- ================= MẶT TRƯỚC (FRONT) ================= -->
@@ -606,6 +486,8 @@
                     <div class="pass-metallic-glare" id="pass-metallic-glare" aria-hidden="true"></div>
                     <!-- Lớp màng tán sắc Holographic Foil Iridescent -->
                     <div class="pass-iridescent-foil" aria-hidden="true"></div>
+                    <!-- Vệt quét sáng tương tác khi điền form -->
+                    <div class="pass-form-shimmer" aria-hidden="true"></div>
 
                     <div class="pass-header-strip">
                       <div class="pass-brand-mark">
@@ -668,6 +550,7 @@
                   <div class="pass-face pass-face--back">
                     <div class="pass-metallic-glare" aria-hidden="true"></div>
                     <div class="pass-iridescent-foil" aria-hidden="true"></div>
+                    <div class="pass-form-shimmer" aria-hidden="true"></div>
 
                     <!-- Dải từ tính kim loại đen bóng -->
                     <div class="pass-magnetic-stripe"></div>
@@ -729,128 +612,7 @@
       </section>
 
       <!-- =======================================================
-           8. BUỒNG LÁI KHÔNG GIAN DUAL-VIEW (BẢN ĐỒ VỆ TINH & LOUNGE 360°)
-           ======================================================= -->
-      <section class="spatial-hud-section" id="showroom-map" aria-label="Bản đồ định vị vệ tinh và buồng lái không gian Showroom">
-        <div class="hud-cockpit-frame">
-
-          <!-- HUD TOP CONTROL BAR WITH DUAL-VIEW TABS -->
-          <div class="hud-top-bar">
-            <div class="hud-view-switcher" role="tablist" aria-label="Chế độ hiển thị buồng lái">
-              <button type="button" class="hud-tab-btn is-active" id="tab-map-view" role="tab" aria-selected="true">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-                <span>BẢN ĐỒ ĐỊNH VỊ</span>
-              </button>
-              <button type="button" class="hud-tab-btn" id="tab-lounge-view" role="tab" aria-selected="false">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-                <span>KHÔNG GIAN SHOWROOM</span>
-              </button>
-            </div>
-
-            <div class="hud-time-display">
-              <span class="hud-time-label">GIỜ ĐÓN KHÁCH (ICT):</span>
-              <span class="hud-time-clock" id="hud-live-clock">09:00:00 ICT</span>
-            </div>
-          </div>
-
-          <!-- KHUNG HIỂN THỊ CHÍNH (VIEWPORT DUAL-MODE) -->
-          <div class="hud-viewport-stage">
-            <div class="hud-crosshair hud-crosshair--tl" aria-hidden="true"></div>
-            <div class="hud-crosshair hud-crosshair--tr" aria-hidden="true"></div>
-            <div class="hud-crosshair hud-crosshair--bl" aria-hidden="true"></div>
-            <div class="hud-crosshair hud-crosshair--br" aria-hidden="true"></div>
-
-            <!-- CHẾ ĐỘ 1: BẢN ĐỒ VỆ TINH -->
-            <div class="hud-view-panel is-active" id="panel-map-view">
-              <iframe 
-                class="hud-map-iframe"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.517826543169!2d106.70175557585093!3d10.771594959281734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f4165689169%3A0x6b87640a455a73e4!2zUGjhu5EgxJFpIGLhu5kgTmd1eeG7hW4gSHXhu4csIELhur9uIE5naMOpLCBRdeG6rW4gMSwgSOG7kyBDaMOtIE1pbmgsIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1710777600000!5m2!1svi!2s" 
-                width="100%" 
-                height="100%" 
-                allowfullscreen="" 
-                loading="lazy" 
-                referrerpolicy="no-referrer-when-downgrade" 
-                title="Bản đồ vị trí Showroom Flagship NEXUS VR Nguyễn Huệ Quận 1">
-              </iframe>
-
-              <!-- HUD Overlay Pin Point Info Floating -->
-              <div class="hud-floating-pin-card">
-                <div class="pin-card-head">
-                  <span class="pin-dot-active"></span>
-                  <span class="pin-card-title">NEXUS TOWER FLAGSHIP</span>
-                </div>
-                <p class="pin-card-addr">Phố đi bộ Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh</p>
-                <a 
-                  href="https://maps.google.com/?q=Nguy%E1%BB%85n+Hu%E1%BB%87,+Qu%E1%BA%ADn+1,+H%E1%BB%93+Ch%C3%AD+Minh" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  class="btn-hud-navigate"
-                  id="btn-hud-nav"
-                  aria-label="Kích hoạt điều hướng bản đồ đến Showroom"
-                >
-                  <span>Mở Google Maps Chỉ Đường</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </a>
-              </div>
-            </div>
-
-            <!-- CHẾ ĐỘ 2: TOÀN CẢNH KHÔNG GIAN SHOWROOM FLAGSHIP -->
-            <div class="hud-view-panel" id="panel-lounge-view">
-              <div class="lounge-panorama-wrap">
-                <img 
-                  src="assets/images/hero/hero-vr-headset-trangnau.webp" 
-                  alt="Không gian phòng trải nghiệm âm thanh không gian và kính NEXUS VR Flagship" 
-                  class="lounge-panorama-img"
-                >
-                <div class="lounge-ambient-vignette"></div>
-
-                <!-- Các điểm Hotspot tương tác trên không gian -->
-                <div class="lounge-hotspot hotspot--1" style="top: 35%; left: 30%;">
-                  <span class="hotspot-pulse"></span>
-                  <div class="hotspot-tooltip">
-                    <strong>POD 01: Sảnh Thử Kính 8K</strong>
-                    <span>Ghế công thái học và dàn âm thanh không gian 360°</span>
-                  </div>
-                </div>
-
-                <div class="lounge-hotspot hotspot--2" style="top: 48%; left: 68%;">
-                  <span class="hotspot-pulse"></span>
-                  <div class="hotspot-tooltip">
-                    <strong>POD 02: Bàn Đo IPD Quang Học</strong>
-                    <span>Cân chỉnh khoảng cách đồng tử tự động 0.1mm</span>
-                  </div>
-                </div>
-
-                <div class="lounge-hud-caption">
-                  <span class="caption-title">FLAGSHIP PRIVATE LOUNGE — LEVEL 38</span>
-                  <span class="caption-desc">Hệ thống ánh sáng điều biến Circadian Lighting và bộ lọc không khí ion âm cao cấp</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- HUD FOOTER TELEMETRY STATS -->
-          <div class="hud-footer-telemetry">
-            <div class="telem-item">
-              <span class="telem-label">VỊ TRÍ:</span>
-              <span class="telem-val">Trung tâm Quận 1 • Phố đi bộ Nguyễn Huệ</span>
-            </div>
-            <div class="telem-item">
-              <span class="telem-label">BÃI ĐỖ XE:</span>
-              <span class="telem-val">Hầm B1/B2 an ninh cao cho Ô tô & Xe máy</span>
-            </div>
-            <div class="telem-item">
-              <span class="telem-label">TRẠNG THÁI:</span>
-              <span class="telem-val text-emerald">Đang sẵn sàng đón tiếp</span>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- =======================================================
-           9. EDITORIAL FAQ ACCORDION (CÂU HỎI THƯỜNG GẶP)
+           ZONE 4: EDITORIAL FAQ ACCORDION (CÂU HỎI THƯỜNG GẶP)
            ======================================================= -->
       <section class="faq-editorial-section" id="faq" aria-labelledby="faq-title">
         <header class="faq-editorial-header">
@@ -865,7 +627,11 @@
             <div class="accordion-header">
               <button type="button" class="accordion-trigger">
                 <span class="accordion-trigger__text">Người bị cận thị hoặc loạn thị có sử dụng được kính NEXUS VR không?</span>
-                <span class="accordion-trigger__icon" aria-hidden="true">+</span>
+                <span class="accordion-trigger__icon" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
               </button>
             </div>
             <div class="accordion-content">
@@ -879,7 +645,11 @@
             <div class="accordion-header">
               <button type="button" class="accordion-trigger">
                 <span class="accordion-trigger__text">Chính sách trải nghiệm và dùng thử tại nhà 14 ngày áp dụng ra sao?</span>
-                <span class="accordion-trigger__icon" aria-hidden="true">+</span>
+                <span class="accordion-trigger__icon" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
               </button>
             </div>
             <div class="accordion-content">
@@ -893,7 +663,11 @@
             <div class="accordion-header">
               <button type="button" class="accordion-trigger">
                 <span class="accordion-trigger__text">Kính NEXUS VR có yêu cầu cấu hình máy tính (PC) rời để hoạt động không?</span>
-                <span class="accordion-trigger__icon" aria-hidden="true">+</span>
+                <span class="accordion-trigger__icon" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
               </button>
             </div>
             <div class="accordion-content">
@@ -907,7 +681,11 @@
             <div class="accordion-header">
               <button type="button" class="accordion-trigger">
                 <span class="accordion-trigger__text">Chính sách bảo hành và chăm sóc khách hàng VIP diễn ra trong bao lâu?</span>
-                <span class="accordion-trigger__icon" aria-hidden="true">+</span>
+                <span class="accordion-trigger__icon" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
               </button>
             </div>
             <div class="accordion-content">
@@ -921,7 +699,11 @@
             <div class="accordion-header">
               <button type="button" class="accordion-trigger">
                 <span class="accordion-trigger__text">Tôi có cần phải đặt lịch hẹn trước khi đến trải nghiệm tại Flagship Showroom không?</span>
-                <span class="accordion-trigger__icon" aria-hidden="true">+</span>
+                <span class="accordion-trigger__icon" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
               </button>
             </div>
             <div class="accordion-content">
@@ -990,19 +772,18 @@
   <!-- TẦNG 1: DATA & SERVICES -->
   <script src="assets/js/data/products-data.js"></script>
   <script src="assets/js/services/storage-service.js"></script>
-  <script src="assets/js/services/api-service.js"></script>
+
+  <!-- VENDORS: GSAP (Offline) -->
+  <script src="assets/js/vendors/gsap.min.js"></script>
 
   <!-- TẦNG 2: CORE MODULES -->
   <script src="assets/js/modules/toast.js"></script>
-  <script src="assets/js/modules/theme-toggle.js"></script>
+  <!-- [THEME TOGGLE REMOVED] -->
   <script src="assets/js/modules/layout-loader.js"></script>
   <script src="assets/js/modules/validator.js"></script>
-  <script src="assets/js/modules/counter-engine.js"></script>
-  <script src="assets/js/modules/slider-engine.js"></script>
   <script src="assets/js/modules/accordion-engine.js"></script>
-  <script src="assets/js/modules/cart-manager.js"></script>
 
-  <!-- TẦNG 3: BESPOKE CONTROLLER WITH LIVE VIP PASS ENGRAVER & WEB AUDIO HAPTICS -->
+  <!-- TẦNG 3: CONTACT CONTROLLER -->
   <script src="assets/js/controllers/contact-controller.js"></script>
 </body>
 </html>

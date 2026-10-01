@@ -17,10 +17,18 @@
   animation: toast-in .35s ease;
 }
 .toast.is-leaving { animation: toast-out .3s ease forwards; }
-.toast__icon { font-size: 16px; line-height: 1; margin-top: 1px; }
+.toast__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
 .toast--success .toast__icon { color: var(--success); }
 .toast--error .toast__icon { color: var(--error); }
-.toast--info .toast__icon { color: var(--accent-cyan); }
+.toast--info .toast__icon { color: var(--accent); }
 .toast__msg { font-size: 13.5px; color: var(--text-primary); flex: 1; }
 .toast__bar { position: absolute; left: 0; bottom: 0; height: 2px; background: var(--accent-gradient); animation: toast-shrink linear forwards; }
 

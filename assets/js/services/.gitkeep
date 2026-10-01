@@ -1,0 +1,2 @@
+# assets/js/services
+Thư mục chứa các service xử lý API và Storage (storage-service.js, api-service.js)

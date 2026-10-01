@@ -6,7 +6,9 @@
    ========================================================= */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { 
+  scroll-behavior: auto; /* [FIX CRITICAL DELAY] Trả lại quyền cuộn mượt cho thư viện Lenis (Cấm dùng smooth ở đây để tránh Double-Smooth Conflict) */
+}
 body {
   background: var(--bg-primary);
   color: var(--text-primary);

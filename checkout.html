@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thanh Toán | NEXUS VR — Quiet Luxury Spatial Computing</title>
+  <meta name="description" content="Hoàn tất đơn hàng và trải nghiệm quy trình mua sắm an toàn, tinh tế tại NEXUS VR.">
+  <meta name="theme-color" content="#F9F6F0">
+
+  <!-- FONTS: Space Grotesk & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- TẦNG 1: FOUNDATION -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+
+  <!-- TẦNG 2: COMPONENTS -->
+  <link rel="stylesheet" href="assets/css/components/navbar.css">
+  <link rel="stylesheet" href="assets/css/components/footer.css">
+  <link rel="stylesheet" href="assets/css/components/toast.css">
+  <link rel="stylesheet" href="assets/css/components/cart-drawer.css">
+
+  <!-- TẦNG 3: PAGE CSS RIÊNG -->
+  <link rel="stylesheet" href="assets/css/pages/checkout.css">
+</head>
+<body data-page="checkout">
+
+  <!-- NAVBAR (Tự động nạp bởi layout-loader.js) -->
+  <div id="navbar-root"></div>
+
+  <main class="checkout-page" id="main-content">
+    <div class="checkout-container">
+      
+      <!-- BREADCRUMB -->
+      <nav class="checkout-breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html">Trang chủ</a>
+        <span>/</span>
+        <a href="cart.html">Giỏ hàng</a>
+        <span>/</span>
+        <strong>Thanh toán</strong>
+      </nav>
+
+      <!-- EMPTY STATE (NẾU GIỎ HÀNG TRỐNG) -->
+      <div class="checkout-empty-state" id="checkoutEmptyNotice" hidden>
+        <div style="margin-bottom: 12px;" aria-label="Giỏ hàng trống">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+        </div>
+        <h2 class="checkout-empty-title">Giỏ hàng của bạn đang trống</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 24px;">Bạn chưa chọn sản phẩm nào để thanh toán. Hãy ghé qua cửa hàng để khám phá.</p>
+        <a href="shop.html" class="btn btn-primary">Khám phá cửa hàng</a>
+      </div>
+
+      <!-- MAIN CHECKOUT FLOW -->
+      <div id="checkoutMainLayout">
+
+        <!-- STEP PROGRESS INDICATOR -->
+        <div class="checkout-stepper" aria-label="Tiến trình thanh toán">
+          <div class="checkout-stepper__line" aria-hidden="true">
+            <div class="checkout-stepper__line-fill" id="stepperLineFill"></div>
+          </div>
+
+          <div class="checkout-step is-active" id="stepPill1">
+            <div class="checkout-step__num">1</div>
+            <div class="checkout-step__label">Giao Hàng</div>
+          </div>
+
+          <div class="checkout-step" id="stepPill2">
+            <div class="checkout-step__num">2</div>
+            <div class="checkout-step__label">Thanh Toán</div>
+          </div>
+
+          <div class="checkout-step" id="stepPill3">
+            <div class="checkout-step__num">3</div>
+            <div class="checkout-step__label">Hoàn Tất</div>
+          </div>
+        </div>
+
+        <div class="checkout-layout">
+          
+          <!-- CỘT CHÍNH (STEPS) -->
+          <div class="checkout-main-panel">
+            
+            <!-- ==========================================
+                 BƯỚC 1: THÔNG TIN GIAO HÀNG
+                 ========================================== -->
+            <div class="checkout-step-content" id="checkoutStep1">
+              <h2 class="checkout-section-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                Thông tin người nhận
+              </h2>
+
+              <div class="checkout-form-grid">
+                <div class="form-field full-col">
+                  <label for="orderName" class="form-label">Họ và tên người nhận *</label>
+                  <input type="text" id="orderName" class="form-input" placeholder="Ví dụ: Nguyễn Văn An" autocomplete="name" required>
+                  <span class="field-error" id="orderNameError" aria-live="polite"></span>
+                </div>
+
+                <div class="form-field">
+                  <label for="orderPhone" class="form-label">Số điện thoại *</label>
+                  <input type="tel" id="orderPhone" class="form-input" placeholder="0987 654 321" autocomplete="tel" required>
+                  <span class="field-error" id="orderPhoneError" aria-live="polite"></span>
+                </div>
+
+                <div class="form-field">
+                  <label for="orderEmail" class="form-label">Địa chỉ Email *</label>
+                  <input type="email" id="orderEmail" class="form-input" placeholder="email@domain.com" autocomplete="email" required>
+                  <span class="field-error" id="orderEmailError" aria-live="polite"></span>
+                </div>
+
+                <div class="form-field">
+                  <label for="orderCity" class="form-label">Tỉnh / Thành phố *</label>
+                  <select id="orderCity" class="form-input">
+                    <option value="Hà Nội">Hà Nội</option>
+                    <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                    <option value="Đà Nẵng">Đà Nẵng</option>
+                    <option value="Hải Phòng">Hải Phòng</option>
+                    <option value="Cần Thơ">Cần Thơ</option>
+                    <option value="Tỉnh thành khác">Tỉnh thành khác</option>
+                  </select>
+                </div>
+
+                <div class="form-field">
+                  <label for="orderDistrict" class="form-label">Quận / Huyện</label>
+                  <input type="text" id="orderDistrict" class="form-input" placeholder="Ví dụ: Ba Đình / Quận 1">
+                </div>
+
+                <div class="form-field full-col">
+                  <label for="orderAddress" class="form-label">Địa chỉ nhận hàng chi tiết *</label>
+                  <input type="text" id="orderAddress" class="form-input" placeholder="Số nhà, tên đường, phường/xã" autocomplete="street-address" required>
+                  <span class="field-error" id="orderAddressError" aria-live="polite"></span>
+                </div>
+
+                <div class="form-field full-col">
+                  <label for="orderNote" class="form-label">Ghi chú cho đơn vị vận chuyển (tùy chọn)</label>
+                  <input type="text" id="orderNote" class="form-input" placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi đến...">
+                </div>
+              </div>
+
+              <div class="checkout-btn-row">
+                <a href="cart.html" class="btn-checkout-prev">← Quay lại giỏ hàng</a>
+                <button type="button" class="btn-checkout-next" id="toStep2Btn">
+                  Tiếp tục đến thanh toán →
+                </button>
+              </div>
+            </div>
+
+            <!-- ==========================================
+                 BƯỚC 2: PHƯƠNG THỨC VẬN CHUYỂN & THANH TOÁN
+                 ========================================== -->
+            <div class="checkout-step-content" id="checkoutStep2" hidden>
+              
+              <!-- 1. Vận chuyển -->
+              <h2 class="checkout-section-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                Phương thức vận chuyển
+              </h2>
+
+              <div class="option-cards-group">
+                <label class="option-card shipping-card is-selected">
+                  <div class="option-card__left">
+                    <input type="radio" name="shippingMethod" value="standard" class="option-card__radio" checked>
+                    <div>
+                      <div class="option-card__title">NEXUS Standard Delivery</div>
+                      <div class="option-card__sub">Giao hàng bảo đảm 2-3 ngày làm việc (Đóng gói chống sốc chuyên dụng)</div>
+                    </div>
+                  </div>
+                  <div class="option-card__price">Miễn phí</div>
+                </label>
+
+                <label class="option-card shipping-card">
+                  <div class="option-card__left">
+                    <input type="radio" name="shippingMethod" value="express" class="option-card__radio">
+                    <div>
+                      <div class="option-card__title">NEXUS Premier Express (Hỏa tốc)</div>
+                      <div class="option-card__sub">Giao trong ngày tại HN &amp; TP.HCM bởi chuyên viên chuyển giao kỹ thuật</div>
+                    </div>
+                  </div>
+                  <div class="option-card__price">150.000 ₫</div>
+                </label>
+              </div>
+
+              <!-- 2. Thanh toán -->
+              <h2 class="checkout-section-title mt-32">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                Phương thức thanh toán
+              </h2>
+
+              <div class="option-cards-group">
+                <label class="option-card payment-card is-selected">
+                  <div class="option-card__left">
+                    <input type="radio" name="paymentMethod" value="cod" class="option-card__radio" checked>
+                    <div>
+                      <div class="option-card__title">Thanh toán khi nhận hàng (COD)</div>
+                      <div class="option-card__sub">Kiểm tra kiện hàng nguyên niêm phong trước khi thanh toán</div>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="option-card payment-card">
+                  <div class="option-card__left">
+                    <input type="radio" name="paymentMethod" value="bank" class="option-card__radio">
+                    <div>
+                      <div class="option-card__title">Chuyển khoản VietQR (Ngân hàng 24/7)</div>
+                      <div class="option-card__sub">Quét mã QR qua mọi ứng dụng ngân hàng và nhận xác nhận tức thì</div>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="option-card payment-card">
+                  <div class="option-card__left">
+                    <input type="radio" name="paymentMethod" value="card" class="option-card__radio">
+                    <div>
+                      <div class="option-card__title">Thẻ tín dụng / Thẻ ghi nợ Quốc tế</div>
+                      <div class="option-card__sub">Hỗ trợ Visa, Mastercard, JCB với chuẩn bảo mật mã hóa 256-bit</div>
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <!-- KHỐI VIETQR CHI TIẾT -->
+              <div class="bank-qr-box" id="bankTransferQrBlock" hidden>
+                <svg width="130" height="130" viewBox="0 0 130 130" fill="none" xmlns="http://www.w3.org/2000/svg" class="bank-qr-img">
+                  <rect width="130" height="130" fill="white" rx="8"/>
+                  <rect x="15" y="15" width="30" height="30" fill="#1A1715" rx="4"/>
+                  <rect x="20" y="20" width="20" height="20" fill="white" rx="2"/>
+                  <rect x="25" y="25" width="10" height="10" fill="#A67C52" rx="1"/>
+                  <rect x="85" y="15" width="30" height="30" fill="#1A1715" rx="4"/>
+                  <rect x="90" y="20" width="20" height="20" fill="white" rx="2"/>
+                  <rect x="95" y="25" width="10" height="10" fill="#A67C52" rx="1"/>
+                  <rect x="15" y="85" width="30" height="30" fill="#1A1715" rx="4"/>
+                  <rect x="20" y="90" width="20" height="20" fill="white" rx="2"/>
+                  <rect x="25" y="95" width="10" height="10" fill="#A67C52" rx="1"/>
+                  <rect x="55" y="18" width="6" height="6" fill="#1A1715"/>
+                  <rect x="68" y="18" width="6" height="6" fill="#1A1715"/>
+                  <rect x="55" y="30" width="6" height="6" fill="#A67C52"/>
+                  <rect x="68" y="38" width="6" height="6" fill="#1A1715"/>
+                  <rect x="18" y="55" width="6" height="6" fill="#1A1715"/>
+                  <rect x="30" y="55" width="6" height="6" fill="#1A1715"/>
+                  <rect x="55" y="55" width="20" height="20" fill="#1A1715" rx="2"/>
+                  <rect x="60" y="60" width="10" height="10" fill="#A67C52" rx="1"/>
+                  <rect x="85" y="55" width="6" height="6" fill="#1A1715"/>
+                  <rect x="98" y="55" width="6" height="6" fill="#1A1715"/>
+                  <rect x="55" y="85" width="6" height="6" fill="#1A1715"/>
+                  <rect x="68" y="85" width="6" height="6" fill="#1A1715"/>
+                  <rect x="85" y="85" width="6" height="6" fill="#1A1715"/>
+                </svg>
+                <div class="bank-qr-info">
+                  <div>Ngân hàng: <strong>MB BANK (Quân Đội)</strong></div>
+                  <div>Số tài khoản: <strong>0399887766</strong></div>
+                  <div>Chủ tài khoản: <strong>CONG TY NEXUS VR VIET NAM</strong></div>
+                  <div class="mt-8">Nội dung CK: <span class="bank-qr-code-highlight">NEXUS [Số điện thoại]</span></div>
+                </div>
+              </div>
+
+              <!-- KHỐI THẺ TÍN DỤNG CHI TIẾT -->
+              <div class="card-details-box" id="creditCardBlock" hidden>
+                <div class="form-field">
+                  <label class="form-label">Số thẻ tín dụng</label>
+                  <input type="text" class="form-input" placeholder="4123 •••• •••• 9999" maxlength="19">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <div class="form-field">
+                    <label class="form-label">Hạn thẻ (MM/YY)</label>
+                    <input type="text" class="form-input" placeholder="12/28" maxlength="5">
+                  </div>
+                  <div class="form-field">
+                    <label class="form-label">Mã bảo mật CVV</label>
+                    <input type="password" class="form-input" placeholder="•••" maxlength="4">
+                  </div>
+                </div>
+              </div>
+
+              <div class="checkout-btn-row">
+                <button type="button" class="btn-checkout-prev" id="backToStep1Btn">← Chỉnh sửa thông tin</button>
+                <button type="button" class="btn-checkout-next" id="placeOrderBtn">
+                  XÁC NHẬN ĐẶT HÀNG
+                </button>
+              </div>
+            </div>
+
+            <!-- ==========================================
+                 BƯỚC 3: MÀN HÌNH HOÀN TẤT ĐẶT HÀNG
+                 ========================================== -->
+            <div class="checkout-step-content" id="checkoutStep3" hidden>
+              <div class="order-success-card">
+                <div class="order-success-icon">
+                  <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+
+                <h2 class="order-success-title">Đặt hàng thành công!</h2>
+                <div class="order-success-code" id="confirmedOrderCode">#NX-000000</div>
+                <p class="order-success-desc">
+                  Cảm ơn <strong id="confirmedCustomerName">Quý khách</strong> đã tin tưởng lựa chọn NEXUS VR. Đơn hàng của bạn đã được tiếp nhận và nhân viên chăm sóc khách hàng sẽ liên hệ xác nhận trong thời gian sớm nhất.
+                </p>
+
+                <div class="order-success-details-box">
+                  <div style="font-family: var(--font-head); font-weight: 700; margin-bottom: 12px; font-size: 1.05rem;">
+                    Thông tin đơn hàng
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9375rem; color: var(--text-secondary);">
+                    <div>Địa chỉ giao nhận: <strong id="confirmedCustomerAddress" style="color: var(--text-primary);">-</strong></div>
+                    <div>Phương thức: <strong id="confirmedPaymentMethod" style="color: var(--text-primary);">-</strong></div>
+                    <div>Tổng thanh toán: <strong id="confirmedTotalAmount" style="color: var(--accent); font-family: var(--font-head); font-size: 1.1rem;">-</strong></div>
+                  </div>
+                </div>
+
+                <div class="order-success-actions">
+                  <a href="shop.html" class="btn btn-secondary">Tiếp tục mua sắm</a>
+                  <a href="index.html" class="btn btn-primary">Về trang chủ</a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- CỘT PHỤ (ORDER SUMMARY) -->
+          <aside class="checkout-sidebar" id="checkoutSidebar">
+            <h3 class="summary-heading">Tóm tắt đơn hàng</h3>
+            <div class="summary-items-list" id="summaryItemsList"></div>
+
+            <div class="summary-lines">
+              <div class="summary-line">
+                <span>Tạm tính</span>
+                <span id="summarySubtotal">0 ₫</span>
+              </div>
+              <div class="summary-line">
+                <span>Vận chuyển</span>
+                <span id="summaryShipping">Miễn phí</span>
+              </div>
+              <div class="summary-line summary-line--total">
+                <span>Tổng cộng</span>
+                <span id="summaryTotal">0 ₫</span>
+              </div>
+            </div>
+
+            <div style="font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5; text-align: center; margin-top: 16px;">
+              🛡️ Đã bao gồm thuế GTGT &amp; bảo hiểm hàng không gian toàn diện 24 tháng.
+            </div>
+          </aside>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- CHÂN TRANG (Tự động nạp bởi layout-loader.js) -->
+  <div id="footer-root"></div>
+
+  <!-- TẦNG 1: DATA & SERVICES -->
+  <script src="assets/js/data/products-data.js"></script>
+  <script src="assets/js/services/storage-service.js"></script>
+  <script src="assets/js/services/api-service.js"></script>
+
+  <!-- TẦNG 2: MODULES -->
+  <script src="assets/js/modules/toast.js"></script>
+  <script src="assets/js/modules/layout-loader.js"></script>
+  <script src="assets/js/modules/validator.js"></script>
+  <script src="assets/js/modules/cart-manager.js"></script>
+
+  <!-- TẦNG 3: CONTROLLER -->
+  <script src="assets/js/controllers/checkout-controller.js"></script>
+</body>
+</html>

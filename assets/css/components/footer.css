@@ -1,19 +1,144 @@
 /* =========================================================
-   NEXUS VR — components/footer.css   [PHỤ TRÁCH: Đức Huy]
-   TẦNG 2 - COMPONENTS
+   NEXUS VR — components/footer.css
+   TẦNG 2 - COMPONENTS: GLOBAL FOOTER
+   Concept: Quiet Luxury / Warm Minimalist Tech
    ========================================================= */
 
-footer { padding: 70px 0 30px; border-top: 1px solid var(--glass-border); }
-.footer__grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 50px; }
-.footer__grid h4 { font-size: 14px; margin-bottom: 18px; }
-.footer__grid li { margin-bottom: 11px; }
-.footer__grid a { font-size: 13.5px; color: var(--text-secondary); }
-.footer__grid a:hover { color: var(--accent-cyan); }
-.footer__bottom {
-  display: flex; justify-content: space-between; align-items: center;
-  padding-top: 28px; border-top: 1px solid var(--glass-border);
-  font-size: 12.5px; color: var(--text-muted); flex-wrap: wrap; gap: 10px;
+.site-footer {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  padding: clamp(64px, 10vh, 100px) 0 40px;
+  position: relative;
+  z-index: 20;
+  border-top: 1px solid rgba(249, 246, 240, 0.08);
 }
-@media (max-width: 700px) {
-  .footer__grid { grid-template-columns: 1fr 1fr; }
+
+.footer__top {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: clamp(30px, 5vw, 60px);
+  margin-bottom: clamp(48px, 8vh, 80px);
+}
+
+/* Brand column */
+.footer__brand {
+  max-width: 340px;
+}
+
+.footer__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  color: var(--text-light);
+  text-decoration: none;
+  margin-bottom: 18px;
+}
+
+.footer__logo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  box-shadow: 0 0 12px rgba(166, 124, 82, 0.6);
+  display: inline-block;
+}
+
+.footer__tagline {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--text-light-muted);
+}
+
+/* Link Columns */
+.footer__nav-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer__heading {
+  font-family: var(--font-head);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-light);
+  margin-bottom: 20px;
+}
+
+.footer__links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer__links a {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--text-light-muted);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  display: inline-block;
+}
+
+.footer__links a:hover {
+  color: var(--accent);
+  transform: translateX(3px);
+}
+
+/* Bottom bar */
+.footer__bottom {
+  padding-top: 32px;
+  border-top: 1px solid rgba(249, 246, 240, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer__copyright {
+  font-size: 0.82rem;
+  color: var(--text-light-muted);
+  margin: 0;
+}
+
+.footer__bottom-links {
+  display: flex;
+  gap: 20px;
+  font-size: 0.82rem;
+  color: var(--text-light-muted);
+}
+
+.footer__bottom-links span {
+  opacity: 0.75;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .footer__top {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .footer__brand {
+    grid-column: 1 / -1;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .footer__top {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .footer__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

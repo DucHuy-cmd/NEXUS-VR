@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <!-- Nền màu cát/kem -->
+  <rect width="800" height="800" fill="#E8E2D9" />
+  
+  <!-- Viền mỏng bên trong -->
+  <rect x="20" y="20" width="760" height="760" fill="none" stroke="#D3C9BE" stroke-width="2" stroke-dasharray="10 10" />
+
+  <!-- Khối chữ -->
+  <g transform="translate(400, 400)">
+    <text x="0" y="-20" font-family="'Space Grotesk', sans-serif" font-size="48" font-weight="700" fill="#8B6239" text-anchor="middle">
+      [CẦN ĐIỀN]
+    </text>
+    <text x="0" y="30" font-family="'Inter', sans-serif" font-size="24" font-weight="500" fill="#A67C52" text-anchor="middle">
+      Vui lòng bổ sung Asset (Ảnh thật)
+    </text>
+  </g>
+</svg>

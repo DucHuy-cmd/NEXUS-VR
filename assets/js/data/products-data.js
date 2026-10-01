@@ -1,54 +1,46 @@
 /* =========================================================
    NEXUS VR — data/products-data.js
-   [PHỤ TRÁCH: Đức Huy dựng khung ban đầu, Nhất Vũ bổ sung
-   thêm sản phẩm/thông số kỹ thuật chi tiết cho product.html]
-   TẦNG 1 - DATA & SERVICES
-
-   Nhúng bằng script THƯỜNG (không phải type="module"), TRƯỚC
-   mọi file JS khác đọc PRODUCTS/POSTS:
-     <script src="assets/js/data/products-data.js"></script>
-
-   Khi thêm sản phẩm/bài viết mới, giữ đúng cấu trúc field bên
-   dưới — không tự đổi tên field khi chưa báo cả nhóm.
+   TẦNG 1 - DATA & SERVICES: PRODUCT CATALOG & POSTS
    ========================================================= */
 
 const PRODUCTS = [
   {
     id: "vr-001",
-    name: "NEXUS Vision Pro 8K",
+    name: "NEXUS Vision Pro",
     category: "kinh-vr",
     categoryLabel: "Kính VR",
-    price: 24990000,
-    oldPrice: 28500000,
-    rating: 4.8,
-    reviewCount: 214,
+    price: 89990000,
+    oldPrice: 94990000,
+    rating: 4.9,
+    reviewCount: 345,
     colors: [
-      { name: "Đen Vũ Trụ", hex: "#12121a" },
-      { name: "Trắng Bạc", hex: "#e8e9ee" }
+      { name: "Xám Than", hex: "#9F9FA1", imageIndex: 0, image: "assets/images/products/hero-vr-headset-xam.webp" },
+      { name: "Trắng Nâu", hex: "#EFEBE5", imageIndex: 1, image: "assets/images/products/hero-vr-headset-trangnau.webp" },
+      { name: "Xanh Cam", hex: "#D9E0E9", imageIndex: 2, image: "assets/images/products/hero-vr-headset-xanhcam.webp" }
     ],
     images: [
-      "assets/images/products/vr-001-1.webp",
-      "assets/images/products/vr-001-2.webp",
-      "assets/images/products/vr-001-3.webp",
-      "assets/images/products/vr-001-4.webp"
+      "assets/images/products/hero-vr-headset-xam.webp",
+      "assets/images/products/hero-vr-headset-trangnau.webp",
+      "assets/images/products/hero-vr-headset-xanhcam.webp",
+      "assets/images/products/person-vr.jpg"
     ],
-    shortDesc: "Màn hình 8K, AI Eye Tracking, âm thanh 360°.",
-    description: "NEXUS Vision Pro 8K là flagship cao cấp nhất của dòng NEXUS, tích hợp màn hình 8K cho từng mắt, công nghệ AI Eye Tracking theo dõi chuyển động mắt theo thời gian thực, và hệ thống âm thanh không gian 360° tái tạo chính xác vị trí âm thanh trong không gian ảo.",
+    shortDesc: "Máy tính không gian cao cấp. Màn hình 8K, 120Hz.",
+    description: "NEXUS Vision Pro kết hợp thế giới thực và ảo một cách liền mạch. Trang bị màn hình siêu nét 8K cho mỗi mắt, chip xử lý không gian NEXUS M2, và hệ thống camera bắt nét thời gian thực.",
     specs: [
-      { label: "Độ phân giải", value: "8K (7680 x 3840) mỗi mắt" },
-      { label: "Tần số quét", value: "120Hz" },
+      { label: "Độ phân giải", value: "8K (7680 × 3840) mỗi mắt" },
+      { label: "Tần số quét", value: "120 Hz" },
       { label: "Trường nhìn (FOV)", value: "130°" },
-      { label: "Trọng lượng", value: "420g" },
-      { label: "Thời lượng pin", value: "3.5 giờ sử dụng liên tục" },
-      { label: "Kết nối", value: "USB-C 3.2, Wi-Fi 6E, Bluetooth 5.3" }
+      { label: "Trọng lượng", value: "420 g" },
+      { label: "Thời lượng pin", value: "3,5 giờ sử dụng liên tục" },
+      { label: "Kết nối", value: "Wi-Fi 7, Bluetooth 5.4" }
     ],
     reviews: [
-      { author: "Minh Anh", rating: 5, comment: "Độ trễ gần như bằng không, trải nghiệm tuyệt vời.", date: "2026-08-12" },
-      { author: "Quốc Bảo", rating: 5, comment: "Đeo cả buổi không mỏi, âm thanh 360° rất sống động.", date: "2026-07-30" },
-      { author: "Thu Trang", rating: 4, comment: "Sản phẩm tốt nhưng giá hơi cao so với mặt bằng chung.", date: "2026-07-02" }
+      { author: "Minh Anh", rating: 5, comment: "Kỷ nguyên mới của điện toán cá nhân. Vượt xa mọi kỳ vọng.", date: "2026-08-12" },
+      { author: "Quốc Bảo", rating: 5, comment: "Độ nét kinh ngạc, không thể nhận ra điểm ảnh. Xứng đáng với giá tiền.", date: "2026-07-30" },
+      { author: "Thu Trang", rating: 4, comment: "Phần mềm mượt mà, nhưng giá vẫn hơi cao với số đông.", date: "2026-07-02" }
     ],
     featured: true,
-    stock: 42
+    stock: 24
   },
   {
     id: "vr-002",
@@ -57,77 +49,147 @@ const PRODUCTS = [
     categoryLabel: "Kính VR",
     price: 12490000,
     oldPrice: null,
-    rating: 4.5,
-    reviewCount: 132,
-    colors: [{ name: "Đen Vũ Trụ", hex: "#12121a" }],
-    images: [
-      "assets/images/products/vr-002-1.webp",
-      "assets/images/products/vr-002-2.webp",
-      "assets/images/products/vr-002-3.webp"
+    rating: 4.7,
+    reviewCount: 812,
+    colors: [
+      { name: "Xám Than", hex: "#9F9FA1", imageIndex: 0, image: "assets/images/products/hero-vr-headset-xam.webp" }
     ],
-    shortDesc: "Nhẹ, gọn, phù hợp người mới bắt đầu.",
-    description: "NEXUS Air Lite là lựa chọn nhập môn lý tưởng — trọng lượng nhẹ hơn 30% so với dòng Pro, vẫn giữ độ phân giải sắc nét và thiết lập nhanh trong 2 phút.",
+    images: [
+      "assets/images/products/hero-vr-headset-xam.webp"
+    ],
+    shortDesc: "Lựa chọn thực tế ảo di động, gọn nhẹ và đa dụng.",
+    description: "NEXUS Air Lite mang đến trải nghiệm VR mượt mà với mức giá dễ tiếp cận. Thiết kế siêu nhẹ 295g, không cần kết nối dây rườm rà.",
     specs: [
       { label: "Độ phân giải", value: "4K mỗi mắt" },
-      { label: "Tần số quét", value: "90Hz" },
+      { label: "Tần số quét", value: "90 Hz" },
       { label: "Trường nhìn (FOV)", value: "110°" },
-      { label: "Trọng lượng", value: "295g" },
-      { label: "Thời lượng pin", value: "2.5 giờ sử dụng liên tục" }
+      { label: "Trọng lượng", value: "295 g" },
+      { label: "Thời lượng pin", value: "2,5 giờ sử dụng liên tục" },
+      { label: "Kết nối", value: "Wi-Fi 6E, Bluetooth 5.2" }
     ],
     reviews: [
-      { author: "Hải Đăng", rating: 4, comment: "Nhẹ và dễ dùng, hợp cho người mới.", date: "2026-06-18" }
+      { author: "Hải Đăng", rating: 5, comment: "Giá quá tốt cho một hệ sinh thái mạnh mẽ như NEXUS.", date: "2026-06-18" }
     ],
     featured: true,
-    stock: 78
+    stock: 154
   },
   {
     id: "ctrl-001",
-    name: "NEXUS Motion Controller",
+    name: "NEXUS Motion Controller Pro",
     category: "tay-cam",
     categoryLabel: "Tay cầm",
-    price: 3290000,
+    price: 6990000,
     oldPrice: null,
-    rating: 4.7,
-    reviewCount: 89,
+    rating: 4.8,
+    reviewCount: 156,
     colors: [
-      { name: "Đen Vũ Trụ", hex: "#12121a" },
-      { name: "Tím Neon", hex: "#7b2fff" }
+      { name: "Titanium", hex: "#4B4F56", imageIndex: 0, image: "assets/images/products/ctrl-titanium.jpg" },
+      { name: "Champagne", hex: "#C8B29B", imageIndex: 1, image: "assets/images/products/ctrl-champagne.jpg" },
+      { name: "Sport Cam", hex: "#E65C00", imageIndex: 2, image: "assets/images/products/ctrl-sport.jpg" }
     ],
     images: [
-      "assets/images/products/ctrl-001-1.webp",
-      "assets/images/products/ctrl-001-2.webp"
+      "assets/images/products/ctrl-titanium.jpg",
+      "assets/images/products/ctrl-champagne.jpg",
+      "assets/images/products/ctrl-sport.jpg"
     ],
-    shortDesc: "Cặp tay cầm theo dõi chuyển động độ chính xác cao.",
-    description: "Cặp tay cầm NEXUS Motion Controller sử dụng cảm biến 6-DOF, phản hồi haptic chi tiết, tương thích toàn bộ dòng kính NEXUS.",
+    shortDesc: "Điều khiển chuẩn xác với phản hồi xúc giác tiên tiến.",
+    description: "Cặp tay cầm NEXUS Motion Controller tích hợp camera theo dõi độc lập, không bị giới hạn tầm nhìn, kèm mô-tơ rung Haptic mang lại cảm giác chân thực nhất.",
     specs: [
-      { label: "Loại cảm biến", value: "6-DOF Motion Tracking" },
-      { label: "Phản hồi", value: "Haptic Feedback đa cấp độ" },
-      { label: "Pin", value: "AA x2, dùng được 30 giờ" }
+      { label: "Công nghệ", value: "Theo dõi Inside-Out độc lập" },
+      { label: "Phản hồi", value: "Haptic Feedback độ trễ siêu thấp" },
+      { label: "Pin", value: "Pin sạc tích hợp (Dùng 10 giờ)" }
     ],
     reviews: [],
     featured: true,
-    stock: 156
+    stock: 89
   },
   {
     id: "acc-001",
-    name: "NEXUS Comfort Strap",
+    name: "NEXUS Magnetic Charging Dock",
     category: "phu-kien",
     categoryLabel: "Phụ kiện",
-    price: 890000,
-    oldPrice: 1090000,
-    rating: 4.3,
-    reviewCount: 41,
-    colors: [{ name: "Đen Vũ Trụ", hex: "#12121a" }],
-    images: ["assets/images/products/acc-001-1.webp"],
-    shortDesc: "Dây đeo đầu êm ái, giảm áp lực khi dùng lâu.",
-    description: "Dây đeo thay thế bằng chất liệu đệm mút hoạt tính, phân bổ đều trọng lượng kính lên toàn bộ đầu thay vì dồn vào mặt.",
+    price: 3990000,
+    oldPrice: null,
+    rating: 4.6,
+    reviewCount: 92,
+    colors: [
+      { name: "Titanium", hex: "#4B4F56", imageIndex: 0, image: "assets/images/products/dock-titanium.jpg" },
+      { name: "Champagne", hex: "#C8B29B", imageIndex: 1, image: "assets/images/products/dock-champagne.jpg" },
+      { name: "Silver", hex: "#D8D8D8", imageIndex: 2, image: "assets/images/products/dock-silver.jpg" }
+    ],
+    images: [
+      "assets/images/products/dock-titanium.jpg",
+      "assets/images/products/dock-champagne.jpg",
+      "assets/images/products/dock-silver.jpg"
+    ],
+    shortDesc: "Đế sạc từ tính đa năng cho kính và tay cầm.",
+    description: "Giải pháp sạc thanh lịch giúp không gian làm việc luôn gọn gàng. Sạc đồng thời NEXUS Vision Pro và hai tay cầm chỉ với một điểm chạm từ tính.",
     specs: [
-      { label: "Chất liệu", value: "Mút hoạt tính + vải thoáng khí" },
-      { label: "Tương thích", value: "Toàn bộ dòng NEXUS Vision & Air" }
+      { label: "Công suất", value: "100W Fast Charge" },
+      { label: "Chất liệu", value: "Hợp kim nhôm Anodized nguyên khối" },
+      { label: "Tương thích", value: "Toàn bộ hệ sinh thái NEXUS" }
+    ],
+    reviews: [],
+    featured: true,
+    stock: 45
+  },
+  {
+    id: "acc-002",
+    name: "NEXUS Solo Knit Band",
+    category: "phu-kien",
+    categoryLabel: "Phụ kiện",
+    price: 2490000,
+    oldPrice: null,
+    rating: 4.9,
+    reviewCount: 134,
+    colors: [
+      { name: "Cream", hex: "#EFEBE5", imageIndex: 0, image: "assets/images/products/strap-cream.jpg" },
+      { name: "Titanium", hex: "#4B4F56", imageIndex: 1, image: "assets/images/products/strap-titanium.jpg" },
+      { name: "Sport Cam", hex: "#E65C00", imageIndex: 2, image: "assets/images/products/strap-sport.jpg" }
+    ],
+    images: [
+      "assets/images/products/strap-cream.jpg",
+      "assets/images/products/strap-titanium.jpg",
+      "assets/images/products/strap-sport.jpg"
+    ],
+    shortDesc: "Dây đeo đan 3D êm ái, co giãn và thoáng khí.",
+    description: "Được đan 3D từ hàng nghìn sợi vi sinh, Solo Knit Band phân bổ đều trọng lượng của kính, giúp bạn luôn thoải mái kể cả khi đeo cả ngày dài.",
+    specs: [
+      { label: "Chất liệu", value: "Sợi dệt 3D sinh học thân thiện môi trường" },
+      { label: "Cơ chế", value: "Vòng xoay tinh chỉnh vi mô" }
+    ],
+    reviews: [],
+    featured: true,
+    stock: 210
+  },
+  {
+    id: "acc-003",
+    name: "NEXUS Leather Travel Case",
+    category: "phu-kien",
+    categoryLabel: "Phụ kiện",
+    price: 4990000,
+    oldPrice: null,
+    rating: 4.8,
+    reviewCount: 67,
+    colors: [
+      { name: "Caramel", hex: "#A67C52", imageIndex: 0, image: "assets/images/products/case-caramel.jpg" },
+      { name: "Cream", hex: "#EFEBE5", imageIndex: 1, image: "assets/images/products/case-cream.jpg" },
+      { name: "Espresso", hex: "#231F1C", imageIndex: 2, image: "assets/images/products/case-espresso.jpg" }
+    ],
+    images: [
+      "assets/images/products/case-caramel.jpg",
+      "assets/images/products/case-cream.jpg",
+      "assets/images/products/case-espresso.jpg"
+    ],
+    shortDesc: "Hộp bảo vệ cao cấp chống sốc.",
+    description: "Được thiết kế riêng cho NEXUS Vision Pro. Vỏ ngoài bằng vật liệu dệt cao cấp chống nước, lót trong bằng vải sợi siêu nhỏ bảo vệ thấu kính tuyệt đối.",
+    specs: [
+      { label: "Vỏ ngoài", value: "Polycarbonate định hình nhiệt bọc vải" },
+      { label: "Lớp lót", value: "Sợi Microfiber cao cấp chống trầy" }
     ],
     reviews: [],
     featured: false,
-    stock: 210
+    stock: 55
   }
 ];
 
@@ -168,7 +230,7 @@ const POSTS = [
   },
   {
     id: "post-003",
-    title: "Hướng dẫn thiết lập NEXUS VR lần đầu trong 5 phút",
+    title: "Hướng dẫn thiết lập NEXUS Vision Pro lần đầu trong 5 phút",
     category: "huong-dan",
     categoryLabel: "Hướng dẫn",
     excerpt: "Các bước thiết lập nhanh gọn giúp bạn bắt đầu trải nghiệm ngay sau khi mở hộp.",
@@ -184,3 +246,6 @@ const POSTS = [
     featured: false
   }
 ];
+
+window.PRODUCTS = PRODUCTS;
+window.POSTS = POSTS;

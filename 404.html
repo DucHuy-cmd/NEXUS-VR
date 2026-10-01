@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS VR — 404 Không tìm thấy trang</title>
+  <meta name="description" content="Trang bạn đang tìm kiếm không tồn tại trên hệ thống NEXUS VR. Vui lòng quay lại trang chủ hoặc cửa hàng.">
+  <meta name="theme-color" content="#F9F6F0">
+
+  <!-- FONTS: Space Grotesk & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- TẦNG 1: FOUNDATION -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+
+  <!-- TẦNG 2: COMPONENTS -->
+  <link rel="stylesheet" href="assets/css/components/navbar.css">
+  <link rel="stylesheet" href="assets/css/components/footer.css">
+  <link rel="stylesheet" href="assets/css/components/toast.css">
+
+  <!-- TẦNG 3: PAGE CSS -->
+  <link rel="stylesheet" href="assets/css/pages/404.css">
+</head>
+<body data-page="404">
+
+  <!-- NAVBAR -->
+  <div id="navbar-root"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="error-page" id="main-content">
+    <div class="error-container">
+      <h1 class="error-code">404</h1>
+      <h2 class="error-title">Trang không tồn tại</h2>
+      <p class="error-msg">Có vẻ bạn đã lạc vào một vùng không gian chưa được NEXUS VR khám phá. Trang bạn tìm không tồn tại hoặc đã bị di chuyển.</p>
+      <div class="error-btns">
+        <a href="index.html" class="btn btn-primary">Về trang chủ</a>
+        <a href="shop.html" class="btn btn-outline">Xem cửa hàng</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <div id="footer-root"></div>
+
+  <!-- SCRIPTS -->
+  <script src="assets/js/data/products-data.js"></script>
+  <script src="assets/js/services/storage-service.js"></script>
+  <script src="assets/js/modules/toast.js"></script>
+  <script src="assets/js/modules/layout-loader.js"></script>
+</body>
+</html>

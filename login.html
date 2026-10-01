@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tài Khoản | NEXUS VR — Quiet Luxury Spatial Computing</title>
+  <meta name="description" content="Đăng nhập hoặc đăng ký tài khoản thành viên NEXUS VR để quản lý đơn hàng và nhận đặc quyền công nghệ không gian.">
+  <meta name="theme-color" content="#F9F6F0">
+
+  <!-- FONTS: Space Grotesk & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- TẦNG 1: FOUNDATION -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+
+  <!-- TẦNG 2: COMPONENTS -->
+  <link rel="stylesheet" href="assets/css/components/navbar.css">
+  <link rel="stylesheet" href="assets/css/components/footer.css">
+  <link rel="stylesheet" href="assets/css/components/toast.css">
+  <link rel="stylesheet" href="assets/css/components/cart-drawer.css">
+
+  <!-- TẦNG 3: PAGE CSS RIÊNG -->
+  <link rel="stylesheet" href="assets/css/pages/login.css">
+</head>
+<body data-page="login">
+
+  <!-- NAVBAR (Tự động dựng bởi layout-loader.js) -->
+  <div id="navbar-root"></div>
+
+  <main class="auth-page" id="main-content">
+    <div class="auth-container">
+      
+      <div class="auth-card">
+        
+        <!-- HEADER -->
+        <header class="auth-header">
+          <span class="auth-eyebrow">TÀI KHOẢN NEXUS</span>
+          <h1 class="auth-title" id="authTitle">Đăng Nhập</h1>
+          <p class="auth-subtitle" id="authSubtitle">Chào mừng bạn quay lại với không gian điện toán NEXUS.</p>
+        </header>
+
+        <!-- TABS SWITCHER -->
+        <div class="auth-tabs" id="authTabsCluster" role="tablist" aria-label="Lựa chọn phương thức xác thực">
+          <button type="button" class="auth-tab-btn is-active" id="tabLoginBtn" role="tab" aria-selected="true" aria-controls="loginForm">
+            Đăng nhập
+          </button>
+          <button type="button" class="auth-tab-btn" id="tabRegisterBtn" role="tab" aria-selected="false" aria-controls="registerForm">
+            Đăng ký
+          </button>
+        </div>
+
+        <!-- CLUSTER CHỨA FORM -->
+        <div id="authFormsCluster">
+          
+          <!-- =========================
+               FORM 1: ĐĂNG NHẬP
+               ========================= -->
+          <form class="auth-form" id="loginForm" novalidate>
+            <div class="auth-field">
+              <label for="loginEmail" class="auth-label">Địa chỉ Email</label>
+              <div class="auth-input-wrap">
+                <input type="email" id="loginEmail" class="auth-input" placeholder="ten@vidu.com" autocomplete="email" required>
+              </div>
+              <span class="auth-field-error" id="loginEmailError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="loginPassword" class="auth-label">Mật khẩu</label>
+              <div class="auth-input-wrap">
+                <input type="password" id="loginPassword" class="auth-input" placeholder="••••••••" autocomplete="current-password" required>
+                <button type="button" class="auth-toggle-pwd" data-target="loginPassword" aria-label="Hiện mật khẩu">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="7" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <span class="auth-field-error" id="loginPasswordError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-row-between">
+              <label class="auth-checkbox-label">
+                <input type="checkbox" id="loginRemember" checked>
+                <span>Ghi nhớ phiên</span>
+              </label>
+              <a href="#" class="auth-forgot-link" onclick="if(typeof showToast==='function')showToast('Chức năng cấp lại mật khẩu đang được gửi mã OTP qua email demo.','info'); return false;">Quên mật khẩu?</a>
+            </div>
+
+            <button type="submit" class="auth-submit-btn" id="loginSubmitBtn">
+              ĐĂNG NHẬP VÀO NEXUS
+            </button>
+          </form>
+
+          <!-- =========================
+               FORM 2: ĐĂNG KÝ
+               ========================= -->
+          <form class="auth-form" id="registerForm" novalidate hidden>
+            <div class="auth-field">
+              <label for="registerName" class="auth-label">Họ và tên</label>
+              <div class="auth-input-wrap">
+                <input type="text" id="registerName" class="auth-input" placeholder="Nguyễn Văn An" autocomplete="name" required>
+              </div>
+              <span class="auth-field-error" id="registerNameError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="registerEmail" class="auth-label">Địa chỉ Email</label>
+              <div class="auth-input-wrap">
+                <input type="email" id="registerEmail" class="auth-input" placeholder="ten@vidu.com" autocomplete="email" required>
+              </div>
+              <span class="auth-field-error" id="registerEmailError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="registerPassword" class="auth-label">Mật khẩu (tối thiểu 6 ký tự)</label>
+              <div class="auth-input-wrap">
+                <input type="password" id="registerPassword" class="auth-input" placeholder="••••••••" autocomplete="new-password" required>
+                <button type="button" class="auth-toggle-pwd" data-target="registerPassword" aria-label="Hiện mật khẩu">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="7" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <span class="auth-field-error" id="registerPasswordError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="registerConfirmPassword" class="auth-label">Nhập lại mật khẩu</label>
+              <div class="auth-input-wrap">
+                <input type="password" id="registerConfirmPassword" class="auth-input" placeholder="••••••••" autocomplete="new-password" required>
+                <button type="button" class="auth-toggle-pwd" data-target="registerConfirmPassword" aria-label="Hiện mật khẩu">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="7" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <span class="auth-field-error" id="registerConfirmError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label class="auth-checkbox-label">
+                <input type="checkbox" id="registerTerms" checked>
+                <span>Tôi đồng ý với Điều khoản dịch vụ &amp; Chính sách bảo mật</span>
+              </label>
+            </div>
+
+            <button type="submit" class="auth-submit-btn" id="registerSubmitBtn">
+              TẠO TÀI KHOẢN MỚI
+            </button>
+          </form>
+
+          <!-- NÚT ĐIỀN TEST ACCOUNT (1-CLICK DEMO CHO ĐỒ ÁN) -->
+          <div class="auth-demo-helper">
+            <button type="button" class="auth-demo-btn" id="fillDemoBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              Điền tài khoản Demo chấm bài (1-Click)
+            </button>
+          </div>
+
+        </div>
+
+        <!-- =========================
+             TRẠNG THÁI PROFILE (KHI ĐÃ ĐĂNG NHẬP)
+             ========================= -->
+        <div class="auth-profile" id="authProfileCluster" hidden>
+          <div class="auth-avatar-circle" id="profileAvatar">VR</div>
+          <div>
+            <h2 class="auth-profile-name" id="profileName">Khách Hàng</h2>
+            <p class="auth-profile-email" id="profileEmail">khachhang@nexus.com</p>
+          </div>
+
+          <div class="auth-profile-stats">
+            <div class="auth-stat-item">
+              <span class="auth-stat-val">VIP</span>
+              <span class="auth-stat-lbl">Hạng thẻ</span>
+            </div>
+            <div class="auth-stat-item">
+              <span class="auth-stat-val">24</span>
+              <span class="auth-stat-lbl">Tháng BH</span>
+            </div>
+            <div class="auth-stat-item">
+              <span class="auth-stat-val">10%</span>
+              <span class="auth-stat-lbl">Ưu đãi</span>
+            </div>
+          </div>
+
+          <div class="auth-profile-actions">
+            <a href="cart.html" class="btn btn-primary" style="width: 100%; text-align: center;">Xem giỏ hàng</a>
+            <a href="shop.html" class="btn btn-secondary" style="width: 100%; text-align: center;">Tiếp tục mua sắm</a>
+            <button type="button" class="auth-logout-btn" id="profileLogoutBtn">
+              Đăng xuất tài khoản
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- CHÂN TRANG (Tự động dựng bởi layout-loader.js) -->
+  <div id="footer-root"></div>
+
+  <!-- TẦNG 1: DATA & SERVICES -->
+  <script src="assets/js/data/products-data.js"></script>
+  <script src="assets/js/services/storage-service.js"></script>
+  <script src="assets/js/services/api-service.js"></script>
+
+  <!-- TẦNG 2: MODULES -->
+  <script src="assets/js/modules/toast.js"></script>
+  <script src="assets/js/modules/layout-loader.js"></script>
+  <script src="assets/js/modules/validator.js"></script>
+
+  <!-- TẦNG 3: CONTROLLER -->
+  <script src="assets/js/controllers/login-controller.js"></script>
+</body>
+</html>

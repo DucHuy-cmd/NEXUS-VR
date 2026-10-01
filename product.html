@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEXUS VR — Chi tiết sản phẩm</title>
+<meta name="description" content="Xem chi tiết sản phẩm kính thực tế ảo NEXUS VR, thông số kỹ thuật, hình ảnh thực tế và đánh giá.">
+<meta name="theme-color" content="#F9F6F0">
 <!-- [PHỤ TRÁCH: Nhất Vũ] -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,10 +40,6 @@
       <span id="pd-breadcrumb-current">Chi tiết sản phẩm</span>
     </nav>
 
-    <!-- Toàn bộ khối chi tiết sản phẩm chỉ hiện ra sau khi product-controller.js
-         tìm thấy sản phẩm hợp lệ theo ?id=... và render xong dữ liệu, tránh
-         nháy giao diện rỗng. Nếu ID không hợp lệ, JS sẽ chuyển hướng sang
-         404.html trước khi khối này kịp hiện ra. -->
     <div id="product-detail-root" hidden>
 
       <div class="product-detail">
@@ -113,7 +111,7 @@
         </div>
       </div>
 
-      <!-- SẢN PHẨM TƯƠNG TỰ (dùng lại components/product-card.css của Hưng) -->
+      <!-- SẢN PHẨM TƯƠNG TỰ -->
       <div class="product-detail__related">
         <h2>Sản phẩm tương tự</h2>
         <div class="grid-4 mt-24" id="pd-related-grid"></div>

@@ -1,0 +1,40 @@
+/* ==========================================================================
+   NEXUS VR — fx.css
+   ANIMATION & INTERACTION SYSTEM (Safe & Graceful Fallback)
+   Concept: Quiet Luxury / Intentional Motion
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. REVEAL & SLIDE-UP
+   Chỉ ẩn ban đầu KHI VÀ CHỈ KHI JavaScript đã sẵn sàng và gắn thẻ html.fx-on.
+   Nếu JS hoặc CDN không tải được, nội dung luôn hiển thị tĩnh bình thường!
+   -------------------------------------------------------------------------- */
+html.fx-on [data-fx="slide-up"],
+html.fx-on [data-fx="reveal"] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity var(--dur-slow) var(--ease-out),
+              transform var(--dur-slow) var(--ease-out);
+  will-change: opacity, transform;
+}
+
+html.fx-on [data-fx="slide-up"].is-revealed,
+html.fx-on [data-fx="reveal"].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   2. PREFERS REDUCED MOTION (Accessibility standard)
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html.fx-on [data-fx="slide-up"],
+  html.fx-on [data-fx="reveal"],
+  [data-fx="slide-up"],
+  [data-fx="reveal"] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}

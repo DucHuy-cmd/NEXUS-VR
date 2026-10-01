@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cửa Hàng | NEXUS VR</title>
+  <meta name="description" content="Khám phá kính VR, tay cầm và phụ kiện NEXUS VR — lọc theo danh mục, tùy chọn màu sắc, mức giá và đánh giá.">
+  <meta name="theme-color" content="#F9F6F0">
+
+  <!-- Fonts dùng chung toàn site -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- CSS dùng chung toàn dự án -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/components/navbar.css">
+  <link rel="stylesheet" href="assets/css/components/footer.css">
+  <link rel="stylesheet" href="assets/css/components/product-card.css">
+  <link rel="stylesheet" href="assets/css/components/toast.css">
+  <link rel="stylesheet" href="assets/css/components/cart-drawer.css">
+
+  <!-- CSS riêng của trang Cửa hàng -->
+  <link rel="stylesheet" href="assets/css/pages/shop.css">
+
+  <style>
+    .header-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 280px;
+      min-width: 100px;
+      flex-shrink: 1;
+      padding: 9px 16px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--glass-border, rgba(35, 31, 28, 0.14));
+      box-shadow: 0 2px 10px rgba(166, 124, 82, 0.08);
+      box-sizing: border-box;
+    }
+    .header-search__icon { flex-shrink: 0; color: var(--text-muted, #726657); }
+    .header-search__input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-family: inherit; font-size: 0.9rem; color: var(--text-primary, #231F1C); }
+    .header-search__input::placeholder { color: var(--text-muted, #9C8F82); }
+  </style>
+</head>
+<body data-page="shop">
+
+  <div id="navbar-root"></div>
+
+  <main class="shop-page">
+    <div class="shop-intro">
+      <p class="eyebrow">Cửa hàng</p>
+      <h1>Toàn bộ sản phẩm NEXUS VR</h1>
+    </div>
+
+    <!-- Nút mở bộ lọc trên mobile/tablet -->
+    <button type="button" class="filter-toggle-btn" id="filterToggleBtn" aria-expanded="false" aria-controls="shopSidebar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+      Bộ lọc sản phẩm
+    </button>
+
+    <div class="shop-layout">
+
+      <!-- SIDEBAR FILTER -->
+      <aside class="shop-sidebar" id="shopSidebar" aria-label="Bộ lọc sản phẩm">
+        <div class="sidebar-overlay" id="sidebarOverlay" tabindex="-1"></div>
+
+        <div class="sidebar-panel">
+          <div class="sidebar-panel__header">
+            <h2>Bộ lọc</h2>
+            <button type="button" class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Đóng bộ lọc">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+
+          <!-- Lọc theo danh mục -->
+          <div class="filter-group">
+            <h3 class="filter-group__title">Danh mục</h3>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="category" value="kinh-vr" checked>
+              <span>Kính VR</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="category" value="tay-cam" checked>
+              <span>Tay cầm</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" name="category" value="phu-kien" checked>
+              <span>Phụ kiện</span>
+            </label>
+          </div>
+
+          <!-- Lọc theo màu sắc tùy chọn -->
+          <div class="filter-group">
+            <h3 class="filter-group__title">Tùy chọn màu sắc</h3>
+            <div class="color-filter-grid" id="colorFilterMount">
+              <label class="color-filter-chip">
+                <input type="checkbox" name="color" value="all" checked style="display:none;">
+                <span>Tất cả màu</span>
+              </label>
+              <label class="color-filter-chip">
+                <input type="checkbox" name="color" value="Xám Than" style="display:none;">
+                <span class="color-filter-chip__dot" style="background:#9F9FA1;"></span>
+                <span>Xám Than</span>
+              </label>
+              <label class="color-filter-chip">
+                <input type="checkbox" name="color" value="Trắng Nâu" style="display:none;">
+                <span class="color-filter-chip__dot" style="background:#EFEBE5;"></span>
+                <span>Trắng Nâu</span>
+              </label>
+              <label class="color-filter-chip">
+                <input type="checkbox" name="color" value="Titanium" style="display:none;">
+                <span class="color-filter-chip__dot" style="background:#4B4F56;"></span>
+                <span>Titanium</span>
+              </label>
+              <label class="color-filter-chip">
+                <input type="checkbox" name="color" value="Champagne" style="display:none;">
+                <span class="color-filter-chip__dot" style="background:#C8B29B;"></span>
+                <span>Champagne</span>
+              </label>
+              <label class="color-filter-chip">
+                <input type="checkbox" name="color" value="Sport Cam" style="display:none;">
+                <span class="color-filter-chip__dot" style="background:#E65C00;"></span>
+                <span>Sport Cam</span>
+              </label>
+              <label class="color-filter-chip">
+                <input type="checkbox" name="color" value="Caramel" style="display:none;">
+                <span class="color-filter-chip__dot" style="background:#A67C52;"></span>
+                <span>Caramel</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Lọc theo mức giá -->
+          <div class="filter-group">
+            <h3 class="filter-group__title">Mức giá</h3>
+            <div class="price-range">
+              <input type="range" id="priceRange" min="0" max="100000000" step="1000000" value="100000000">
+              <div class="price-range__labels">
+                <span>0₫</span>
+                <span id="priceRangeValue">100.000.000₫</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lọc theo đánh giá -->
+          <div class="filter-group">
+            <h3 class="filter-group__title">Đánh giá</h3>
+            <label class="filter-radio">
+              <input type="radio" name="rating" value="0" checked>
+              <span>Tất cả</span>
+            </label>
+            <label class="filter-radio">
+              <input type="radio" name="rating" value="4.5">
+              <span class="stars" aria-hidden="true">★★★★★</span> 4.5 trở lên
+            </label>
+            <label class="filter-radio">
+              <input type="radio" name="rating" value="4">
+              <span class="stars" aria-hidden="true">★★★★☆</span> 4.0 trở lên
+            </label>
+          </div>
+
+          <!-- Lọc còn hàng / đang giảm giá -->
+          <div class="filter-group">
+            <h3 class="filter-group__title">Tình trạng</h3>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="inStockOnly">
+              <span>Chỉ hiện sản phẩm còn hàng</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" id="filter-sale">
+              <span>Chỉ sản phẩm đang Sale</span>
+            </label>
+          </div>
+
+          <button type="button" class="btn-reset-filter" id="resetFilterBtn">
+            Xóa tất cả bộ lọc
+          </button>
+        </div>
+      </aside>
+
+      <!-- NỘI DUNG CHÍNH -->
+      <div class="shop-content">
+
+        <!-- SORT / RESULT BAR -->
+        <div class="shop-toolbar">
+          <p class="shop-toolbar__count">
+            Tìm thấy <strong id="resultCount">0</strong> sản phẩm
+          </p>
+
+          <div class="shop-toolbar__sort">
+            <label for="sortSelect">Sắp xếp:</label>
+            <select id="sortSelect" name="sort">
+              <option value="popular">Phổ biến nhất</option>
+              <option value="newest">Mới nhất</option>
+              <option value="price-asc">Giá: Thấp đến cao</option>
+              <option value="price-desc">Giá: Cao đến thấp</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- PRODUCT GRID -->
+        <section class="product-grid" id="productGrid" aria-label="Danh sách sản phẩm" aria-live="polite">
+          <!-- JS render vào đây -->
+        </section>
+
+        <!-- EMPTY STATE -->
+        <div class="shop-empty" id="shopEmpty" hidden>
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+          <h3>Không tìm thấy sản phẩm phù hợp</h3>
+          <p>Hãy thử điều chỉnh hoặc xóa bớt bộ lọc đang áp dụng.</p>
+          <button type="button" class="btn-reset-filter" data-empty-reset>Xóa bộ lọc</button>
+        </div>
+
+        <!-- PAGINATION -->
+        <nav class="pagination" id="pagination" aria-label="Phân trang sản phẩm">
+          <!-- JS render vào đây -->
+        </nav>
+
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-root"></div>
+
+  <!-- Tầng 1: DATA & SERVICES -->
+  <script src="assets/js/data/products-data.js"></script>
+  <script src="assets/js/services/storage-service.js"></script>
+
+  <!-- Tầng 2: REUSABLE MODULES -->
+  <script src="assets/js/modules/toast.js"></script>
+  <script src="assets/js/modules/layout-loader.js"></script>
+  <script src="assets/js/modules/cart-manager.js"></script>
+
+  <!-- Tầng 3: CONTROLLER -->
+  <script src="assets/js/controllers/shop-controller.js"></script>
+
+</body>
+</html>

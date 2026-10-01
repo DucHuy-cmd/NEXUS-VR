@@ -1,0 +1,407 @@
+/* ==========================================================================
+   NEXUS VR — pages/about.css   [PHỤ TRÁCH: Trường Vũ]
+   TẦNG 3 - PAGES: TRANG GIỚI THIỆU
+   Concept: Quiet Luxury / Warm Minimalist Tech / Editorial Typographic
+   ========================================================================== */
+
+/* 1. HERO SECTION */
+.about-hero {
+  padding: calc(var(--nav-height, 72px) + 60px) 0 70px;
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.about-hero__header {
+  max-width: 840px;
+  margin: 0 auto 48px;
+  text-align: center;
+}
+
+.about-eyebrow {
+  display: inline-block;
+  font-family: var(--font-head);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.about-hero__title {
+  font-family: var(--font-head);
+  font-size: var(--fs-h1, clamp(2.2rem, 4.5vw, 3.5rem));
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+}
+
+.about-hero__desc {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.about-hero__media {
+  position: relative;
+  max-width: 1040px;
+  margin: 0 auto;
+  border-radius: var(--radius-xl, 20px);
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(35, 31, 28, 0.08);
+  border: 1px solid var(--border);
+  background-color: var(--bg-elevated);
+}
+
+.about-hero__img {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+  object-position: center 35%;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.about-hero__media:hover .about-hero__img {
+  transform: scale(1.02);
+}
+
+.about-hero__caption {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  background: rgba(249, 246, 240, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+/* 2. SECTION HEADER DÙNG CHUNG */
+.about-section-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 56px;
+}
+
+.about-section-title {
+  font-family: var(--font-head);
+  font-size: var(--fs-h2, clamp(1.8rem, 3.2vw, 2.5rem));
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 10px;
+  margin-bottom: 16px;
+  letter-spacing: -0.015em;
+}
+
+.about-section-sub {
+  font-size: 1.0625rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* 3. TIMELINE CỘT MỐC (3 MỐC THỜI GIAN) */
+.about-timeline-section {
+  padding: 100px 0;
+  background-color: var(--bg-primary);
+}
+
+.timeline-flow {
+  max-width: 860px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.timeline-flow::before {
+  content: "";
+  position: absolute;
+  top: 30px;
+  bottom: 30px;
+  left: 50%;
+  width: 2px;
+  background: linear-gradient(180deg, var(--accent) 0%, rgba(166, 124, 82, 0.2) 100%);
+  transform: translateX(-50%);
+}
+
+.timeline-milestone {
+  position: relative;
+  display: flex;
+  margin-bottom: 64px;
+  align-items: flex-start;
+}
+
+.timeline-milestone:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-milestone__dot {
+  position: absolute;
+  left: 50%;
+  top: 24px;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 0 6px rgba(166, 124, 82, 0.15);
+  z-index: 2;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.timeline-milestone:hover .timeline-milestone__dot {
+  transform: translate(-50%, -50%) scale(1.25);
+  box-shadow: 0 0 0 10px rgba(166, 124, 82, 0.25);
+}
+
+.timeline-milestone__card {
+  width: calc(50% - 44px);
+  background: var(--bg-elevated);
+  padding: 32px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 30px rgba(35, 31, 28, 0.04);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.timeline-milestone:hover .timeline-milestone__card {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(35, 31, 28, 0.08);
+}
+
+.timeline-milestone--left {
+  justify-content: flex-start;
+}
+
+.timeline-milestone--left .timeline-milestone__card {
+  margin-right: auto;
+}
+
+.timeline-milestone--right {
+  justify-content: flex-end;
+}
+
+.timeline-milestone--right .timeline-milestone__card {
+  margin-left: auto;
+}
+
+.timeline-milestone__year {
+  display: inline-block;
+  font-family: var(--font-head);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.timeline-milestone__heading {
+  font-family: var(--font-head);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.timeline-milestone__desc {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* 4. DESIGN PRINCIPLES SECTION */
+.about-principles-section {
+  padding: 100px 0;
+  background-color: var(--bg-secondary);
+}
+
+.principles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.principle-card {
+  background: var(--bg-elevated);
+  padding: 40px 32px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid var(--border);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.principle-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 45px rgba(35, 31, 28, 0.07);
+}
+
+.principle-num {
+  font-family: var(--font-head);
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--accent);
+  opacity: 0.5;
+  margin-bottom: 20px;
+  line-height: 1;
+}
+
+.principle-title {
+  font-family: var(--font-head);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.principle-text {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+/* 5. TEAM COLLECTIVE SECTION */
+.about-team-section {
+  padding: 100px 0;
+  background-color: var(--bg-primary);
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 24px;
+}
+
+.team-member-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid var(--border);
+  padding: 30px 20px;
+  text-align: center;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.team-member-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent);
+  box-shadow: 0 14px 35px rgba(166, 124, 82, 0.09);
+}
+
+.team-member-avatar {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--accent);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.team-member-name {
+  font-family: var(--font-head);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.team-member-role {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.team-member-bio {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+/* 6. ABOUT CTA */
+.about-cta-section {
+  padding: 90px 0;
+  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
+.about-cta-box {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.about-cta-title {
+  font-family: var(--font-head);
+  font-size: var(--fs-h2, 2.25rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.about-cta-desc {
+  font-size: 1.0625rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.about-cta-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* RESPONSIVE */
+@media (max-width: 960px) {
+  .principles-grid {
+    grid-template-columns: 1fr;
+  }
+  .about-hero__img {
+    height: 380px;
+  }
+}
+
+@media (max-width: 768px) {
+  .timeline-flow::before {
+    left: 24px;
+  }
+  .timeline-milestone {
+    flex-direction: column;
+    padding-left: 56px;
+  }
+  .timeline-milestone__dot {
+    left: 24px;
+    top: 28px;
+  }
+  .timeline-milestone__card {
+    width: 100%;
+    margin: 0 !important;
+  }
+  .about-hero__img {
+    height: 280px;
+  }
+  .about-hero__caption {
+    position: static;
+    margin-top: 12px;
+    display: inline-block;
+    border-radius: var(--radius-md, 8px);
+  }
+}

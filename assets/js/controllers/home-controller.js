@@ -1,397 +1,400 @@
-/* ==========================================================================
+/* =========================================================
    NEXUS VR — controllers/home-controller.js
-   TẦNG 3 - CONTROLLER: HOMEPAGE INTERACTION & STORYTELLING
-   Concept: Quiet Luxury / Intentional Motion / Rock-solid Fallback
-   ========================================================================== */
+   TẦNG 3 - CONTROLLERS: HOME PAGE CONTROLLER
+   Apple-Style Quiet Luxury Motion Engine & Interactive UI
+   ========================================================= */
 
 (function () {
   "use strict";
 
-  document.addEventListener("DOMContentLoaded", initHome);
-  if (document.readyState === "interactive" || document.readyState === "complete") initHome();
+  document.addEventListener("DOMContentLoaded", initHomePage);
 
-  function initHome() {
-    if (window.__nexusHomeInitialized) return;
-    window.__nexusHomeInitialized = true;
+  if (document.readyState === "interactive" || document.readyState === "complete") {
+    initHomePage();
+  }
 
-    // Kích hoạt thẻ hiệu ứng an toàn
-    document.documentElement.classList.add("fx-on");
+  function initHomePage() {
+    if (window.__homePageInitialized) return;
+    window.__homePageInitialized = true;
 
-    // Khởi tạo GSAP Plugins nếu có
-    if (typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined") {
-      window.gsap.registerPlugin(window.ScrollTrigger);
-    }
-
-    initProgressBar();
-    initScrollReveal();
-    initStatementShimmer();
-    // initHeroAmbientMouse() đã vô hiệu hóa theo chuẩn Premium Minimalist
-    initPinnedProductStory();
+    setupMotionClass();
+    initScrollRevealEngine();
+    initHeroTiltEffect();
     initColorwaySelector();
+    initPinnedScrollStory();
     renderComparisonTable();
-    renderEcosystemGrid();
+    renderAccessoriesGrid();
   }
 
   /* --------------------------------------------------------------------------
-     1. THANH TIẾN ĐỘ ĐỌC TRANG (SCROLL PROGRESS BAR)
+     1. ACTIVATING MOTION CLASS (html.fx-on)
      -------------------------------------------------------------------------- */
-  function initProgressBar() {
-    const bar = document.getElementById("scroll-progress");
-    if (!bar) return;
-
-    window.addEventListener("scroll", () => {
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (docHeight <= 0) return;
-      const progress = (window.scrollY / docHeight) * 100;
-      bar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
-    }, { passive: true });
+  function setupMotionClass() {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!prefersReducedMotion) {
+      document.documentElement.classList.add("fx-on");
+    }
   }
 
   /* --------------------------------------------------------------------------
-     2. HIỆU ỨNG HIỆN DẦN CÓ CHỦ ĐÍCH (SCROLL REVEAL / SLIDE-UP)
+     2. 2-WAY INTERSECTION OBSERVER SCROLL REVEAL ENGINE
+     (Hiển thị khi cuộn xuống, ẩn dần khi cuộn lên ra khỏi tầm nhìn)
      -------------------------------------------------------------------------- */
-  function initScrollReveal() {
-    const items = document.querySelectorAll('[data-fx="slide-up"], [data-fx="reveal"]');
-    if (!items.length) return;
+  function initScrollRevealEngine() {
+    const isFxOn = document.documentElement.classList.contains("fx-on");
+    const revealElements = document.querySelectorAll('[data-fx="reveal"]');
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      items.forEach(el => el.classList.add("is-revealed"));
+    if (!revealElements.length) return;
+
+    if (!isFxOn) {
+      revealElements.forEach((el) => el.classList.add("is-visible"));
       return;
     }
 
-    if (window.ScrollTrigger) {
-      items.forEach((el, idx) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.94 && rect.bottom > 0) {
-          setTimeout(() => el.classList.add("is-revealed"), idx * 60);
-        }
-        window.ScrollTrigger.create({
-          trigger: el,
-          start: "top 92%",
-          onEnter: () => el.classList.add("is-revealed")
-        });
-      });
-    } else if ("IntersectionObserver" in window) {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
+    if (!("IntersectionObserver" in window)) {
+      revealElements.forEach((el) => el.classList.add("is-visible"));
+      return;
+    }
+
+    let lastScrollY = window.scrollY;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const currentScrollY = window.scrollY;
+        const isScrollingDown = currentScrollY >= lastScrollY;
+        lastScrollY = currentScrollY;
+
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add("is-revealed");
-            observer.unobserve(entry.target);
+            entry.target.classList.add("is-visible");
+          } else {
+            // Khi phần tử đi ra khỏi tầm nhìn:
+            // Nếu cuộn ngược lên (hoặc ra khỏi viewport), ẩn lại để tạo hiệu ứng 2 chiều
+            const bounds = entry.boundingClientRect;
+            if (bounds.top > window.innerHeight || bounds.bottom < 0) {
+              entry.target.classList.remove("is-visible");
+            }
           }
         });
-      }, { threshold: 0.08 });
-      items.forEach(el => observer.observe(el));
-    } else {
-      items.forEach(el => el.classList.add("is-revealed"));
-    }
-  }
-
-  /* --------------------------------------------------------------------------
-     3. STATEMENT SHIMMER (CHỮ SÁNG THEO NHỊP CUỘN)
-     -------------------------------------------------------------------------- */
-  function initStatementShimmer() {
-    const words = document.querySelectorAll(".shimmer-word, .shimmer-sub-word");
-    if (!words.length) return;
-
-    if (!window.ScrollTrigger || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      words.forEach(w => w.classList.add("is-lit"));
-      return;
-    }
-
-    window.ScrollTrigger.create({
-      trigger: "#statement",
-      start: "top 75%",
-      end: "bottom 40%",
-      scrub: 0.35,
-      onUpdate: (self) => {
-        const targetIdx = Math.floor(self.progress * (words.length + 1));
-        words.forEach((w, i) => w.classList.toggle("is-lit", i < targetIdx));
-      }
-    });
-  }
-
-  /* --------------------------------------------------------------------------
-     4. HERO AMBIENT TILT (TINH TẾ & ĐIỀM TĨNH)
-     -------------------------------------------------------------------------- */
-  function initHeroAmbientMouse() {
-    if (window.innerWidth < 1024 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const hero = document.getElementById("hero");
-    const halo = document.getElementById("hero-ambient-halo");
-    const heroImg = document.getElementById("hero-main-img");
-    if (!hero || !halo) return;
-
-    let rafId = null;
-
-    hero.addEventListener("mousemove", (e) => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        const rect = hero.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width - 0.5;
-        const y = (e.clientY - rect.top) / rect.height - 0.5;
-
-        halo.style.transform = `translate(${x * 32}px, ${y * 24}px)`;
-        if (heroImg) heroImg.style.transform = `translate(${x * 8}px, ${y * 6}px) scale(1.008)`;
-      });
-    });
-
-    hero.addEventListener("mouseleave", () => {
-      halo.style.transform = "translate(0, 0)";
-      if (heroImg) heroImg.style.transform = "translate(0, 0) scale(1)";
-    });
-  }
-
-  /* --------------------------------------------------------------------------
-     5. SECTION 04: PINNED PRODUCT STORY (01 IMMERSIVE, 02 PRECISE, 03 PERSONAL)
-     -------------------------------------------------------------------------- */
-  function initPinnedProductStory() {
-    const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!window.ScrollTrigger || window.innerWidth < 768 || isReduced) return;
-
-    const stages = [
-      {
-        chapter: "01 — IMMERSIVE",
-        title: "Thị giác thuần khiết",
-        desc: "Màn hình 8K kép tái hiện chi tiết sống động đến từng milimet, xóa nhòa ranh giới giữa thế giới thực và không gian số.",
-        id: "scroll-img-front",
-        tone: "gray"
       },
       {
-        chapter: "02 — PRECISE",
-        title: "Định vị 6-DoF siêu nhạy",
-        desc: "Hệ thống cảm biến quang học bắt trọn từng chuyển động vi mô của mắt và bàn tay với độ trễ chuyển động triệt tiêu.",
-        id: "scroll-img-top",
-        tone: "warm"
-      },
-      {
-        chapter: "03 — PERSONAL",
-        title: "Thiết kế may đo riêng bạn",
-        desc: "Vải dệt thoáng khí 3D cùng cơ chế phân bổ trọng lượng công thái học 420g cho cảm giác đeo tĩnh lặng cả ngày dài.",
-        id: "scroll-img-side",
-        tone: "blue"
+        threshold: 0.12,
+        rootMargin: "0px 0px -40px 0px",
       }
-    ];
+    );
 
-    const chapterEl = document.getElementById("scroll-story-chapter");
-    const nameEl = document.getElementById("scroll-color-name");
-    const descEl = document.getElementById("scroll-story-desc");
-    const halo = document.getElementById("scroll-ambient-halo");
-    const imgs = stages.map(s => document.getElementById(s.id));
-    const dots = document.querySelectorAll(".story-dot");
+    revealElements.forEach((el) => observer.observe(el));
+  }
 
-    let currentIdx = -1;
+  /* --------------------------------------------------------------------------
+     3. INTERACTIVE HERO 3D TILT EFFECT
+     -------------------------------------------------------------------------- */
+  function initHeroTiltEffect() {
+    const wrapper = document.querySelector(".home-hero__media-wrapper");
+    const media = document.querySelector(".home-hero__media");
 
-    window.ScrollTrigger.create({
-      trigger: "#scroll-colors",
-      start: "top top",
-      end: "+=240%",
-      pin: "#scroll-pin-track",
-      scrub: 0.5,
-      onUpdate: (self) => {
-        const p = self.progress;
-        const activeIdx = p < 0.36 ? 0 : (p < 0.72 ? 1 : 2);
+    if (!wrapper || !media) return;
 
-        if (activeIdx !== currentIdx) {
-          currentIdx = activeIdx;
-          const stage = stages[activeIdx];
+    wrapper.addEventListener("mousemove", (e) => {
+      const rect = wrapper.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
 
-          if (chapterEl) chapterEl.textContent = stage.chapter;
-          if (nameEl) nameEl.textContent = stage.title;
-          if (descEl) descEl.textContent = stage.desc;
-          if (halo) halo.setAttribute("data-tone", stage.tone);
+      const rotateX = ((y - centerY) / centerY) * -8;
+      const rotateY = ((x - centerX) / centerX) * 8;
 
-          imgs.forEach((img, idx) => {
-            if (img) img.classList.toggle("is-active", idx === activeIdx);
-          });
+      media.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+    });
 
-          dots.forEach((dot, idx) => {
-            dot.classList.toggle("is-active", idx === activeIdx);
-          });
-        }
-      }
+    wrapper.addEventListener("mouseleave", () => {
+      media.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)";
     });
   }
 
   /* --------------------------------------------------------------------------
-     6. SECTION 05: COLORWAY SELECTOR (INTERACTIVE & ACCESSIBLE)
+     4. INTERACTIVE COLORWAY SELECTOR (Phần 5)
      -------------------------------------------------------------------------- */
   function initColorwaySelector() {
-    const dots = Array.from(document.querySelectorAll(".color-dot"));
-    const mainImg = document.getElementById("colorway-current-img");
-    const label = document.getElementById("colorway-active-label");
-    const halo = document.getElementById("colorway-ambient-halo");
-    if (!dots.length || !mainImg) return;
+    const dots = document.querySelectorAll(".color-dot");
+    const imgEl = document.getElementById("colorway-current-img");
+    const labelEl = document.getElementById("colorway-active-label");
 
-    function selectColor(btn) {
-      dots.forEach(d => {
+    if (!dots.length || !imgEl) return;
+
+    function selectColor(dot) {
+      dots.forEach((d) => {
         d.classList.remove("is-active");
         d.setAttribute("aria-checked", "false");
       });
-      btn.classList.add("is-active");
-      btn.setAttribute("aria-checked", "true");
 
-      const name = btn.getAttribute("data-name");
-      const src = btn.getAttribute("data-img");
-      const tone = btn.getAttribute("data-color-tone") || "gray";
+      dot.classList.add("is-active");
+      dot.setAttribute("aria-checked", "true");
 
-      if (label && name) label.textContent = name;
-      if (halo) halo.setAttribute("data-tone", tone);
+      const name = dot.getAttribute("data-name");
+      const imgSrc = dot.getAttribute("data-img");
 
-      mainImg.classList.add("is-fading");
+      if (labelEl) labelEl.textContent = name;
+
+      // Cross-fade image 350ms
+      imgEl.style.opacity = "0";
+      imgEl.style.transform = "scale(0.96)";
+
       setTimeout(() => {
-        if (src) mainImg.src = src;
-        mainImg.classList.remove("is-fading");
-      }, 160);
+        imgEl.src = imgSrc;
+        imgEl.alt = `NEXUS Vision Pro ${name}`;
+        imgEl.style.opacity = "1";
+        imgEl.style.transform = "scale(1)";
+      }, 180);
     }
 
-    dots.forEach((dot, idx) => {
+    dots.forEach((dot, index) => {
       dot.addEventListener("click", () => selectColor(dot));
-      dot.addEventListener("keydown", (e) => {
-        let next = idx;
-        if (e.key === "ArrowRight" || e.key === "ArrowDown") next = (idx + 1) % dots.length;
-        if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (idx - 1 + dots.length) % dots.length;
-        if (e.key === "Home") next = 0;
-        if (e.key === "End") next = dots.length - 1;
 
-        if (next !== idx) {
+      dot.addEventListener("keydown", (e) => {
+        let targetIndex = null;
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          targetIndex = (index + 1) % dots.length;
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          targetIndex = (index - 1 + dots.length) % dots.length;
+        } else if (e.key === "Home") {
+          targetIndex = 0;
+        } else if (e.key === "End") {
+          targetIndex = dots.length - 1;
+        }
+
+        if (targetIndex !== null) {
           e.preventDefault();
-          dots[next].focus();
-          selectColor(dots[next]);
+          dots[targetIndex].focus();
+          selectColor(dots[targetIndex]);
         }
       });
     });
   }
 
   /* --------------------------------------------------------------------------
-     7. SECTION 06: SPECIFICATIONS (EDITORIAL COMPARISON TABLE)
+     5. PINNED SCROLL STORY (Phần 4 - Headset Color Story Showcase)
      -------------------------------------------------------------------------- */
-  function renderComparisonTable() {
-    const mount = document.getElementById("comparison-mount");
-    if (!mount || typeof PRODUCTS === "undefined") return;
+  function initPinnedScrollStory() {
+    const section = document.getElementById("scroll-pin");
+    const titleEl = document.getElementById("scroll-pin-title");
+    const chapterEl = document.getElementById("scroll-pin-chapter");
+    const descEl = document.getElementById("scroll-pin-desc");
 
-    const p1 = PRODUCTS.find(p => p.id === "vr-001");
-    const p2 = PRODUCTS.find(p => p.id === "vr-002");
-    if (!p1 || !p2) return;
+    const imgXam = document.getElementById("pin-img-xam");
+    const imgTrangNau = document.getElementById("pin-img-trangnau");
+    const imgXanhCam = document.getElementById("pin-img-xanhcam");
 
-    const fmt = (v) => v ? v.toLocaleString("vi-VN") + "₫" : "—";
-    const getSpec = (p, keyword) => {
-      if (!p.specs) return "—";
-      const match = p.specs.find(item => item.label.toLowerCase().includes(keyword.toLowerCase()));
-      return match ? match.value : "—";
-    };
+    const dot0 = document.getElementById("dot-0");
+    const dot1 = document.getElementById("dot-1");
+    const dot2 = document.getElementById("dot-2");
 
-    mount.innerHTML = `
-      <table class="comparison-table comparison-table--editorial" aria-label="Bảng so sánh cấu hình NEXUS Vision Pro và NEXUS Air Lite">
-        <thead>
-          <tr>
-            <th class="comparison-row-label">Cấu hình</th>
-            <th class="is-featured">${p1.name} (Flagship)</th>
-            <th>${p2.name} (Lite)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="comparison-row-label">Màn hình kép</td>
-            <td class="comparison-row-val is-featured" data-label="Màn hình kép (${p1.name})">${getSpec(p1, "Độ phân giải")}</td>
-            <td class="comparison-row-val" data-label="Màn hình kép (${p2.name})">${getSpec(p2, "Độ phân giải")}</td>
-          </tr>
-          <tr>
-            <td class="comparison-row-label">Tần số làm tươi</td>
-            <td class="comparison-row-val is-featured" data-label="Tần số làm tươi (${p1.name})">${getSpec(p1, "Tần số")}</td>
-            <td class="comparison-row-val" data-label="Tần số làm tươi (${p2.name})">${getSpec(p2, "Tần số")}</td>
-          </tr>
-          <tr>
-            <td class="comparison-row-label">Trường nhìn (FOV)</td>
-            <td class="comparison-row-val is-featured" data-label="Trường nhìn FOV (${p1.name})">${getSpec(p1, "Trường nhìn")}</td>
-            <td class="comparison-row-val" data-label="Trường nhìn FOV (${p2.name})">${getSpec(p2, "Trường nhìn")}</td>
-          </tr>
-          <tr>
-            <td class="comparison-row-label">Trọng lượng thân kính</td>
-            <td class="comparison-row-val is-featured" data-label="Trọng lượng thân kính (${p1.name})">${getSpec(p1, "Trọng lượng")}</td>
-            <td class="comparison-row-val" data-label="Trọng lượng thân kính (${p2.name})">${getSpec(p2, "Trọng lượng")}</td>
-          </tr>
-          <tr>
-            <td class="comparison-row-label">Thời lượng pin</td>
-            <td class="comparison-row-val is-featured" data-label="Thời lượng pin (${p1.name})">${getSpec(p1, "pin")}</td>
-            <td class="comparison-row-val" data-label="Thời lượng pin (${p2.name})">${getSpec(p2, "pin")}</td>
-          </tr>
-          <tr>
-            <td class="comparison-row-label">Kết nối không dây</td>
-            <td class="comparison-row-val is-featured" data-label="Kết nối không dây (${p1.name})">${getSpec(p1, "Kết nối")}</td>
-            <td class="comparison-row-val" data-label="Kết nối không dây (${p2.name})">${getSpec(p2, "Kết nối")}</td>
-          </tr>
-          <tr>
-            <td class="comparison-row-label">Giá niêm yết</td>
-            <td class="comparison-row-val is-featured comparison-row-val--price" data-label="Giá niêm yết (${p1.name})">${fmt(p1.price)}</td>
-            <td class="comparison-row-val comparison-row-val--price" data-label="Giá niêm yết (${p2.name})">${fmt(p2.price)}</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
+    if (!section) return;
+
+    const chapters = [
+      {
+        chapter: "01 — XÁM THAN",
+        title: "Xám Than",
+        desc: "Thân bọc vải dệt tối màu, tĩnh lặng và thanh lịch trong mọi không gian làm việc.",
+        activeImg: imgXam,
+        activeDot: dot0,
+      },
+      {
+        chapter: "02 — TRẮNG NÂU",
+        title: "Trắng Nâu",
+        desc: "Sắc thái ấm áp hòa quyện với phong cách kiến trúc kem hiện đại.",
+        activeImg: imgTrangNau,
+        activeDot: dot1,
+      },
+      {
+        chapter: "03 — XANH CAM",
+        title: "Xanh Cam",
+        desc: "Điểm nhấn năng động với dải quai thể thao cá tính và nổi bật.",
+        activeImg: imgXanhCam,
+        activeDot: dot2,
+      },
+    ];
+
+    function setChapter(index) {
+      const item = chapters[index];
+      if (!item) return;
+
+      if (chapterEl) chapterEl.textContent = item.chapter;
+      if (titleEl) titleEl.textContent = item.title;
+      if (descEl) descEl.textContent = item.desc;
+
+      [imgXam, imgTrangNau, imgXanhCam].forEach((img) => img && img.classList.remove("is-active"));
+      if (item.activeImg) item.activeImg.classList.add("is-active");
+
+      [dot0, dot1, dot2].forEach((dot) => dot && dot.classList.remove("is-active"));
+      if (item.activeDot) item.activeDot.classList.add("is-active");
+    }
+
+    // Dot click support
+    [dot0, dot1, dot2].forEach((dot, idx) => {
+      if (dot) {
+        dot.addEventListener("click", () => setChapter(idx));
+      }
+    });
+
+    // Scroll trigger update
+    if (typeof ScrollTrigger !== "undefined") {
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        end: "+=180%",
+        onUpdate: (self) => {
+          const p = self.progress;
+          if (p < 0.33) {
+            setChapter(0);
+          } else if (p < 0.66) {
+            setChapter(1);
+          } else {
+            setChapter(2);
+          }
+        },
+      });
+    }
   }
 
   /* --------------------------------------------------------------------------
-     8. SECTION 07: ECOSYSTEM (4 FEATURED ACCESSORIES CURATED EDITORIAL GRID)
+     6. DYNAMIC EDITORIAL COMPARISON TABLE (Phần 6)
      -------------------------------------------------------------------------- */
-  function renderEcosystemGrid() {
-    const mount = document.getElementById("accessories-mount");
-    if (!mount) return;
+  function renderComparisonTable() {
+    const container = document.getElementById("comparison-mount");
+    if (!container || typeof PRODUCTS === "undefined") return;
 
-    const source = typeof PRODUCTS !== "undefined" ? PRODUCTS : [];
-    const accessoryIds = ["ctrl-001", "acc-001", "acc-002", "acc-003"];
-    const items = accessoryIds
-      .map(id => source.find(p => p.id === id))
-      .filter(Boolean);
+    const vr001 = PRODUCTS.find((p) => p.id === "vr-001");
+    const vr002 = PRODUCTS.find((p) => p.id === "vr-002");
 
-    const fmt = (v) => v ? v.toLocaleString("vi-VN") + "₫" : "";
-    
-    // Curated role map:
-    // ctrl-001 -> anchor (large feature card)
-    // acc-001  -> companion (medium top card)
-    // acc-002  -> compact (bottom left)
-    // acc-003  -> compact (bottom right)
-    const roleClasses = {
-      "ctrl-001": "product-card--anchor",
-      "acc-001": "product-card--companion",
-      "acc-002": "product-card--compact",
-      "acc-003": "product-card--compact"
-    };
+    if (!vr001 || !vr002) return;
 
-    mount.innerHTML = items.map(p => {
-      const extraClass = roleClasses[p.id] || "";
-      const isAnchor = p.id === "ctrl-001";
-      return `
-      <article class="product-card ${extraClass}" data-id="${p.id}" data-fx="slide-up">
-        <div class="product-card__thumb">
-          <a href="product.html?id=${p.id}" aria-label="${p.name}">
-            <img 
-              src="${p.images[0]}" 
-              alt="${p.name}" 
-              class="product-card__image" 
-              loading="lazy" 
-              width="${isAnchor ? 640 : 400}" 
-              height="${isAnchor ? 480 : 300}"
-              onerror="this.onerror=null; this.src='assets/images/placeholder.svg';"
-            >
-          </a>
-          ${isAnchor ? `<span class="product-card__curated-badge">Tâm Điểm Hệ Sinh Thái</span>` : ''}
-        </div>
-        <div class="product-card__body">
-          <span class="product-card__category">${p.categoryLabel || "Phụ kiện"}</span>
-          <h3 class="product-card__title">
-            <a href="product.html?id=${p.id}">${p.name}</a>
-          </h3>
-          <p class="product-card__desc">${p.shortDesc || ""}</p>
-          <div class="product-card__footer">
-            <div class="product-card__price-group">
-              <span class="product-card__price">${fmt(p.price)}</span>
-            </div>
-            <a href="product.html?id=${p.id}" class="product-card__btn">Chi tiết</a>
-          </div>
-        </div>
-      </article>
-      `;
-    }).join("");
+    const specsRows = [
+      { label: "Màn hình", key: "Độ phân giải" },
+      { label: "Tần số quét", key: "Tần số quét" },
+      { label: "Trường nhìn (FOV)", key: "Trường nhìn (FOV)" },
+      { label: "Trọng lượng", key: "Trọng lượng" },
+      { label: "Pin sử dụng", key: "Thời lượng pin" },
+      { label: "Giá bán bán lẻ", isPrice: true },
+    ];
+
+    function getSpecVal(product, specKey) {
+      if (!product.specs) return "—";
+      const found = product.specs.find((s) => s.label === specKey);
+      return found ? found.value : "—";
+    }
+
+    const html = `
+      <div class="comparison-table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Thông số kĩ thuật</th>
+              <th>${vr001.name} (Flagship)</th>
+              <th>${vr002.name}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${specsRows
+              .map((row) => {
+                const val1 = row.isPrice ? `${vr001.price.toLocaleString("vi-VN")}₫` : getSpecVal(vr001, row.key);
+                const val2 = row.isPrice ? `${vr002.price.toLocaleString("vi-VN")}₫` : getSpecVal(vr002, row.key);
+                return `
+                  <tr>
+                    <td>${row.label}</td>
+                    <td><strong>${val1}</strong></td>
+                    <td>${val2}</td>
+                  </tr>
+                `;
+              })
+              .join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    container.innerHTML = html;
   }
 
+  /* --------------------------------------------------------------------------
+     7. DYNAMIC CURATED ACCESSORIES GRID (Phần 7)
+     -------------------------------------------------------------------------- */
+  function renderAccessoriesGrid() {
+    const container = document.getElementById("accessories-mount");
+    if (!container || typeof PRODUCTS === "undefined") return;
+
+    // Lấy 4 phụ kiện đi kèm tiêu biểu
+    const accessories = PRODUCTS.filter((p) => p.id !== "vr-001").slice(0, 4);
+
+    container.innerHTML = accessories
+      .map((p) => {
+        const imageSrc = p.images && p.images[0] ? p.images[0] : "assets/images/placeholder.svg";
+        return `
+          <article class="product-card">
+            <div class="product-card__media">
+              <a href="product.html?id=${encodeURIComponent(p.id)}">
+                <img 
+                  class="product-card__image" 
+                  src="${imageSrc}" 
+                  alt="${p.name}"
+                  loading="lazy"
+                  width="400"
+                  height="300"
+                  onerror="this.onerror=null; this.src='assets/images/placeholder.svg';"
+                >
+              </a>
+            </div>
+            <div class="product-card__body">
+              <span class="product-card__category">${p.categoryLabel}</span>
+              <h3 class="product-card__title">
+                <a href="product.html?id=${encodeURIComponent(p.id)}">${p.name}</a>
+              </h3>
+              <p class="product-card__short-desc" style="font-size:0.85rem; color:var(--text-secondary); margin:6px 0 12px; line-height:1.4;">${p.shortDesc || ''}</p>
+              <div class="product-card__price">
+                <span class="product-card__price-current">${p.price.toLocaleString("vi-VN")}₫</span>
+              </div>
+              <button 
+                type="button" 
+                class="product-card__add-btn" 
+                onclick="if(typeof addToCart === 'function'){ addToCart('${p.id}'); } else if(typeof window.showToast==='function'){ window.showToast('Đã thêm ${p.name} vào giỏ hàng', 'success'); }"
+              >
+                Thêm vào giỏ
+              </button>
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+  }
+
+  // Toàn cục helper cho Add To Cart
+  window.addToCart = function (productId) {
+    if (typeof StorageService !== "undefined" && StorageService.getCart) {
+      const cart = StorageService.getCart() || [];
+      const existing = cart.find((item) => item.id === productId);
+      if (existing) {
+        existing.quantity = (existing.quantity || 1) + 1;
+      } else {
+        const prod = PRODUCTS.find((p) => p.id === productId);
+        if (prod) {
+          cart.push({
+            id: prod.id,
+            name: prod.name,
+            price: prod.price,
+            image: prod.images[0],
+            quantity: 1,
+          });
+        }
+      }
+      StorageService.saveCart(cart);
+      if (typeof window.updateCartBadge === "function") window.updateCartBadge();
+    }
+
+    const item = PRODUCTS.find((p) => p.id === productId);
+    const itemName = item ? item.name : "Sản phẩm";
+    if (typeof window.showToast === "function") {
+      window.showToast(`Đã thêm ${itemName} vào giỏ hàng!`, "success");
+    }
+  };
 })();

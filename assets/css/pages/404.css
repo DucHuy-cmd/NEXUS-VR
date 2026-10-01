@@ -1,0 +1,75 @@
+/* =========================================================
+   NEXUS VR — pages/404.css
+   TẦNG 3 - PAGES: 404 ERROR PAGE
+   ========================================================= */
+
+.error-page {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 24px 60px;
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.error-code {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: clamp(100px, 20vw, 200px);
+  line-height: 1;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0 0 12px;
+  animation: error-glitch 2.5s infinite;
+}
+
+@keyframes error-glitch {
+  0%, 92%, 100% {
+    transform: translate(0, 0);
+    filter: none;
+  }
+  93% {
+    transform: translate(-3px, 2px);
+    filter: hue-rotate(20deg);
+  }
+  95% {
+    transform: translate(3px, -2px);
+    filter: hue-rotate(-20deg);
+  }
+  97% {
+    transform: translate(-2px, 0);
+    filter: none;
+  }
+}
+
+.error-title {
+  font-family: var(--font-head);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+}
+
+.error-msg {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0 0 32px;
+}
+
+.error-btns {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
