@@ -1,0 +1,2 @@
+# server/routes
+Thư mục chứa các route API của Express Backend do Nhất Vũ phụ trách (api-contact.js, api-auth.js...)

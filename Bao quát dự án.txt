@@ -1,0 +1,69 @@
+
+│
+├── index.html                           # [Trường Vũ] View Trang chủ
+├── about.html                           # [Trường Vũ] View Giới thiệu
+├── contact.html                         # [Trường Vũ] View Liên hệ
+├── shop.html                            # [Hưng] View Cửa hàng
+├── product.html                         # [Nhất Vũ] View Chi tiết sản phẩm
+├── cart.html                            # [Tường] View Giỏ hàng
+├── checkout.html                        # [Tường] View Thanh toán
+├── login.html                           # [Tường] View Đăng nhập/Đăng ký
+├── 404.html                             # [Đức Huy] View Trang lỗi
+│
+├── assets/
+│   │
+│   ├── css/
+│   │   ├── # --- TẦNG 1: FOUNDATION (Biến & Cốt lõi dùng chung) ---
+│   │   ├── variables.css                # Biến CSS Dark/Light, màu Neon, font, radius (Đức Huy)
+│   │   ├── reset.css                    # Reset chuẩn CSS toàn trình duyệt
+│   │   ├── global.css                   # Typography, Grid layout, Utility class
+│   │   │
+│   │   ├── # --- TẦNG 2: COMPONENTS (Các khối dùng chung nhiều trang) ---
+│   │   ├── components/
+│   │   │   ├── navbar.css               # Header điều hướng (Huy)
+│   │   │   ├── footer.css               # Chân trang (Huy)
+│   │   │   ├── toast.css                # Thông báo popup (Huy)
+│   │   │   ├── product-card.css         # Thẻ hiển thị kính VR (Dùng chung cho cả Vũ, Hưng, Nhất Vũ)
+│   │   │   └── cart-drawer.css          # Thanh trượt giỏ hàng mini (Tường)
+│   │   │
+│   │   └── # --- TẦNG 3: PAGES (CSS đặc thù riêng từng trang) ---
+│   │   ├── pages/
+│   │   │   ├── home.css                 # [Vũ] CSS Hero, Counter, Testimonial, 360 Spin
+│   │   │   ├── about.css                # [Vũ] CSS Timeline, Team Flip 3D
+│   │   │   ├── contact.css              # [Vũ] CSS Form liên hệ, Maps, FAQ Accordion
+│   │   │   ├── shop.css                 # [Hưng] CSS Bộ lọc, phân trang
+│   │   │   └── product-detail.css       # [Nhất Vũ] CSS Gallery ảnh, thông số kính
+│   │
+│   ├── js/
+│   │   ├── # --- TẦNG 1: DATA & SERVICES (Dữ liệu & Dịch vụ máy chủ) ---
+│   │   ├── data/
+│   │   │   └── products-data.js         # Mảng dữ liệu sản phẩm gốc (Đức Huy & Nhất Vũ)
+│   │   ├── services/
+│   │   │   ├── storage-service.js       # Quản lý đọc/ghi localStorage ('nexus_cart', 'theme')
+│   │   │   └── api-service.js           # Chứa các hàm fetch() API Backend (Gửi mail, Auth...)
+│   │   │
+│   │   ├── # --- TẦNG 2: REUSABLE MODULES (Các cỗ máy tính toán/hiệu ứng) ---
+│   │   ├── modules/
+│   │   │   ├── theme-toggle.js          # Logic bấm nút đổi sáng/tối (Huy)
+│   │   │   ├── toast.js                 # Hàm bắn popup showToast(msg, type) (Huy)
+│   │   │   ├── cart-manager.js          # Logic thêm/sửa/xóa tính tiền giỏ hàng (Tường)
+│   │   │   ├── validator.js             # [Vũ] Module kiểm tra Regex form (dùng cho cả Form Liên hệ & Checkout)
+│   │   │   ├── counter-engine.js        # [Vũ] Bộ đếm số nhảy bằng IntersectionObserver
+│   │   │   ├── slider-engine.js         # [Vũ] Bộ trượt slide (dùng cho Testimonial & Banner)
+│   │   │   └── accordion-engine.js      # [Vũ] Bộ trượt mở câu hỏi FAQ
+│   │   │
+│   │   └── # --- TẦNG 3: CONTROLLERS (Điều khiển riêng từng trang) ---
+│   │   ├── controllers/
+│   │   │   ├── home-controller.js       # [Vũ] Kích hoạt Hero, render SP nổi bật, nạp Counter
+│   │   │   ├── about-controller.js      # [Vũ] Kích hoạt Timeline cuộn & Team Flip 3D
+│   │   │   └── contact-controller.js    # [Vũ] Bắt sự kiện gửi form, gọi validator & gọi api-service
+│   │
+│   └── images/                          # Toàn bộ ảnh tối ưu định dạng .webp
+│       ├── hero/                        # Kính VR banner lớn
+│       ├── products/                    # Ảnh các mẫu kính bán
+│       └── team/                        # 5 ảnh chân dung thành viên chuẩn tỉ lệ 3:4
+│
+└── server/                              # [Nhất Vũ] Máy chủ Node.js / Express Backend
+    ├── app.js
+    ├── database.sqlite
+    └── routes/api-contact.js            # API tiếp nhận form từ trang của Vũ để gửi mail
