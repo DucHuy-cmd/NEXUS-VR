@@ -83,14 +83,14 @@ const PRODUCTS = [
     rating: 4.8,
     reviewCount: 156,
     colors: [
-      { name: "Titanium", hex: "#4B4F56", imageIndex: 0, image: "assets/images/products/ctrl-titanium.jpg" },
-      { name: "Champagne", hex: "#C8B29B", imageIndex: 1, image: "assets/images/products/ctrl-champagne.jpg" },
-      { name: "Sport Cam", hex: "#E65C00", imageIndex: 2, image: "assets/images/products/ctrl-sport.jpg" }
+      { name: "Titanium", hex: "#4B4F56", imageIndex: 0, image: "assets/images/products/ctrl-titanium.webp" },
+      { name: "Champagne", hex: "#C8B29B", imageIndex: 1, image: "assets/images/products/ctrl-champagne.webp" },
+      { name: "Sport Cam", hex: "#E65C00", imageIndex: 2, image: "assets/images/products/ctrl-sport.webp" }
     ],
     images: [
-      "assets/images/products/ctrl-titanium.jpg",
-      "assets/images/products/ctrl-champagne.jpg",
-      "assets/images/products/ctrl-sport.jpg"
+      "assets/images/products/ctrl-titanium.webp",
+      "assets/images/products/ctrl-champagne.webp",
+      "assets/images/products/ctrl-sport.webp"
     ],
     shortDesc: "Điều khiển chuẩn xác với phản hồi xúc giác tiên tiến.",
     description: "Cặp tay cầm NEXUS Motion Controller tích hợp camera theo dõi độc lập, không bị giới hạn tầm nhìn, kèm mô-tơ rung Haptic mang lại cảm giác chân thực nhất.",
@@ -113,14 +113,14 @@ const PRODUCTS = [
     rating: 4.6,
     reviewCount: 92,
     colors: [
-      { name: "Titanium", hex: "#4B4F56", imageIndex: 0, image: "assets/images/products/dock-titanium.jpg" },
-      { name: "Champagne", hex: "#C8B29B", imageIndex: 1, image: "assets/images/products/dock-champagne.jpg" },
-      { name: "Silver", hex: "#D8D8D8", imageIndex: 2, image: "assets/images/products/dock-silver.jpg" }
+      { name: "Titanium", hex: "#4B4F56", imageIndex: 0, image: "assets/images/products/dock-titanium.webp" },
+      { name: "Champagne", hex: "#C8B29B", imageIndex: 1, image: "assets/images/products/dock-champagne.webp" },
+      { name: "Silver", hex: "#D8D8D8", imageIndex: 2, image: "assets/images/products/dock-silver.webp" }
     ],
     images: [
-      "assets/images/products/dock-titanium.jpg",
-      "assets/images/products/dock-champagne.jpg",
-      "assets/images/products/dock-silver.jpg"
+      "assets/images/products/dock-titanium.webp",
+      "assets/images/products/dock-champagne.webp",
+      "assets/images/products/dock-silver.webp"
     ],
     shortDesc: "Đế sạc từ tính đa năng cho kính và tay cầm.",
     description: "Giải pháp sạc thanh lịch giúp không gian làm việc luôn gọn gàng. Sạc đồng thời NEXUS Vision Pro và hai tay cầm chỉ với một điểm chạm từ tính.",
@@ -143,14 +143,14 @@ const PRODUCTS = [
     rating: 4.9,
     reviewCount: 134,
     colors: [
-      { name: "Cream", hex: "#EFEBE5", imageIndex: 0, image: "assets/images/products/strap-cream.jpg" },
-      { name: "Titanium", hex: "#4B4F56", imageIndex: 1, image: "assets/images/products/strap-titanium.jpg" },
-      { name: "Sport Cam", hex: "#E65C00", imageIndex: 2, image: "assets/images/products/strap-sport.jpg" }
+      { name: "Cream", hex: "#EFEBE5", imageIndex: 0, image: "assets/images/products/strap-cream.webp" },
+      { name: "Titanium", hex: "#4B4F56", imageIndex: 1, image: "assets/images/products/strap-titanium.webp" },
+      { name: "Sport Cam", hex: "#E65C00", imageIndex: 2, image: "assets/images/products/strap-sport.webp" }
     ],
     images: [
-      "assets/images/products/strap-cream.jpg",
-      "assets/images/products/strap-titanium.jpg",
-      "assets/images/products/strap-sport.jpg"
+      "assets/images/products/strap-cream.webp",
+      "assets/images/products/strap-titanium.webp",
+      "assets/images/products/strap-sport.webp"
     ],
     shortDesc: "Dây đeo đan 3D êm ái, co giãn và thoáng khí.",
     description: "Được đan 3D từ hàng nghìn sợi vi sinh, Solo Knit Band phân bổ đều trọng lượng của kính, giúp bạn luôn thoải mái kể cả khi đeo cả ngày dài.",
@@ -172,14 +172,14 @@ const PRODUCTS = [
     rating: 4.8,
     reviewCount: 67,
     colors: [
-      { name: "Caramel", hex: "#A67C52", imageIndex: 0, image: "assets/images/products/case-caramel.jpg" },
-      { name: "Cream", hex: "#EFEBE5", imageIndex: 1, image: "assets/images/products/case-cream.jpg" },
-      { name: "Espresso", hex: "#231F1C", imageIndex: 2, image: "assets/images/products/case-espresso.jpg" }
+      { name: "Caramel", hex: "#A67C52", imageIndex: 0, image: "assets/images/products/case-caramel.webp" },
+      { name: "Cream", hex: "#EFEBE5", imageIndex: 1, image: "assets/images/products/case-cream.webp" },
+      { name: "Espresso", hex: "#231F1C", imageIndex: 2, image: "assets/images/products/case-espresso.webp" }
     ],
     images: [
-      "assets/images/products/case-caramel.jpg",
-      "assets/images/products/case-cream.jpg",
-      "assets/images/products/case-espresso.jpg"
+      "assets/images/products/case-caramel.webp",
+      "assets/images/products/case-cream.webp",
+      "assets/images/products/case-espresso.webp"
     ],
     shortDesc: "Hộp bảo vệ cao cấp chống sốc.",
     description: "Được thiết kế riêng cho NEXUS Vision Pro. Vỏ ngoài bằng vật liệu dệt cao cấp chống nước, lót trong bằng vải sợi siêu nhỏ bảo vệ thấu kính tuyệt đối.",

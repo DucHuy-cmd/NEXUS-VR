@@ -1,6 +1,6 @@
 # NEXUS VR — Trạng Thái Dự Án (STATE.md)
 
-Cập nhật lần cuối: 2026-10-01 (Hoàn thành Phase P0, P1, P2, P3 & P4)
+Cập nhật lần cuối: 2026-10-02 (Hoàn thành Phase P0, P1, P2, P3 & P4 — phạm vi Frontend; xem mục Backend/Server bên dưới)
 
 ---
 
@@ -17,6 +17,7 @@ Cập nhật lần cuối: 2026-10-01 (Hoàn thành Phase P0, P1, P2, P3 & P4)
 | Giới thiệu | `about.html` | Trường Vũ | 🟢 Hoàn thành P1 | Triết lý thiết kế Quiet Luxury, kỹ nghệ chế tác & đội ngũ |
 | Liên hệ | `contact.html` | Trường Vũ | 🟢 Hoàn thành P1 | Form liên hệ, đặt lịch trải nghiệm & hỗ trợ Concierge |
 | Trang 404 | `404.html` | Đức Huy | 🟢 Hoàn thành P1 | Cấu trúc chuẩn `<main>`, `<h1>`, token CSS & `404.css` |
+| **Backend / Server** | `server/` | Nhất Vũ | 🔴 Đã gỡ bỏ | Dự án deploy static trên Vercel, không chạy được Node.js/Express thật nên không giữ code chết — Đăng nhập/Đăng ký/Đăng xuất và Form liên hệ hiện xử lý bằng `localStorage` trực tiếp trong từng controller (xem `assets/js/services/api-service.js`), không qua API thật |
 
 ---
 
