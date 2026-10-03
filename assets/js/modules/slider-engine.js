@@ -238,15 +238,15 @@
       currentX = e.type.includes("mouse") ? e.pageX : e.touches[0].clientX;
       const diffX = currentX - startX;
 
-      if (Math.abs(diffX) > 5) {
+      if (Math.abs(diffX) > 3) {
         hasMoved = true;
       }
 
-      // Kháng cự kéo mép (elastic rubber-band) nếu không cho phép loop
+      // Kháng cự kéo mép (elastic rubber-band physics) nếu không cho phép loop
       let dragOffset = diffX;
       if (!opts.loop) {
         if ((currentIndex === 0 && diffX > 0) || (currentIndex === totalSlides - 1 && diffX < 0)) {
-          dragOffset = diffX * 0.3; // Giảm biên độ kéo khi chạm giới hạn
+          dragOffset = diffX * 0.25; // Smooth elastic resistance curve
         }
       }
 
@@ -262,14 +262,14 @@
       isDragging = false;
 
       const diffX = currentX - startX;
-      if (hasMoved && Math.abs(diffX) > opts.threshold) {
+      if (hasMoved && Math.abs(diffX) > (opts.threshold || 30)) {
         if (diffX < 0) {
           next();
         } else {
           prev();
         }
       } else {
-        // Hoàn vị trí cũ nếu vuốt chưa đủ khoảng cách threshold
+        // Hoàn vị trí cũ mượt mà 60fps nếu vuốt chưa đủ khoảng cách
         applyTransform(-currentIndex * 100, true);
       }
 
