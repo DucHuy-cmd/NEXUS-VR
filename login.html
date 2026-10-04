@@ -57,11 +57,11 @@
           ========================= -->
           <form class="auth-form" id="loginForm" novalidate>
             <div class="auth-field">
-              <label for="loginEmail" class="auth-label">Địa chỉ Email</label>
+              <label for="loginAccount" class="auth-label">Tài khoản (Email / Số điện thoại / Username)</label>
               <div class="auth-input-wrap">
-                <input type="email" id="loginEmail" class="auth-input" placeholder="ten@vidu.com" autocomplete="email" required>
+                <input type="text" id="loginAccount" class="auth-input" placeholder="tuong@nexus.com hoặc 0988123456" autocomplete="username" required>
               </div>
-              <span class="auth-field-error" id="loginEmailError" aria-live="polite"></span>
+              <span class="auth-field-error" id="loginAccountError" aria-live="polite"></span>
             </div>
 
             <div class="auth-field">
@@ -83,7 +83,7 @@
                 <input type="checkbox" id="loginRemember" checked>
                 <span>Ghi nhớ phiên</span>
               </label>
-              <a href="#" class="auth-forgot-link" onclick="if(typeof showToast==='function')showToast('Chức năng cấp lại mật khẩu đang gửi OTP qua email.','info'); return false;">Quên mật khẩu?</a>
+              <a href="#" class="auth-forgot-link" onclick="if(typeof window.showToast==='function')window.showToast('Chức năng cấp lại mật khẩu đang gửi mã OTP qua email.','info'); return false;">Quên mật khẩu?</a>
             </div>
 
             <button type="submit" class="auth-submit-btn" id="loginSubmitBtn">
@@ -96,19 +96,11 @@
           ========================= -->
           <form class="auth-form" id="registerForm" novalidate hidden>
             <div class="auth-field">
-              <label for="registerName" class="auth-label">Họ và tên</label>
+              <label for="registerAccount" class="auth-label">Tài khoản (Email / Số điện thoại / Username)</label>
               <div class="auth-input-wrap">
-                <input type="text" id="registerName" class="auth-input" placeholder="Trần Tưởng" autocomplete="name" required>
+                <input type="text" id="registerAccount" class="auth-input" placeholder="tuong@nexus.com hoặc 0988123456" autocomplete="username" required>
               </div>
-              <span class="auth-field-error" id="registerNameError" aria-live="polite"></span>
-            </div>
-
-            <div class="auth-field">
-              <label for="registerEmail" class="auth-label">Địa chỉ Email</label>
-              <div class="auth-input-wrap">
-                <input type="email" id="registerEmail" class="auth-input" placeholder="tuong@nexus.com" autocomplete="email" required>
-              </div>
-              <span class="auth-field-error" id="registerEmailError" aria-live="polite"></span>
+              <span class="auth-field-error" id="registerAccountError" aria-live="polite"></span>
             </div>
 
             <div class="auth-field">
@@ -152,84 +144,84 @@
           </form>
 
           <!-- =========================
-          FORM 3: HOÀN TẤT / CẬP NHẬT HỒ SƠ CHI TIẾT
+          FORM 3: HOÀN TẤT HỒ SƠ & UPLOAD AVATAR TỪ MÁY
           ========================= -->
           <form class="auth-form" id="profileDetailsForm" novalidate hidden>
-            <div class="auth-field">
-              <label for="detailName" class="auth-label">Họ và tên</label>
-              <div class="auth-input-wrap">
-                <input type="text" id="detailName" class="auth-input" placeholder="Trần Tưởng" readonly>
+            <!-- UPLOAD AVATAR -->
+            <div class="auth-field" style="text-align: center; margin-bottom: 24px;">
+              <label class="auth-label" style="margin-bottom: 10px; display: block; font-weight: 600;">Ảnh đại diện cá nhân</label>
+              <div style="position: relative; display: inline-block; width: 96px; height: 96px; border-radius: 50%; overflow: hidden; border: 2px solid var(--accent); background: var(--bg-secondary); box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
+                <img id="avatarPreviewImg" src="assets/images/placeholder.svg" alt="Preview Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div style="margin-top: 10px;">
+                <label for="avatarFileInput" style="padding: 8px 18px; font-size: 0.85rem; font-weight: 600; border-radius: 999px; background: var(--bg-secondary); border: 1px solid var(--border); cursor: pointer; display: inline-block; transition: all 0.2s ease;">
+                  📷 Chọn ảnh từ thiết bị
+                </label>
+                <input type="file" id="avatarFileInput" accept="image/*" hidden>
               </div>
             </div>
 
             <div class="auth-field">
-              <label for="detailEmail" class="auth-label">Địa chỉ Email</label>
+              <label for="detailName" class="auth-label">Họ và tên *</label>
               <div class="auth-input-wrap">
-                <input type="email" id="detailEmail" class="auth-input" placeholder="tuong@nexus.com" readonly>
+                <input type="text" id="detailName" class="auth-input" placeholder="Trần Tưởng" required>
               </div>
+              <span class="auth-field-error" id="detailNameError" aria-live="polite"></span>
             </div>
 
             <div class="auth-field">
               <label for="detailPhone" class="auth-label">Số điện thoại giao hàng *</label>
               <div class="auth-input-wrap">
-                <input type="tel" id="detailPhone" class="auth-input" placeholder="0988 123 456" required>
+                <input type="tel" id="detailPhone" class="auth-input" placeholder="0988123456" required>
               </div>
               <span class="auth-field-error" id="detailPhoneError" aria-live="polite"></span>
             </div>
 
             <div class="auth-field">
-              <label for="detailCity" class="auth-label">Tỉnh / Thành phố *</label>
+              <label for="detailEmail" class="auth-label">Địa chỉ Email *</label>
               <div class="auth-input-wrap">
-                <select id="detailCity" class="auth-input">
-                  <option value="Hà Nội">Hà Nội</option>
-                  <option value="Cao Bằng">Cao Bằng</option>
-                  <option value="Tuyên Quang">Tuyên Quang</option>
-                  <option value="Điện Biên">Điện Biên</option>
-                  <option value="Lai Châu">Lai Châu</option>
-                  <option value="Sơn La">Sơn La</option>
-                  <option value="Lào Cai">Lào Cai</option>
-                  <option value="Thái Nguyên">Thái Nguyên</option>
-                  <option value="Lạng Sơn">Lạng Sơn</option>
-                  <option value="Quảng Ninh">Quảng Ninh</option>
-                  <option value="Bắc Ninh">Bắc Ninh</option>
-                  <option value="Phú Thọ">Phú Thọ</option>
-                  <option value="Hải Phòng">Hải Phòng</option>
-                  <option value="Hưng Yên">Hưng Yên</option>
-                  <option value="Ninh Bình">Ninh Bình</option>
-                  <option value="Thanh Hóa">Thanh Hóa</option>
-                  <option value="Nghệ An">Nghệ An</option>
-                  <option value="Hà Tĩnh">Hà Tĩnh</option>
-                  <option value="Quảng Trị">Quảng Trị</option>
-                  <option value="Huế">Huế</option>
-                  <option value="Đà Nẵng">Đà Nẵng</option>
-                  <option value="Quảng Ngãi">Quảng Ngãi</option>
-                  <option value="Gia Lai">Gia Lai</option>
-                  <option value="Khánh Hòa">Khánh Hòa</option>
-                  <option value="Đắk Lắk">Đắk Lắk</option>
-                  <option value="Lâm Đồng">Lâm Đồng</option>
-                  <option value="Đồng Nai">Đồng Nai</option>
-                  <option value="TP. Hồ Chí Minh" selected>TP. Hồ Chí Minh</option>
-                  <option value="Tây Ninh">Tây Ninh</option>
-                  <option value="Đồng Tháp">Đồng Tháp</option>
-                  <option value="Vĩnh Long">Vĩnh Long</option>
-                  <option value="An Giang">An Giang</option>
-                  <option value="Cần Thơ">Cần Thơ</option>
-                  <option value="Cà Mau">Cà Mau</option>
+                <input type="email" id="detailEmail" class="auth-input" placeholder="tuong@nexus.com" required>
+              </div>
+              <span class="auth-field-error" id="detailEmailError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="detailGender" class="auth-label">Giới tính</label>
+              <div class="auth-input-wrap">
+                <select id="detailGender" class="auth-input">
+                  <option value="Nam" selected>Nam</option>
+                  <option value="Nữ">Nữ</option>
+                  <option value="Khác">Khác</option>
                 </select>
               </div>
             </div>
 
+            <!-- CHỌN 1 TRONG 34 TỈNH THÀNH -->
             <div class="auth-field">
-              <label for="detailDistrict" class="auth-label">Phường/Xã</label>
+              <label for="detailProvince" class="auth-label">Tỉnh / Thành phố (1/34 Tỉnh thành) *</label>
               <div class="auth-input-wrap">
-                <input type="text" id="detailDistrict" class="auth-input" placeholder="">
+                <select id="detailProvince" class="auth-input" required>
+                  <option value="">-- Chọn Tỉnh / Thành phố --</option>
+                </select>
               </div>
+              <span class="auth-field-error" id="detailProvinceError" aria-live="polite"></span>
+            </div>
+
+            <!-- CHỌN PHƯỜNG XÃ -->
+            <div class="auth-field">
+              <label for="detailWard" class="auth-label">Phường / Xã *</label>
+              <div class="auth-input-wrap">
+                <select id="detailWard" class="auth-input" disabled required>
+                  <option value="">-- Vui lòng chọn Tỉnh/Thành trước --</option>
+                </select>
+              </div>
+              <span class="auth-field-error" id="detailWardError" aria-live="polite"></span>
             </div>
 
             <div class="auth-field">
-              <label for="detailAddress" class="auth-label">Địa chỉ nhận hàng chi tiết *</label>
+              <label for="detailAddress" class="auth-label">Địa chỉ chi tiết (Số nhà, tên đường) *</label>
               <div class="auth-input-wrap">
-                <input type="text" id="detailAddress" class="auth-input" placeholder="Số nhà, tên đường, phường/xã" required>
+                <input type="text" id="detailAddress" class="auth-input" placeholder="Số 123 Nguyễn Huệ" required>
               </div>
               <span class="auth-field-error" id="detailAddressError" aria-live="polite"></span>
             </div>
@@ -239,7 +231,7 @@
             </button>
           </form>
 
-          <!-- NÚT ĐIỀN TEST ACCOUNT (1-CLICK DEMO CHO ĐỒ ÁN) -->
+          <!-- NÚT ĐIỀN TEST ACCOUNT (1-CLICK DEMO) -->
           <div class="auth-demo-helper">
             <button type="button" class="auth-demo-btn" id="fillDemoBtn">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -252,14 +244,19 @@
         TRẠNG THÁI PROFILE (KHI ĐÃ ĐĂNG NHẬP)
         ========================= -->
         <div class="auth-profile" id="authProfileCluster" hidden>
-          <div class="auth-avatar-circle" id="profileAvatar">TT</div>
-          <div>
-            <h2 class="auth-profile-name" id="profileName">Trần Tưởng</h2>
-            <p class="auth-profile-email" id="profileEmail">tuong@nexus.com</p>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;" id="profilePhoneDisplay"></p>
+          <div class="auth-avatar-circle" style="overflow: hidden; width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; background: var(--accent); color: #fff; font-weight: 700; font-size: 1.6rem; box-shadow: 0 4px 18px rgba(166, 124, 82, 0.3);">
+            <img id="profileAvatarImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" hidden>
+            <span id="profileAvatarText">TT</span>
+          </div>
+
+          <div style="text-align: center;">
+            <h2 class="auth-profile-greeting" id="profileGreetingHeader" style="font-size: 1.4rem; color: var(--accent); margin-bottom: 2px; font-weight: 700;">Hi, Trần Tưởng</h2>
+            <p class="auth-profile-email" id="profileEmail" style="color: var(--text-secondary); font-size: 0.9rem;">tuong@nexus.com</p>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;" id="profilePhoneDisplay"></p>
             <p style="font-size: 0.85rem; color: var(--text-secondary);" id="profileAddressDisplay"></p>
           </div>
-          <div class="auth-profile-stats">
+
+          <div class="auth-profile-stats" style="margin: 20px 0;">
             <div class="auth-stat-item">
               <span class="auth-stat-val">VIP</span>
               <span class="auth-stat-lbl">Hạng thẻ</span>
@@ -273,8 +270,9 @@
               <span class="auth-stat-lbl">Ưu đãi</span>
             </div>
           </div>
+
           <div class="auth-profile-actions">
-            <button type="button" class="btn btn-secondary" id="profileEditBtn" style="width: 100%; text-align: center;">Chỉnh sửa thông tin giao hàng</button>
+            <button type="button" class="btn btn-secondary" id="profileEditBtn" style="width: 100%; text-align: center;">Chỉnh sửa thông tin &amp; Ảnh đại diện</button>
             <a href="cart.html" class="btn btn-primary" style="width: 100%; text-align: center;">Xem giỏ hàng</a>
             <button type="button" class="auth-logout-btn" id="profileLogoutBtn">
               Đăng xuất tài khoản
@@ -291,12 +289,12 @@
   <!-- TẦNG 1: DATA & SERVICES -->
   <script src="assets/js/data/products-data.js"></script>
   <script src="assets/js/services/storage-service.js"></script>
-  <script src="assets/js/services/api-service.js"></script>
 
   <!-- TẦNG 2: MODULES -->
   <script src="assets/js/modules/toast.js"></script>
   <script src="assets/js/modules/layout-loader.js"></script>
   <script src="assets/js/modules/validator.js"></script>
+  <script src="assets/js/modules/address-manager.js"></script>
 
   <!-- TẦNG 3: CONTROLLER -->
   <script src="assets/js/controllers/login-controller.js"></script>

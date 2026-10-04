@@ -1,6 +1,6 @@
 /* ==========================================================================
 NEXUS VR — controllers/login-controller.js   [PHỤ TRÁCH: Tưởng]
-TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KHOẢN
+TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / UPLOAD AVATAR / CẬP NHẬT HỒ SƠ 2 CẤP
 ========================================================================== */
 (function () {
   "use strict";
@@ -10,12 +10,16 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
     initLoginController();
   }
 
+  let currentUploadedAvatar = "";
+
   function initLoginController() {
     if (window.__nexusLoginInitialized) return;
     window.__nexusLoginInitialized = true;
 
     initAuthTabs();
     initPasswordToggles();
+    initAvatarUploader();
+    initAddressCascading();
     initDemoAccountFiller();
     initLoginForm();
     initRegisterForm();
@@ -42,9 +46,11 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
       tabRegister.classList.remove("is-active");
       tabLogin.setAttribute("aria-selected", "true");
       tabRegister.setAttribute("aria-selected", "false");
+
       formLogin.hidden = false;
       formRegister.hidden = true;
       if (formDetails) formDetails.hidden = true;
+
       if (title) title.textContent = "Đăng Nhập";
       if (subtitle) subtitle.textContent = "Chào mừng bạn quay lại với không gian điện toán NEXUS.";
     });
@@ -54,9 +60,11 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
       tabLogin.classList.remove("is-active");
       tabRegister.setAttribute("aria-selected", "true");
       tabLogin.setAttribute("aria-selected", "false");
+
       formRegister.hidden = false;
       formLogin.hidden = true;
       if (formDetails) formDetails.hidden = true;
+
       if (title) title.textContent = "Tạo Tài Khoản";
       if (subtitle) subtitle.textContent = "Trải nghiệm đặc quyền điện toán không gian cao cấp.";
     });
@@ -67,7 +75,7 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
   -------------------------------------------------------------------------- */
   function initPasswordToggles() {
     const toggleBtns = document.querySelectorAll(".auth-toggle-pwd");
-    toggleBtns.forEach(btn => {
+    toggleBtns.forEach((btn) => {
       btn.addEventListener("click", () => {
         const targetId = btn.getAttribute("data-target");
         const input = document.getElementById(targetId);
@@ -88,7 +96,48 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
   }
 
   /* --------------------------------------------------------------------------
-  3. ĐIỀN TÀI KHOẢN TEST DEMO (1-CLICK)
+  3. UPLOAD ÁNH ĐẠI DIỆN TỪ THIẾT BỊ (READ AS DATA URL)
+  -------------------------------------------------------------------------- */
+  function initAvatarUploader() {
+    const fileInput = document.getElementById("avatarFileInput");
+    const previewImg = document.getElementById("avatarPreviewImg");
+
+    if (!fileInput || !previewImg) return;
+
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        if (typeof window.showToast === "function") {
+          window.showToast("Vui lòng chọn file hình ảnh hợp lệ.", "warning");
+        }
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        currentUploadedAvatar = event.target.result;
+        previewImg.src = currentUploadedAvatar;
+        if (typeof window.showToast === "function") {
+          window.showToast("Đã chọn ảnh đại diện mới!", "info");
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* --------------------------------------------------------------------------
+  4. KHỞI TẠO ĐỊA CHÍNH 2 CẤP (34 TỈNH THÀNH -> PHƯỜNG XÃ)
+  -------------------------------------------------------------------------- */
+  function initAddressCascading() {
+    if (window.AddressManager && typeof window.AddressManager.initAddressCascade === "function") {
+      window.AddressManager.initAddressCascade("detailProvince", "detailWard");
+    }
+  }
+
+  /* --------------------------------------------------------------------------
+  5. ĐIỀN TÀI KHOẢN TEST DEMO (1-CLICK)
   -------------------------------------------------------------------------- */
   function initDemoAccountFiller() {
     const demoBtn = document.getElementById("fillDemoBtn");
@@ -98,49 +147,52 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
       const tabLogin = document.getElementById("tabLoginBtn");
       if (tabLogin) tabLogin.click();
 
-      const emailInput = document.getElementById("loginEmail");
+      const accountInput = document.getElementById("loginAccount");
       const pwdInput = document.getElementById("loginPassword");
 
-      if (emailInput && pwdInput) {
-        emailInput.value = "tuong@nexus.com";
+      if (accountInput && pwdInput) {
+        accountInput.value = "tuong@nexus.com";
         pwdInput.value = "123456";
 
         const demoUserData = {
           name: "Trần Tưởng",
+          account: "tuong@nexus.com",
           email: "tuong@nexus.com",
           phone: "0988123456",
-          city: "TP. Hồ Chí Minh",
-          district: "Quận 1",
-          address: "Số 123 Phố đi bộ Nguyễn Huệ, Phường Bến Nghé",
+          gender: "Nam",
+          province: "TP. Hồ Chí Minh",
+          ward: "Phường Bến Nghé",
+          address: "Số 123 Nguyễn Huệ",
+          avatar: "",
           joinedDate: "10/2026"
         };
 
         saveUserData(demoUserData);
 
-        if (typeof showToast === "function") {
-          showToast("Đã điền tài khoản mẫu Tưởng (tuong@nexus.com)", "info");
+        if (typeof window.showToast === "function") {
+          window.showToast("Đã điền tài khoản mẫu Tưởng (tuong@nexus.com)", "info");
         }
       }
     });
   }
 
   /* --------------------------------------------------------------------------
-  4. HÀM DÙNG CHUNG: LƯU VÀ PHÁT SỰ KIỆN CẬP NHẬT TÀI KHOẢN
+  6. HÀM LƯU DỮ LIỆU & BẮT SỰ KIỆN CẬP NHẬT HEADER NAVBAR
   -------------------------------------------------------------------------- */
   function saveUserData(userData) {
-    if (typeof saveCurrentUser === "function") {
-      saveCurrentUser(userData);
+    if (typeof window.saveCurrentUser === "function") {
+      window.saveCurrentUser(userData);
     } else {
       localStorage.setItem("nexus_user", JSON.stringify(userData));
     }
-    if (typeof updateUserState === "function") {
-      updateUserState();
+    if (typeof window.updateUserState === "function") {
+      window.updateUserState();
     }
     window.dispatchEvent(new CustomEvent("nexus:user-updated"));
   }
 
   /* --------------------------------------------------------------------------
-  5. XỬ LÝ ĐĂNG NHẬP
+  7. XỬ LÝ ĐĂNG NHẬP
   -------------------------------------------------------------------------- */
   function initLoginForm() {
     const form = document.getElementById("loginForm");
@@ -148,20 +200,21 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value;
-      const emailError = document.getElementById("loginEmailError");
+      const accountInput = document.getElementById("loginAccount");
+      const pwdInput = document.getElementById("loginPassword");
+      if (!accountInput || !pwdInput) return;
+
+      const account = accountInput.value.trim();
+      const password = pwdInput.value;
+      const accountError = document.getElementById("loginAccountError");
       const pwdError = document.getElementById("loginPasswordError");
       let hasError = false;
 
-      if (emailError) emailError.textContent = "";
+      if (accountError) accountError.textContent = "";
       if (pwdError) pwdError.textContent = "";
 
-      if (!email) {
-        if (emailError) emailError.textContent = "Vui lòng nhập địa chỉ email.";
-        hasError = true;
-      } else if (typeof isValidEmail === "function" && !isValidEmail(email)) {
-        if (emailError) emailError.textContent = "Email không đúng định dạng.";
+      if (!account) {
+        if (accountError) accountError.textContent = "Vui lòng nhập Email, SĐT hoặc Tên tài khoản.";
         hasError = true;
       }
 
@@ -175,26 +228,29 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
 
       if (hasError) return;
 
-      const existingUser = typeof getCurrentUser === "function"
-        ? getCurrentUser()
-        : JSON.parse(localStorage.getItem("nexus_user"));
+      const existingUser = typeof window.getCurrentUser === "function"
+        ? window.getCurrentUser()
+        : JSON.parse(localStorage.getItem("nexus_user") || "null");
 
-      const displayName = existingUser?.name || (email.includes("tuong") ? "Trần Tưởng" : email.split("@")[0]);
+      const displayName = existingUser?.name || (account.includes("tuong") ? "Trần Tưởng" : account.split("@")[0]);
 
       const userData = {
         name: displayName,
-        email: email,
-        phone: existingUser?.phone || "",
-        city: existingUser?.city || "TP. Hồ Chí Minh",
-        district: existingUser?.district || "",
-        address: existingUser?.address || "",
+        account: account,
+        email: existingUser?.email || (account.includes("@") ? account : `${account}@nexus.com`),
+        phone: existingUser?.phone || (!account.includes("@") ? account : ""),
+        gender: existingUser?.gender || "Nam",
+        province: existingUser?.province || "TP. Hồ Chí Minh",
+        ward: existingUser?.ward || "Phường Bến Nghé",
+        address: existingUser?.address || "Số 123 Nguyễn Huệ",
+        avatar: existingUser?.avatar || "",
         joinedDate: existingUser?.joinedDate || "10/2026"
       };
 
       saveUserData(userData);
 
-      if (typeof showToast === "function") {
-        showToast(`Đăng nhập thành công! Chào mừng ${displayName}.`, "success");
+      if (typeof window.showToast === "function") {
+        window.showToast(`Đăng nhập thành công! Chào mừng ${displayName}.`, "success");
       }
 
       initProfileState();
@@ -202,7 +258,7 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
   }
 
   /* --------------------------------------------------------------------------
-  6. XỬ LÝ ĐĂNG KÝ ➔ CHUYỂN MÀN HÌNH NHẬP HỒ SƠ CHI TIẾT
+  8. XỬ LÝ ĐĂNG KÝ -> TỰ ĐỘNG CHUYỂN SANG ĐIỀN HỒ SƠ CHI TIẾT
   -------------------------------------------------------------------------- */
   function initRegisterForm() {
     const form = document.getElementById("registerForm");
@@ -210,36 +266,29 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      const name = document.getElementById("registerName").value.trim();
-      const email = document.getElementById("registerEmail").value.trim();
-      const password = document.getElementById("registerPassword").value;
-      const confirmPwd = document.getElementById("registerConfirmPassword").value;
-      const termsCheck = document.getElementById("registerTerms").checked;
+      const accountInput = document.getElementById("registerAccount");
+      const pwdInput = document.getElementById("registerPassword");
+      const confirmInput = document.getElementById("registerConfirmPassword");
+      const termsInput = document.getElementById("registerTerms");
 
-      const nameError = document.getElementById("registerNameError");
-      const emailError = document.getElementById("registerEmailError");
+      if (!accountInput || !pwdInput || !confirmInput) return;
+
+      const account = accountInput.value.trim();
+      const password = pwdInput.value;
+      const confirmPwd = confirmInput.value;
+      const termsCheck = termsInput ? termsInput.checked : true;
+
+      const accountError = document.getElementById("registerAccountError");
       const pwdError = document.getElementById("registerPasswordError");
       const confirmError = document.getElementById("registerConfirmError");
 
       let hasError = false;
-      if (nameError) nameError.textContent = "";
-      if (emailError) emailError.textContent = "";
+      if (accountError) accountError.textContent = "";
       if (pwdError) pwdError.textContent = "";
       if (confirmError) confirmError.textContent = "";
 
-      if (!name) {
-        if (nameError) nameError.textContent = "Vui lòng nhập họ và tên.";
-        hasError = true;
-      } else if (typeof isValidName === "function" && !isValidName(name)) {
-        if (nameError) nameError.textContent = "Họ tên cần ít nhất 2 từ tiếng Việt hợp lệ.";
-        hasError = true;
-      }
-
-      if (!email) {
-        if (emailError) emailError.textContent = "Vui lòng nhập địa chỉ email.";
-        hasError = true;
-      } else if (typeof isValidEmail === "function" && !isValidEmail(email)) {
-        if (emailError) emailError.textContent = "Email không đúng định dạng.";
+      if (!account) {
+        if (accountError) accountError.textContent = "Vui lòng nhập Email, SĐT hoặc Tên tài khoản.";
         hasError = true;
       }
 
@@ -254,49 +303,61 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
       }
 
       if (!termsCheck) {
-        if (typeof showToast === "function") {
-          showToast("Vui lòng đồng ý với Điều khoản dịch vụ.", "warning");
+        if (typeof window.showToast === "function") {
+          window.showToast("Vui lòng đồng ý với Điều khoản dịch vụ.", "warning");
         }
         return;
       }
 
       if (hasError) return;
 
+      // Phân loại tự động thông tin nhập
+      const isEmail = account.includes("@");
+      const isPhone = /^[0-9]{9,11}$/.test(account);
+
       const initialUser = {
-        name: name,
-        email: email,
-        phone: "",
-        city: "TP. Hồ Chí Minh",
-        district: "",
+        name: isEmail ? account.split("@")[0] : account,
+        account: account,
+        email: isEmail ? account : "",
+        phone: isPhone ? account : "",
+        gender: "Nam",
+        province: "",
+        ward: "",
         address: "",
+        avatar: "",
         joinedDate: "10/2026"
       };
 
       saveUserData(initialUser);
 
-      if (typeof showToast === "function") {
-        showToast("Tạo tài khoản thành công! Vui lòng hoàn tất thông tin giao hàng.", "success");
+      if (typeof window.showToast === "function") {
+        window.showToast("Tạo tài khoản thành công! Vui lòng hoàn tất thông tin cá nhân.", "success");
       }
 
+      // Chuyển sang Form nhập Hồ sơ chi tiết
       form.hidden = true;
       const profileDetailsForm = document.getElementById("profileDetailsForm");
       if (profileDetailsForm) {
         profileDetailsForm.hidden = false;
-        const detailName = document.getElementById("detailName");
-        const detailEmail = document.getElementById("detailEmail");
-        if (detailName) detailName.value = name;
-        if (detailEmail) detailEmail.value = email;
+
+        const emailEl = document.getElementById("detailEmail");
+        const phoneEl = document.getElementById("detailPhone");
+        const nameEl = document.getElementById("detailName");
+
+        if (emailEl && isEmail) emailEl.value = account;
+        if (phoneEl && isPhone) phoneEl.value = account;
+        if (nameEl) nameEl.value = initialUser.name;
       }
 
       const title = document.getElementById("authTitle");
       const subtitle = document.getElementById("authSubtitle");
       if (title) title.textContent = "Hoàn Tất Hồ Sơ";
-      if (subtitle) subtitle.textContent = "Cung cấp thông tin nhận hàng để tối ưu thời gian khi thanh toán.";
+      if (subtitle) subtitle.textContent = "Cập nhật ảnh đại diện và địa chỉ nhận hàng để trải nghiệm mua sắm nhanh chóng.";
     });
   }
 
   /* --------------------------------------------------------------------------
-  7. XỬ LÝ FORM HOÀN TẤT HỒ SƠ CHI TIẾT
+  9. XỬ LÝ FORM HOÀN TẤT HỒ SƠ CHI TIẾT
   -------------------------------------------------------------------------- */
   function initProfileDetailsForm() {
     const form = document.getElementById("profileDetailsForm");
@@ -304,62 +365,95 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      const name = document.getElementById("detailName").value.trim();
-      const email = document.getElementById("detailEmail").value.trim();
-      const phone = document.getElementById("detailPhone").value.trim();
-      const city = document.getElementById("detailCity").value;
-      const district = document.getElementById("detailDistrict").value.trim();
-      const address = document.getElementById("detailAddress").value.trim();
+      const nameInput = document.getElementById("detailName");
+      const phoneInput = document.getElementById("detailPhone");
+      const emailInput = document.getElementById("detailEmail");
+      const genderInput = document.getElementById("detailGender");
+      const provinceInput = document.getElementById("detailProvince");
+      const wardInput = document.getElementById("detailWard");
+      const addressInput = document.getElementById("detailAddress");
 
-      const phoneError = document.getElementById("detailPhoneError");
-      const addressError = document.getElementById("detailAddressError");
+      const name = nameInput ? nameInput.value.trim() : "";
+      const phone = phoneInput ? phoneInput.value.trim() : "";
+      const email = emailInput ? emailInput.value.trim() : "";
+      const gender = genderInput ? genderInput.value : "Nam";
+      const province = provinceInput ? provinceInput.value : "";
+      const ward = wardInput ? wardInput.value : "";
+      const address = addressInput ? addressInput.value.trim() : "";
+
+      const nameErr = document.getElementById("detailNameError");
+      const phoneErr = document.getElementById("detailPhoneError");
+      const provinceErr = document.getElementById("detailProvinceError");
+      const wardErr = document.getElementById("detailWardError");
+      const addressErr = document.getElementById("detailAddressError");
+
       let hasError = false;
+      if (nameErr) nameErr.textContent = "";
+      if (phoneErr) phoneErr.textContent = "";
+      if (provinceErr) provinceErr.textContent = "";
+      if (wardErr) wardErr.textContent = "";
+      if (addressErr) addressErr.textContent = "";
 
-      if (phoneError) phoneError.textContent = "";
-      if (addressError) addressError.textContent = "";
+      if (!name) {
+        if (nameErr) nameErr.textContent = "Vui lòng nhập họ và tên.";
+        hasError = true;
+      }
 
       if (!phone) {
-        if (phoneError) phoneError.textContent = "Vui lòng nhập số điện thoại.";
+        if (phoneErr) phoneErr.textContent = "Vui lòng nhập số điện thoại giao hàng.";
         hasError = true;
-      } else if (typeof isValidPhoneVN === "function" && !isValidPhoneVN(phone)) {
-        if (phoneError) phoneError.textContent = "Số điện thoại Việt Nam không hợp lệ (10 số).";
+      }
+
+      if (!province) {
+        if (provinceErr) provinceErr.textContent = "Vui lòng chọn Tỉnh / Thành phố.";
+        hasError = true;
+      }
+
+      if (!ward) {
+        if (wardErr) wardErr.textContent = "Vui lòng chọn Phường / Xã.";
         hasError = true;
       }
 
       if (!address) {
-        if (addressError) addressError.textContent = "Vui lòng nhập địa chỉ nhận hàng.";
+        if (addressErr) addressErr.textContent = "Vui lòng nhập địa chỉ chi tiết.";
         hasError = true;
       }
 
       if (hasError) return;
 
+      const existingUser = typeof window.getCurrentUser === "function"
+        ? window.getCurrentUser()
+        : JSON.parse(localStorage.getItem("nexus_user") || "{}");
+
       const fullUserData = {
+        ...existingUser,
         name: name,
-        email: email,
         phone: phone,
-        city: city,
-        district: district,
+        email: email,
+        gender: gender,
+        province: province,
+        ward: ward,
         address: address,
-        joinedDate: "10/2026"
+        avatar: currentUploadedAvatar || existingUser.avatar || ""
       };
 
       saveUserData(fullUserData);
 
-      if (typeof showToast === "function") {
-        showToast("Đã lưu hồ sơ cá nhân thành công!", "success");
+      if (typeof window.showToast === "function") {
+        window.showToast("Cập nhật hồ sơ cá nhân thành công!", "success");
       }
 
-      window.location.href = "index.html";
+      initProfileState();
     });
   }
 
   /* --------------------------------------------------------------------------
-  8. TRẠNG THÁI PROFILE KHI ĐÃ ĐĂNG NHẬP
+  10. HIỂN THỊ TRẠNG THÁI PROFILE KHI ĐÃ ĐĂNG NHẬP
   -------------------------------------------------------------------------- */
   function initProfileState() {
-    const user = typeof getCurrentUser === "function"
-      ? getCurrentUser()
-      : JSON.parse(localStorage.getItem("nexus_user"));
+    const user = typeof window.getCurrentUser === "function"
+      ? window.getCurrentUser()
+      : JSON.parse(localStorage.getItem("nexus_user") || "null");
 
     const formsCluster = document.getElementById("authFormsCluster");
     const profileCluster = document.getElementById("authProfileCluster");
@@ -367,67 +461,111 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
 
     if (!formsCluster || !profileCluster) return;
 
-    if (user && user.name) {
+    if (user && (user.name || user.account)) {
       if (tabsCluster) tabsCluster.hidden = true;
       formsCluster.hidden = true;
       profileCluster.hidden = false;
 
-      const nameEl = document.getElementById("profileName");
+      const greetingEl = document.getElementById("profileGreetingHeader");
       const emailEl = document.getElementById("profileEmail");
       const phoneEl = document.getElementById("profilePhoneDisplay");
       const addressEl = document.getElementById("profileAddressDisplay");
-      const avatarEl = document.getElementById("profileAvatar");
+      const avatarImgEl = document.getElementById("profileAvatarImg");
+      const avatarTextEl = document.getElementById("profileAvatarText");
 
-      if (nameEl) nameEl.textContent = user.name;
-      if (emailEl) emailEl.textContent = user.email;
+      if (greetingEl) greetingEl.textContent = `Hi, ${user.name || user.account}`;
+      if (emailEl) emailEl.textContent = user.email || user.account || "";
       if (phoneEl) phoneEl.textContent = user.phone ? `SĐT: ${user.phone}` : "Chưa cập nhật SĐT";
-      if (addressEl) addressEl.textContent = user.address ? `Địa chỉ: ${user.address}, ${user.city}` : "Chưa cập nhật địa chỉ";
 
-      if (avatarEl) {
-        const initials = user.name.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase();
-        avatarEl.textContent = initials || "VR";
+      const fullAddr = [user.address, user.ward, user.province].filter(Boolean).join(", ");
+      if (addressEl) addressEl.textContent = fullAddr ? `Địa chỉ: ${fullAddr}` : "Chưa cập nhật địa chỉ giao hàng";
+
+      // Hiển thị Avatar ảnh upload hoặc chữ cái initials
+      if (user.avatar) {
+        if (avatarImgEl) {
+          avatarImgEl.src = user.avatar;
+          avatarImgEl.hidden = false;
+        }
+        if (avatarTextEl) avatarTextEl.hidden = true;
+      } else {
+        if (avatarImgEl) avatarImgEl.hidden = true;
+        if (avatarTextEl) {
+          avatarTextEl.hidden = false;
+          const initials = (user.name || user.account || "VR")
+            .split(" ")
+            .map((w) => w[0])
+            .slice(0, 2)
+            .join("")
+            .toUpperCase();
+          avatarTextEl.textContent = initials || "VR";
+        }
       }
 
+      // Nút Chỉnh sửa thông tin
       const editBtn = document.getElementById("profileEditBtn");
       if (editBtn) {
         editBtn.onclick = () => {
           profileCluster.hidden = true;
           formsCluster.hidden = false;
+
           const profileDetailsForm = document.getElementById("profileDetailsForm");
           const loginForm = document.getElementById("loginForm");
           const registerForm = document.getElementById("registerForm");
 
           if (loginForm) loginForm.hidden = true;
           if (registerForm) registerForm.hidden = true;
+
           if (profileDetailsForm) {
             profileDetailsForm.hidden = false;
-            document.getElementById("detailName").value = user.name || "";
-            document.getElementById("detailEmail").value = user.email || "";
-            document.getElementById("detailPhone").value = user.phone || "";
-            document.getElementById("detailCity").value = user.city || "TP. Hồ Chí Minh";
-            document.getElementById("detailDistrict").value = user.district || "";
-            document.getElementById("detailAddress").value = user.address || "";
+
+            const nameEl = document.getElementById("detailName");
+            const phoneEl = document.getElementById("detailPhone");
+            const emailEl = document.getElementById("detailEmail");
+            const genderEl = document.getElementById("detailGender");
+            const provinceEl = document.getElementById("detailProvince");
+            const wardEl = document.getElementById("detailWard");
+            const addressEl = document.getElementById("detailAddress");
+            const previewImg = document.getElementById("avatarPreviewImg");
+
+            if (nameEl) nameEl.value = user.name || "";
+            if (phoneEl) phoneEl.value = user.phone || "";
+            if (emailEl) emailEl.value = user.email || "";
+            if (genderEl) genderEl.value = user.gender || "Nam";
+            if (addressEl) addressEl.value = user.address || "";
+
+            if (user.avatar && previewImg) {
+              previewImg.src = user.avatar;
+              currentUploadedAvatar = user.avatar;
+            }
+
+            if (window.AddressManager && provinceEl && wardEl) {
+              window.AddressManager.populateProvinceSelect(provinceEl, user.province);
+              if (user.province) {
+                window.AddressManager.populateWardSelect(wardEl, user.province, user.ward);
+              }
+            }
           }
 
           const title = document.getElementById("authTitle");
           const subtitle = document.getElementById("authSubtitle");
           if (title) title.textContent = "Cập Nhật Hồ Sơ";
-          if (subtitle) subtitle.textContent = "Thay đổi thông tin liên hệ và địa chỉ giao hàng của bạn.";
+          if (subtitle) subtitle.textContent = "Thay đổi thông tin liên hệ, địa chỉ giao hàng và ảnh đại diện.";
         };
       }
 
+      // Nút Đăng xuất
       const logoutBtn = document.getElementById("profileLogoutBtn");
       if (logoutBtn) {
         logoutBtn.onclick = () => {
-          if (typeof clearCurrentUser === "function") {
-            clearCurrentUser();
+          if (typeof window.clearCurrentUser === "function") {
+            window.clearCurrentUser();
           } else {
             localStorage.removeItem("nexus_user");
           }
-          if (typeof updateUserState === "function") updateUserState();
+          if (typeof window.updateUserState === "function") window.updateUserState();
           window.dispatchEvent(new CustomEvent("nexus:user-updated"));
 
-          if (typeof showToast === "function") showToast("Đã đăng xuất tài khoản.", "info");
+          if (typeof window.showToast === "function") window.showToast("Đã đăng xuất tài khoản.", "info");
 
           profileCluster.hidden = true;
           formsCluster.hidden = false;

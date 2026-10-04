@@ -1,6 +1,6 @@
 /* ==========================================================================
-NEXUS VR — controllers/checkout-controller.js
-TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOFILL USER
+NEXUS VR — controllers/checkout-controller.js   [PHỤ TRÁCH: Tưởng]
+TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC, AUTOFILL USER & 2 CẤP ĐỊA CHÍNH
 ========================================================================== */
 (function () {
   "use strict";
@@ -20,6 +20,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
     if (window.__nexusCheckoutInitialized) return;
     window.__nexusCheckoutInitialized = true;
 
+    initAddressCascading();
     renderOrderSummary();
     initStepNavigation();
     initShippingAndPaymentOptions();
@@ -27,12 +28,21 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
   }
 
   /* --------------------------------------------------------------------------
-  1. TỰ ĐỘNG ĐỌC THÔNG TIN TÀI KHOẢN VÀ XỬ LÝ 2 TÙY CHỌN GIAO HÀNG
+  1. KHỞI TẠO NẠP ĐỊA CHÍNH 2 CẤP CHO BẢNG THANH TOÁN
+  -------------------------------------------------------------------------- */
+  function initAddressCascading() {
+    if (window.AddressManager && typeof window.AddressManager.initAddressCascade === "function") {
+      window.AddressManager.initAddressCascade("orderCity", "orderWard");
+    }
+  }
+
+  /* --------------------------------------------------------------------------
+  2. TỰ ĐỘNG ĐỌC THÔNG TIN TÀI KHOẢN VÀ XỬ LÝ 2 TÙY CHỌN GIAO HÀNG
   -------------------------------------------------------------------------- */
   function initAccountAutofillOptions() {
-    const user = typeof getCurrentUser === "function" 
-      ? getCurrentUser() 
-      : JSON.parse(localStorage.getItem("nexus_user"));
+    const user = typeof window.getCurrentUser === "function"
+      ? window.getCurrentUser()
+      : JSON.parse(localStorage.getItem("nexus_user") || "null");
 
     const selectionBox = document.getElementById("accountInfoSelection");
     const previewText = document.getElementById("savedInfoPreviewText");
@@ -41,7 +51,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
     const savedLabel = document.getElementById("optSavedLabel");
     const customLabel = document.getElementById("optCustomLabel");
 
-    if (!user || !user.name) {
+    if (!user || (!user.name && !user.account)) {
       if (selectionBox) selectionBox.style.display = "none";
       return;
     }
@@ -50,8 +60,9 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
 
     if (previewText) {
       const phoneStr = user.phone ? ` • SĐT: ${user.phone}` : "";
-      const addrStr = user.address ? ` • Địa chỉ: ${user.address}` : "";
-      previewText.textContent = `${user.name} (${user.email})${phoneStr}${addrStr}`;
+      const addrStr = [user.address, user.ward, user.province].filter(Boolean).join(", ");
+      const addrFormatted = addrStr ? ` • Địa chỉ: ${addrStr}` : "";
+      previewText.textContent = `${user.name || user.account}${phoneStr}${addrFormatted}`;
     }
 
     function fillSavedData() {
@@ -60,29 +71,39 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
       const phoneInput = document.getElementById("orderPhone");
       const emailInput = document.getElementById("orderEmail");
       const citySelect = document.getElementById("orderCity");
-      const districtInput = document.getElementById("orderDistrict");
+      const wardSelect = document.getElementById("orderWard");
       const addressInput = document.getElementById("orderAddress");
 
       if (nameInput) nameInput.value = user.name || "";
       if (phoneInput) phoneInput.value = user.phone || "";
       if (emailInput) emailInput.value = user.email || "";
-      if (citySelect && user.city) citySelect.value = user.city;
-      if (districtInput) districtInput.value = user.district || "";
       if (addressInput) addressInput.value = user.address || "";
+
+      if (window.AddressManager && citySelect && wardSelect) {
+        window.AddressManager.populateProvinceSelect(citySelect, user.province);
+        if (user.province) {
+          window.AddressManager.populateWardSelect(wardSelect, user.province, user.ward);
+        }
+      }
     }
 
     function clearFormFields() {
       const nameInput = document.getElementById("orderName");
       const phoneInput = document.getElementById("orderPhone");
       const emailInput = document.getElementById("orderEmail");
-      const districtInput = document.getElementById("orderDistrict");
+      const citySelect = document.getElementById("orderCity");
+      const wardSelect = document.getElementById("orderWard");
       const addressInput = document.getElementById("orderAddress");
 
       if (nameInput) nameInput.value = "";
       if (phoneInput) phoneInput.value = "";
       if (emailInput) emailInput.value = "";
-      if (districtInput) districtInput.value = "";
       if (addressInput) addressInput.value = "";
+
+      if (window.AddressManager && citySelect && wardSelect) {
+        window.AddressManager.populateProvinceSelect(citySelect, "");
+        window.AddressManager.populateWardSelect(wardSelect, "", "");
+      }
     }
 
     fillSavedData();
@@ -119,7 +140,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
   }
 
   /* --------------------------------------------------------------------------
-  2. RENDER SIDEBAR TÓM TẮT ĐƠN HÀNG
+  3. RENDER SIDEBAR TÓM TẮT ĐƠN HÀNG
   -------------------------------------------------------------------------- */
   function renderOrderSummary() {
     const listEl = document.getElementById("summaryItemsList");
@@ -133,7 +154,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
 
     const cart = typeof window.cartManager !== "undefined" && typeof window.cartManager.getCart === "function"
       ? window.cartManager.getCart()
-      : (typeof getCart === "function" ? getCart() : []);
+      : (typeof window.getCart === "function" ? window.getCart() : JSON.parse(localStorage.getItem("nexus_cart") || "[]"));
 
     if (cart.length === 0 && currentStep !== 3) {
       if (emptyNotice) emptyNotice.hidden = false;
@@ -148,8 +169,8 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
     listEl.innerHTML = "";
 
     cart.forEach(item => {
-      const product = (typeof PRODUCTS !== "undefined")
-        ? PRODUCTS.find(p => p.id === item.id)
+      const product = (typeof window.PRODUCTS !== "undefined")
+        ? window.PRODUCTS.find(p => p.id === item.id)
         : null;
 
       const name = item.name || (product ? product.name : "NEXUS VR Device");
@@ -183,7 +204,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
   }
 
   /* --------------------------------------------------------------------------
-  3. ĐIỀU HƯỚNG BƯỚC THANH TOÁN
+  4. ĐIỀU HƯỚNG BƯỚC THANH TOÁN
   -------------------------------------------------------------------------- */
   function setStep(step) {
     currentStep = step;
@@ -240,19 +261,21 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
   }
 
   /* --------------------------------------------------------------------------
-  4. VALIDATE STEP 1 (THÔNG TIN NGHƯỜI NHẬN)
+  5. VALIDATE STEP 1 (THÔNG TIN NGƯỜI NHẬN)
   -------------------------------------------------------------------------- */
   function validateStep1() {
     const name = document.getElementById("orderName").value.trim();
     const phone = document.getElementById("orderPhone").value.trim();
     const email = document.getElementById("orderEmail").value.trim();
-    const address = document.getElementById("orderAddress").value.trim();
     const city = document.getElementById("orderCity").value;
-    const district = document.getElementById("orderDistrict") ? document.getElementById("orderDistrict").value.trim() : "";
+    const ward = document.getElementById("orderWard").value;
+    const address = document.getElementById("orderAddress").value.trim();
 
     const nameErr = document.getElementById("orderNameError");
     const phoneErr = document.getElementById("orderPhoneError");
     const emailErr = document.getElementById("orderEmailError");
+    const cityErr = document.getElementById("orderCityError");
+    const wardErr = document.getElementById("orderWardError");
     const addressErr = document.getElementById("orderAddressError");
 
     let isValid = true;
@@ -260,39 +283,42 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
     if (nameErr) nameErr.textContent = "";
     if (phoneErr) phoneErr.textContent = "";
     if (emailErr) emailErr.textContent = "";
+    if (cityErr) cityErr.textContent = "";
+    if (wardErr) wardErr.textContent = "";
     if (addressErr) addressErr.textContent = "";
 
     if (!name) {
       if (nameErr) nameErr.textContent = "Vui lòng nhập họ và tên người nhận.";
-      isValid = false;
-    } else if (typeof isValidName === "function" && !isValidName(name)) {
-      if (nameErr) nameErr.textContent = "Họ tên tiếng Việt cần ít nhất 2 từ.";
       isValid = false;
     }
 
     if (!phone) {
       if (phoneErr) phoneErr.textContent = "Vui lòng nhập số điện thoại.";
       isValid = false;
-    } else if (typeof isValidPhoneVN === "function" && !isValidPhoneVN(phone)) {
-      if (phoneErr) phoneErr.textContent = "Số điện thoại Việt Nam không hợp lệ (10 số).";
-      isValid = false;
     }
 
     if (!email) {
       if (emailErr) emailErr.textContent = "Vui lòng nhập email nhận thông báo.";
       isValid = false;
-    } else if (typeof isValidEmail === "function" && !isValidEmail(email)) {
-      if (emailErr) emailErr.textContent = "Email không đúng định dạng.";
+    }
+
+    if (!city) {
+      if (cityErr) cityErr.textContent = "Vui lòng chọn Tỉnh / Thành phố.";
+      isValid = false;
+    }
+
+    if (!ward) {
+      if (wardErr) wardErr.textContent = "Vui lòng chọn Phường / Xã.";
       isValid = false;
     }
 
     if (!address) {
-      if (addressErr) addressErr.textContent = "Vui lòng nhập địa chỉ nhận hàng.";
+      if (addressErr) addressErr.textContent = "Vui lòng nhập địa chỉ nhận hàng chi tiết.";
       isValid = false;
     }
 
     if (isValid) {
-      const fullAddrStr = district ? `${address}, ${district}, ${city}` : `${address}, ${city}`;
+      const fullAddrStr = `${address}, ${ward}, ${city}`;
       orderCustomerData = {
         name,
         phone,
@@ -306,7 +332,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
   }
 
   /* --------------------------------------------------------------------------
-  5. PHƯƠNG THỨC VẬN CHUYỂN VÀ THANH TOÁN
+  6. PHƯƠNG THỨC VẬN CHUYỂN VÀ THANH TOÁN
   -------------------------------------------------------------------------- */
   function initShippingAndPaymentOptions() {
     const shipOptions = document.querySelectorAll('input[name="shippingMethod"]');
@@ -335,7 +361,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
   }
 
   /* --------------------------------------------------------------------------
-  6. HOÀN TẤT ĐƠN HÀNG
+  7. HOÀN TẤT ĐƠN HÀNG
   -------------------------------------------------------------------------- */
   function completeOrder() {
     const orderCode = "#NX-" + Math.floor(100000 + Math.random() * 900000);
@@ -367,18 +393,18 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOF
 
     if (window.cartManager && typeof window.cartManager.clear === "function") {
       window.cartManager.clear();
-    } else if (typeof saveCart === "function") {
-      saveCart([]);
+    } else if (typeof window.saveCart === "function") {
+      window.saveCart([]);
     } else {
       localStorage.setItem("nexus_cart", JSON.stringify([]));
     }
 
-    if (typeof updateCartBadge === "function") {
-      updateCartBadge();
+    if (typeof window.updateCartBadge === "function") {
+      window.updateCartBadge();
     }
 
-    if (typeof showToast === "function") {
-      showToast(`Đơn hàng ${orderCode} đã được khởi tạo thành công!`, "success");
+    if (typeof window.showToast === "function") {
+      window.showToast(`Đơn hàng ${orderCode} đã được khởi tạo thành công!`, "success");
     }
 
     setStep(3);
