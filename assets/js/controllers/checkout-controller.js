@@ -1,8 +1,7 @@
 /* ==========================================================================
-   NEXUS VR — controllers/checkout-controller.js
-   TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC
-   ========================================================================== */
-
+NEXUS VR — controllers/checkout-controller.js
+TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC & AUTOFILL USER
+========================================================================== */
 (function () {
   "use strict";
 
@@ -24,9 +23,104 @@
     renderOrderSummary();
     initStepNavigation();
     initShippingAndPaymentOptions();
+    initAccountAutofillOptions();
   }
 
-  /* 1. RENDER SIDEBAR TÓM TẮT ĐƠN HÀNG */
+  /* --------------------------------------------------------------------------
+  1. TỰ ĐỘNG ĐỌC THÔNG TIN TÀI KHOẢN VÀ XỬ LÝ 2 TÙY CHỌN GIAO HÀNG
+  -------------------------------------------------------------------------- */
+  function initAccountAutofillOptions() {
+    const user = typeof getCurrentUser === "function" 
+      ? getCurrentUser() 
+      : JSON.parse(localStorage.getItem("nexus_user"));
+
+    const selectionBox = document.getElementById("accountInfoSelection");
+    const previewText = document.getElementById("savedInfoPreviewText");
+    const savedRadio = document.getElementById("useSavedInfoRadio");
+    const customRadio = document.getElementById("useCustomInfoRadio");
+    const savedLabel = document.getElementById("optSavedLabel");
+    const customLabel = document.getElementById("optCustomLabel");
+
+    if (!user || !user.name) {
+      if (selectionBox) selectionBox.style.display = "none";
+      return;
+    }
+
+    if (selectionBox) selectionBox.style.display = "block";
+
+    if (previewText) {
+      const phoneStr = user.phone ? ` • SĐT: ${user.phone}` : "";
+      const addrStr = user.address ? ` • Địa chỉ: ${user.address}` : "";
+      previewText.textContent = `${user.name} (${user.email})${phoneStr}${addrStr}`;
+    }
+
+    function fillSavedData() {
+      if (!user) return;
+      const nameInput = document.getElementById("orderName");
+      const phoneInput = document.getElementById("orderPhone");
+      const emailInput = document.getElementById("orderEmail");
+      const citySelect = document.getElementById("orderCity");
+      const districtInput = document.getElementById("orderDistrict");
+      const addressInput = document.getElementById("orderAddress");
+
+      if (nameInput) nameInput.value = user.name || "";
+      if (phoneInput) phoneInput.value = user.phone || "";
+      if (emailInput) emailInput.value = user.email || "";
+      if (citySelect && user.city) citySelect.value = user.city;
+      if (districtInput) districtInput.value = user.district || "";
+      if (addressInput) addressInput.value = user.address || "";
+    }
+
+    function clearFormFields() {
+      const nameInput = document.getElementById("orderName");
+      const phoneInput = document.getElementById("orderPhone");
+      const emailInput = document.getElementById("orderEmail");
+      const districtInput = document.getElementById("orderDistrict");
+      const addressInput = document.getElementById("orderAddress");
+
+      if (nameInput) nameInput.value = "";
+      if (phoneInput) phoneInput.value = "";
+      if (emailInput) emailInput.value = "";
+      if (districtInput) districtInput.value = "";
+      if (addressInput) addressInput.value = "";
+    }
+
+    fillSavedData();
+
+    if (savedRadio && customRadio) {
+      savedRadio.addEventListener("change", () => {
+        if (savedRadio.checked) {
+          fillSavedData();
+          if (savedLabel) {
+            savedLabel.style.borderColor = "var(--accent)";
+            savedLabel.classList.add("is-selected");
+          }
+          if (customLabel) {
+            customLabel.style.borderColor = "var(--border)";
+            customLabel.classList.remove("is-selected");
+          }
+        }
+      });
+
+      customRadio.addEventListener("change", () => {
+        if (customRadio.checked) {
+          clearFormFields();
+          if (customLabel) {
+            customLabel.style.borderColor = "var(--accent)";
+            customLabel.classList.add("is-selected");
+          }
+          if (savedLabel) {
+            savedLabel.style.borderColor = "var(--border)";
+            savedLabel.classList.remove("is-selected");
+          }
+        }
+      });
+    }
+  }
+
+  /* --------------------------------------------------------------------------
+  2. RENDER SIDEBAR TÓM TẮT ĐƠN HÀNG
+  -------------------------------------------------------------------------- */
   function renderOrderSummary() {
     const listEl = document.getElementById("summaryItemsList");
     const subtotalEl = document.getElementById("summarySubtotal");
@@ -59,23 +153,26 @@
         : null;
 
       const name = item.name || (product ? product.name : "NEXUS VR Device");
-      const price = item.price || (product ? product.price : 0);
+      const img = item.image || (product && product.images ? product.images[0] : "assets/images/placeholder.svg");
+      const color = item.selectedColor || "";
       const qty = item.qty || 1;
-      const color = item.selectedColor || item.color || (product && product.colors ? product.colors[0].name : "");
-      const img = item.image || (product && product.images && product.images[0] ? product.images[0] : "assets/images/placeholder.svg");
-
-      const lineTotal = price * qty;
+      const lineTotal = (item.price || 0) * qty;
       subtotal += lineTotal;
 
       const itemEl = document.createElement("div");
       itemEl.className = "summary-item";
+      itemEl.style.display = "flex";
+      itemEl.style.gap = "12px";
+      itemEl.style.marginBottom = "12px";
+      itemEl.style.alignItems = "center";
+
       itemEl.innerHTML = `
-        <img src="${img}" alt="${name}" class="summary-item__img" onerror="this.onerror=null; this.src='assets/images/placeholder.svg';">
-        <div class="summary-item__info">
-          <div class="summary-item__title">${name}</div>
-          <div class="summary-item__meta">${color ? 'Màu: ' + color + ' • ' : ''}SL: ${qty}</div>
+        <img src="${img}" alt="${name}" class="summary-item__img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null; this.src='assets/images/placeholder.svg';">
+        <div class="summary-item__info" style="flex: 1;">
+          <div class="summary-item__title" style="font-weight: 600; font-size: 0.875rem;">${name}</div>
+          <div class="summary-item__meta" style="font-size: 0.775rem; color: var(--text-secondary);">${color ? 'Màu: ' + color + ' • ' : ''}SL: ${qty}</div>
         </div>
-        <div class="summary-item__price">${formatVND(lineTotal)}</div>
+        <div class="summary-item__price" style="font-weight: 600; font-size: 0.875rem;">${formatVND(lineTotal)}</div>
       `;
       listEl.appendChild(itemEl);
     });
@@ -85,10 +182,11 @@
     totalEl.textContent = formatVND(subtotal + shippingFee);
   }
 
-  /* 2. ĐIỀU HƯỚNG BƯỚC */
+  /* --------------------------------------------------------------------------
+  3. ĐIỀU HƯỚNG BƯỚC THANH TOÁN
+  -------------------------------------------------------------------------- */
   function setStep(step) {
     currentStep = step;
-
     const step1Pill = document.getElementById("stepPill1");
     const step2Pill = document.getElementById("stepPill2");
     const step3Pill = document.getElementById("stepPill3");
@@ -97,12 +195,9 @@
     if (step1Pill && step2Pill && step3Pill && lineFill) {
       step1Pill.classList.toggle("is-active", step === 1);
       step1Pill.classList.toggle("is-completed", step > 1);
-
       step2Pill.classList.toggle("is-active", step === 2);
       step2Pill.classList.toggle("is-completed", step > 2);
-
       step3Pill.classList.toggle("is-active", step === 3);
-
       lineFill.style.width = step === 1 ? "0%" : (step === 2 ? "50%" : "100%");
     }
 
@@ -114,7 +209,6 @@
     if (step1Content) step1Content.hidden = (step !== 1);
     if (step2Content) step2Content.hidden = (step !== 2);
     if (step3Content) step3Content.hidden = (step !== 3);
-
     if (sidebar) sidebar.hidden = (step === 3);
 
     window.scrollTo({ top: 120, behavior: "smooth" });
@@ -145,13 +239,16 @@
     }
   }
 
-  /* 3. VALIDATE STEP 1 */
+  /* --------------------------------------------------------------------------
+  4. VALIDATE STEP 1 (THÔNG TIN NGHƯỜI NHẬN)
+  -------------------------------------------------------------------------- */
   function validateStep1() {
     const name = document.getElementById("orderName").value.trim();
     const phone = document.getElementById("orderPhone").value.trim();
     const email = document.getElementById("orderEmail").value.trim();
     const address = document.getElementById("orderAddress").value.trim();
     const city = document.getElementById("orderCity").value;
+    const district = document.getElementById("orderDistrict") ? document.getElementById("orderDistrict").value.trim() : "";
 
     const nameErr = document.getElementById("orderNameError");
     const phoneErr = document.getElementById("orderPhoneError");
@@ -159,6 +256,7 @@
     const addressErr = document.getElementById("orderAddressError");
 
     let isValid = true;
+
     if (nameErr) nameErr.textContent = "";
     if (phoneErr) phoneErr.textContent = "";
     if (emailErr) emailErr.textContent = "";
@@ -194,19 +292,22 @@
     }
 
     if (isValid) {
+      const fullAddrStr = district ? `${address}, ${district}, ${city}` : `${address}, ${city}`;
       orderCustomerData = {
         name,
         phone,
         email,
-        address: `${address}, ${city}`,
-        note: document.getElementById("orderNote").value.trim()
+        address: fullAddrStr,
+        note: document.getElementById("orderNote") ? document.getElementById("orderNote").value.trim() : ""
       };
     }
 
     return isValid;
   }
 
-  /* 4. SHIPPING & PAYMENT OPTIONS */
+  /* --------------------------------------------------------------------------
+  5. PHƯƠNG THỨC VẬN CHUYỂN VÀ THANH TOÁN
+  -------------------------------------------------------------------------- */
   function initShippingAndPaymentOptions() {
     const shipOptions = document.querySelectorAll('input[name="shippingMethod"]');
     shipOptions.forEach(opt => {
@@ -226,7 +327,6 @@
       opt.addEventListener("change", (e) => {
         document.querySelectorAll(".payment-card").forEach(c => c.classList.remove("is-selected"));
         e.target.closest(".option-card").classList.add("is-selected");
-
         const val = e.target.value;
         if (qrBlock) qrBlock.hidden = (val !== "bank");
         if (cardBlock) cardBlock.hidden = (val !== "card");
@@ -234,11 +334,15 @@
     });
   }
 
-  /* 5. COMPLETE ORDER */
+  /* --------------------------------------------------------------------------
+  6. HOÀN TẤT ĐƠN HÀNG
+  -------------------------------------------------------------------------- */
   function completeOrder() {
     const orderCode = "#NX-" + Math.floor(100000 + Math.random() * 900000);
+
     const codeEl = document.getElementById("confirmedOrderCode");
     const nameEl = document.getElementById("confirmedCustomerName");
+    const nameDisplayEl = document.getElementById("confirmedCustomerNameDisplay");
     const addrEl = document.getElementById("confirmedCustomerAddress");
     const payEl = document.getElementById("confirmedPaymentMethod");
     const totalEl = document.getElementById("confirmedTotalAmount");
@@ -252,6 +356,7 @@
 
     if (codeEl) codeEl.textContent = orderCode;
     if (nameEl) nameEl.textContent = orderCustomerData.name || "Quý khách";
+    if (nameDisplayEl) nameDisplayEl.textContent = orderCustomerData.name || "Quý khách";
     if (addrEl) addrEl.textContent = orderCustomerData.address || "Địa chỉ mặc định";
     if (payEl) payEl.textContent = payLabel;
 
@@ -273,7 +378,7 @@
     }
 
     if (typeof showToast === "function") {
-      showToast(`Đơn hàng ${orderCode} đã được tạo thành công!`, "success");
+      showToast(`Đơn hàng ${orderCode} đã được khởi tạo thành công!`, "success");
     }
 
     setStep(3);
