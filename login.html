@@ -40,21 +40,19 @@
           <p class="auth-subtitle" id="authSubtitle">Chào mừng bạn quay lại với không gian điện toán NEXUS.</p>
         </header>
 
-        <!-- TABS SWITCHER -->
-        <div class="auth-tabs" id="authTabsCluster" role="tablist" aria-label="Lựa chọn phương thức xác thực">
-          <button type="button" class="auth-tab-btn is-active" id="tabLoginBtn" role="tab" aria-selected="true" aria-controls="loginForm">
-            Đăng nhập
-          </button>
-          <button type="button" class="auth-tab-btn" id="tabRegisterBtn" role="tab" aria-selected="false" aria-controls="registerForm">
-            Đăng ký
-          </button>
-        </div>
-
-        <!-- CLUSTER CHỨA FORM -->
+        <!-- CỤM FORM & TABS (ẨN TOÀN BỘ KHI ĐÃ ĐĂNG NHẬP) -->
         <div id="authFormsCluster">
-          <!-- =========================
-          FORM 1: ĐĂNG NHẬP
-          ========================= -->
+          <!-- TABS SWITCHER -->
+          <div class="auth-tabs" id="authTabsCluster" role="tablist" aria-label="Lựa chọn phương thức xác thực">
+            <button type="button" class="auth-tab-btn is-active" id="tabLoginBtn" role="tab" aria-selected="true" aria-controls="loginForm">
+              Đăng nhập
+            </button>
+            <button type="button" class="auth-tab-btn" id="tabRegisterBtn" role="tab" aria-selected="false" aria-controls="registerForm">
+              Đăng ký
+            </button>
+          </div>
+
+          <!-- FORM 1: ĐĂNG NHẬP -->
           <form class="auth-form" id="loginForm" novalidate>
             <div class="auth-field">
               <label for="loginAccount" class="auth-label">Tài khoản (Email / Số điện thoại / Username)</label>
@@ -91,9 +89,7 @@
             </button>
           </form>
 
-          <!-- =========================
-          FORM 2: ĐĂNG KÝ
-          ========================= -->
+          <!-- FORM 2: ĐĂNG KÝ -->
           <form class="auth-form" id="registerForm" novalidate hidden>
             <div class="auth-field">
               <label for="registerAccount" class="auth-label">Tài khoản (Email / Số điện thoại / Username)</label>
@@ -143,18 +139,15 @@
             </button>
           </form>
 
-          <!-- =========================
-          FORM 3: HOÀN TẤT HỒ SƠ & UPLOAD AVATAR TỪ MÁY
-          ========================= -->
+          <!-- FORM 3: HOÀN TẤT HỒ SƠ -->
           <form class="auth-form" id="profileDetailsForm" novalidate hidden>
-            <!-- UPLOAD AVATAR -->
             <div class="auth-field" style="text-align: center; margin-bottom: 24px;">
               <label class="auth-label" style="margin-bottom: 10px; display: block; font-weight: 600;">Ảnh đại diện cá nhân</label>
               <div style="position: relative; display: inline-block; width: 96px; height: 96px; border-radius: 50%; overflow: hidden; border: 2px solid var(--accent); background: var(--bg-secondary); box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
                 <img id="avatarPreviewImg" src="assets/images/placeholder.svg" alt="Preview Avatar" style="width: 100%; height: 100%; object-fit: cover;">
               </div>
               <div style="margin-top: 10px;">
-                <label for="avatarFileInput" style="padding: 8px 18px; font-size: 0.85rem; font-weight: 600; border-radius: 999px; background: var(--bg-secondary); border: 1px solid var(--border); cursor: pointer; display: inline-block; transition: all 0.2s ease;">
+                <label for="avatarFileInput" style="padding: 8px 18px; font-size: 0.85rem; font-weight: 600; border-radius: 999px; background: var(--bg-secondary); border: 1px solid var(--border); cursor: pointer; display: inline-block;">
                   📷 Chọn ảnh từ thiết bị
                 </label>
                 <input type="file" id="avatarFileInput" accept="image/*" hidden>
@@ -196,9 +189,8 @@
               </div>
             </div>
 
-            <!-- CHỌN 1 TRONG 34 TỈNH THÀNH -->
             <div class="auth-field">
-              <label for="detailProvince" class="auth-label">Tỉnh / Thành phố (1/34 Tỉnh thành) *</label>
+              <label for="detailProvince" class="auth-label">Tỉnh / Thành phố *</label>
               <div class="auth-input-wrap">
                 <select id="detailProvince" class="auth-input" required>
                   <option value="">-- Chọn Tỉnh / Thành phố --</option>
@@ -207,7 +199,6 @@
               <span class="auth-field-error" id="detailProvinceError" aria-live="polite"></span>
             </div>
 
-            <!-- CHỌN PHƯỜNG XÃ -->
             <div class="auth-field">
               <label for="detailWard" class="auth-label">Phường / Xã *</label>
               <div class="auth-input-wrap">
@@ -231,7 +222,7 @@
             </button>
           </form>
 
-          <!-- NÚT ĐIỀN TEST ACCOUNT (1-CLICK DEMO) -->
+          <!-- NÚT 1-CLICK DEMO -->
           <div class="auth-demo-helper">
             <button type="button" class="auth-demo-btn" id="fillDemoBtn">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -244,37 +235,24 @@
         TRẠNG THÁI PROFILE (KHI ĐÃ ĐĂNG NHẬP)
         ========================= -->
         <div class="auth-profile" id="authProfileCluster" hidden>
-          <div class="auth-avatar-circle" style="overflow: hidden; width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; background: var(--accent); color: #fff; font-weight: 700; font-size: 1.6rem; box-shadow: 0 4px 18px rgba(166, 124, 82, 0.3);">
+          <div class="auth-avatar-circle" style="overflow: hidden; width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; background: var(--accent); color: #fff; font-weight: 700; font-size: 1.6rem; box-shadow: 0 4px 18px rgba(166, 124, 82, 0.3);">
             <img id="profileAvatarImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" hidden>
             <span id="profileAvatarText">TT</span>
           </div>
 
-          <div style="text-align: center;">
-            <h2 class="auth-profile-greeting" id="profileGreetingHeader" style="font-size: 1.4rem; color: var(--accent); margin-bottom: 2px; font-weight: 700;">Hi, Trần Tưởng</h2>
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h2 class="auth-profile-greeting" id="profileGreetingHeader" style="font-size: 1.4rem; color: var(--accent); margin-bottom: 4px; font-weight: 700;">Hi, Trần Tưởng</h2>
             <p class="auth-profile-email" id="profileEmail" style="color: var(--text-secondary); font-size: 0.9rem;">tuong@nexus.com</p>
             <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;" id="profilePhoneDisplay"></p>
             <p style="font-size: 0.85rem; color: var(--text-secondary);" id="profileAddressDisplay"></p>
           </div>
 
-          <div class="auth-profile-stats" style="margin: 20px 0;">
-            <div class="auth-stat-item">
-              <span class="auth-stat-val">VIP</span>
-              <span class="auth-stat-lbl">Hạng thẻ</span>
-            </div>
-            <div class="auth-stat-item">
-              <span class="auth-stat-val">24</span>
-              <span class="auth-stat-lbl">Tháng BH</span>
-            </div>
-            <div class="auth-stat-item">
-              <span class="auth-stat-val">10%</span>
-              <span class="auth-stat-lbl">Ưu đãi</span>
-            </div>
-          </div>
+          <!-- ĐÃ XÓA HOÀN TOÀN KHUNG VIP TẠI ĐÂY -->
 
           <div class="auth-profile-actions">
             <button type="button" class="btn btn-secondary" id="profileEditBtn" style="width: 100%; text-align: center;">Chỉnh sửa thông tin &amp; Ảnh đại diện</button>
-            <a href="cart.html" class="btn btn-primary" style="width: 100%; text-align: center;">Xem giỏ hàng</a>
-            <button type="button" class="auth-logout-btn" id="profileLogoutBtn">
+            <a href="cart.html" class="btn btn-primary" style="width: 100%; text-align: center; margin-top: 10px;">Xem giỏ hàng</a>
+            <button type="button" class="auth-logout-btn" id="profileLogoutBtn" style="margin-top: 12px;">
               Đăng xuất tài khoản
             </button>
           </div>

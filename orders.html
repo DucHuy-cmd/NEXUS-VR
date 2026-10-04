@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đơn Hàng Đã Đặt | NEXUS VR</title>
+  <meta name="description" content="Quản lý và theo dõi tiến độ các đơn hàng đã đặt tại NEXUS VR.">
+  <meta name="theme-color" content="#F9F6F0">
+
+  <!-- FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- TẦNG 1: FOUNDATION -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+
+  <!-- TẦNG 2: COMPONENTS -->
+  <link rel="stylesheet" href="assets/css/components/navbar.css">
+  <link rel="stylesheet" href="assets/css/components/footer.css">
+  <link rel="stylesheet" href="assets/css/components/toast.css">
+
+  <!-- PAGE CSS -->
+  <style>
+    .orders-page {
+      padding: calc(var(--nav-height, 72px) + 32px) 0 80px;
+      min-height: 80vh;
+      background-color: var(--bg-primary, #F9F6F0);
+    }
+    .orders-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    .orders-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted, #726657);
+      margin-bottom: 24px;
+    }
+    .orders-breadcrumb a {
+      color: var(--text-secondary, #4A4036);
+      text-decoration: none;
+    }
+    .orders-heading {
+      margin-bottom: 28px;
+    }
+    .orders-heading h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      color: var(--text-primary, #231F1C);
+      margin-top: 4px;
+    }
+    .orders-tabs {
+      display: flex;
+      gap: 12px;
+      border-bottom: 2px solid var(--border, #E5DECE);
+      margin-bottom: 24px;
+    }
+    .orders-tab-btn {
+      padding: 12px 20px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-secondary, #726657);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: -2px;
+    }
+    .orders-tab-btn.is-active {
+      color: var(--accent, #A67C52);
+      border-bottom-color: var(--accent, #A67C52);
+    }
+    .order-card {
+      background: var(--bg-elevated, #FFFFFF);
+      border: 1px solid var(--border, #E5DECE);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    }
+    .order-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border, #E5DECE);
+      margin-bottom: 16px;
+    }
+    .order-code {
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--text-primary, #231F1C);
+    }
+    .order-status-badge {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+    .order-status-badge.completed {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .order-status-badge.cancelled {
+      background: #ffebee;
+      color: #c62828;
+    }
+    .order-product-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--border, #E5DECE);
+    }
+    .order-product-item:last-child {
+      border-bottom: none;
+    }
+    .order-product-img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #f0f0f0;
+    }
+    .order-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border, #E5DECE);
+    }
+    .order-total-price {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent, #A67C52);
+    }
+    .btn-action-group {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-cancel {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #d32f2f;
+      background: transparent;
+      color: #d32f2f;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-cancel:hover {
+      background: #ffebee;
+    }
+    .btn-received {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent, #A67C52);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-received:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body data-page="orders">
+  <!-- NAVBAR ROOT (Tự động nạp bởi layout-loader.js) -->
+  <div id="navbar-root"></div>
+
+  <main class="orders-page">
+    <div class="orders-container">
+
+      <!-- BREADCRUMB -->
+      <nav class="orders-breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html">Trang chủ</a>
+        <span>/</span>
+        <a href="cart.html">Giỏ hàng</a>
+        <span>/</span>
+        <strong>Đơn hàng đã đặt</strong>
+      </nav>
+
+      <!-- HEADING -->
+      <div class="orders-heading">
+        <p style="font-size: 0.8rem; letter-spacing: 1.5px; color: var(--accent, #A67C52); font-weight: 600; text-transform: uppercase;">NEXUS VR / ORDERS</p>
+        <h1>Đơn hàng đã đặt</h1>
+        <p style="color: var(--text-secondary, #726657);">Theo dõi tiến độ vận chuyển và lịch sử mua sắm của bạn.</p>
+      </div>
+
+      <!-- TABS -->
+      <div class="orders-tabs">
+        <button type="button" class="orders-tab-btn is-active" data-tab="active">Đang xử lý / Vận chuyển</button>
+        <button type="button" class="orders-tab-btn" data-tab="completed">Lịch sử đã mua</button>
+        <button type="button" class="orders-tab-btn" data-tab="cancelled">Đơn hàng đã hủy</button>
+      </div>
+
+      <!-- DANH SÁCH ĐƠN HÀNG -->
+      <div id="ordersListContainer"></div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER ROOT (Tự động nạp bởi layout-loader.js) -->
+  <div id="footer-root"></div>
+
+  <!-- TẦNG 1: DATA / SERVICES -->
+  <script src="assets/js/data/products-data.js"></script>
+  <script src="assets/js/services/storage-service.js"></script>
+
+  <!-- TẦNG 2: MODULES -->
+  <script src="assets/js/modules/toast.js"></script>
+  <script src="assets/js/modules/layout-loader.js"></script>
+
+  <!-- TẦNG 3: CONTROLLER -->
+  <script src="assets/js/controllers/orders-controller.js"></script>
+</body>
+</html>

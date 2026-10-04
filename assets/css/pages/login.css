@@ -365,3 +365,8 @@
     border-radius: var(--radius-lg, 16px);
   }
 }
+/* Ẩn hoàn toàn cụm tab Đăng nhập / Đăng ký khi form Cập nhật hồ sơ đang mở */
+#profileDetailsForm:not([hidden]) ~ #authTabsCluster,
+#authFormsCluster:has(#profileDetailsForm:not([hidden])) #authTabsCluster {
+  display: none !important;
+}

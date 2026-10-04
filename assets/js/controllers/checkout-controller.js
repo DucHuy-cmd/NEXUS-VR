@@ -1,20 +1,21 @@
 /* ==========================================================================
-NEXUS VR — controllers/checkout-controller.js   [PHỤ TRÁCH: Tưởng]
-TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC, AUTOFILL USER & 2 CẤP ĐỊA CHÍNH
+NEXUS VR — controllers/checkout-controller.js
 ========================================================================== */
 (function () {
   "use strict";
+
+  let currentStep = 1;
+  let shippingFee = 0;
+  let orderCustomerData = {};
+  let qrTimerInterval = null;
+  let remainingSeconds = 300;
+
+  const formatVND = (num) => (num || 0).toLocaleString("vi-VN") + " ₫";
 
   document.addEventListener("DOMContentLoaded", initCheckoutController);
   if (document.readyState === "interactive" || document.readyState === "complete") {
     initCheckoutController();
   }
-
-  let currentStep = 1;
-  let shippingFee = 0;
-  let orderCustomerData = {};
-
-  const formatVND = (num) => (num || 0).toLocaleString("vi-VN") + " ₫";
 
   function initCheckoutController() {
     if (window.__nexusCheckoutInitialized) return;
@@ -25,20 +26,95 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC, AUTOFI
     initStepNavigation();
     initShippingAndPaymentOptions();
     initAccountAutofillOptions();
+    initQrButtons();
   }
 
-  /* --------------------------------------------------------------------------
-  1. KHỞI TẠO NẠP ĐỊA CHÍNH 2 CẤP CHO BẢNG THANH TOÁN
-  -------------------------------------------------------------------------- */
   function initAddressCascading() {
     if (window.AddressManager && typeof window.AddressManager.initAddressCascade === "function") {
       window.AddressManager.initAddressCascade("orderCity", "orderWard");
     }
   }
 
-  /* --------------------------------------------------------------------------
-  2. TỰ ĐỘNG ĐỌC THÔNG TIN TÀI KHOẢN VÀ XỬ LÝ 2 TÙY CHỌN GIAO HÀNG
-  -------------------------------------------------------------------------- */
+  function getCartItems() {
+    try {
+      return JSON.parse(localStorage.getItem("nexus_cart") || "[]");
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function renderOrderSummary() {
+    const listEl = document.getElementById("summaryItemsList");
+    const subtotalEl = document.getElementById("summarySubtotal");
+    const shippingEl = document.getElementById("summaryShipping");
+    const totalEl = document.getElementById("summaryTotal");
+    const emptyNotice = document.getElementById("checkoutEmptyNotice");
+    const mainLayout = document.getElementById("checkoutMainLayout");
+
+    if (!listEl || !subtotalEl || !totalEl) return;
+
+    const cart = getCartItems();
+
+    if (cart.length === 0 && currentStep !== 3) {
+      if (emptyNotice) emptyNotice.hidden = false;
+      if (mainLayout) mainLayout.hidden = true;
+      return;
+    }
+
+    if (emptyNotice) emptyNotice.hidden = true;
+    if (mainLayout) mainLayout.hidden = false;
+
+    let subtotal = 0;
+    listEl.innerHTML = "";
+
+    cart.forEach(item => {
+      const price = Number(item.price) || 0;
+      const qty = Number(item.qty) || 1;
+      const lineTotal = price * qty;
+      subtotal += lineTotal;
+
+      const itemEl = document.createElement("div");
+      itemEl.style.cssText = "display: flex; gap: 12px; margin-bottom: 12px; align-items: center;";
+      itemEl.innerHTML = `
+        <img src="${item.image || 'assets/images/placeholder.svg'}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px;">
+        <div style="flex: 1;">
+          <div style="font-weight: 600; font-size: 0.85rem;">${item.name || 'NEXUS VR'}</div>
+          <div style="font-size: 0.775rem; color: var(--text-secondary);">Màu: ${item.selectedColor || 'Chuẩn'} • SL: ${qty}</div>
+        </div>
+        <div style="font-weight: 600; font-size: 0.85rem;">${formatVND(lineTotal)}</div>
+      `;
+      listEl.appendChild(itemEl);
+    });
+
+    subtotalEl.textContent = formatVND(subtotal);
+    shippingEl.textContent = shippingFee === 0 ? "Miễn phí" : formatVND(shippingFee);
+    totalEl.textContent = formatVND(subtotal + shippingFee);
+  }
+
+  function setStep(step) {
+    currentStep = step;
+    const step1Pill = document.getElementById("stepPill1");
+    const step2Pill = document.getElementById("stepPill2");
+    const step3Pill = document.getElementById("stepPill3");
+    const lineFill = document.getElementById("stepperLineFill");
+
+    if (step1Pill && step2Pill && step3Pill && lineFill) {
+      step1Pill.classList.toggle("is-active", step === 1);
+      step1Pill.classList.toggle("is-completed", step > 1);
+      step2Pill.classList.toggle("is-active", step === 2);
+      step2Pill.classList.toggle("is-completed", step > 2);
+      step3Pill.classList.toggle("is-active", step === 3);
+      lineFill.style.width = step === 1 ? "0%" : (step === 2 ? "50%" : "100%");
+    }
+
+    document.getElementById("checkoutStep1").hidden = (step !== 1);
+    document.getElementById("checkoutStep2").hidden = (step !== 2);
+    document.getElementById("checkoutStep3").hidden = (step !== 3);
+    document.getElementById("checkoutSidebar").hidden = (step === 3);
+
+    window.scrollTo({ top: 100, behavior: "smooth" });
+  }
+
   function initAccountAutofillOptions() {
     const user = typeof window.getCurrentUser === "function"
       ? window.getCurrentUser()
@@ -61,8 +137,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC, AUTOFI
     if (previewText) {
       const phoneStr = user.phone ? ` • SĐT: ${user.phone}` : "";
       const addrStr = [user.address, user.ward, user.province].filter(Boolean).join(", ");
-      const addrFormatted = addrStr ? ` • Địa chỉ: ${addrStr}` : "";
-      previewText.textContent = `${user.name || user.account}${phoneStr}${addrFormatted}`;
+      previewText.textContent = `${user.name || user.account}${phoneStr}${addrStr ? ' • Địa chỉ: ' + addrStr : ''}`;
     }
 
     function fillSavedData() {
@@ -87,182 +162,34 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC, AUTOFI
       }
     }
 
-    function clearFormFields() {
-      const nameInput = document.getElementById("orderName");
-      const phoneInput = document.getElementById("orderPhone");
-      const emailInput = document.getElementById("orderEmail");
-      const citySelect = document.getElementById("orderCity");
-      const wardSelect = document.getElementById("orderWard");
-      const addressInput = document.getElementById("orderAddress");
-
-      if (nameInput) nameInput.value = "";
-      if (phoneInput) phoneInput.value = "";
-      if (emailInput) emailInput.value = "";
-      if (addressInput) addressInput.value = "";
-
-      if (window.AddressManager && citySelect && wardSelect) {
-        window.AddressManager.populateProvinceSelect(citySelect, "");
-        window.AddressManager.populateWardSelect(wardSelect, "", "");
-      }
-    }
-
     fillSavedData();
 
     if (savedRadio && customRadio) {
       savedRadio.addEventListener("change", () => {
         if (savedRadio.checked) {
           fillSavedData();
-          if (savedLabel) {
-            savedLabel.style.borderColor = "var(--accent)";
-            savedLabel.classList.add("is-selected");
-          }
-          if (customLabel) {
-            customLabel.style.borderColor = "var(--border)";
-            customLabel.classList.remove("is-selected");
-          }
+          if (savedLabel) savedLabel.classList.add("is-selected");
+          if (customLabel) customLabel.classList.remove("is-selected");
         }
       });
 
       customRadio.addEventListener("change", () => {
         if (customRadio.checked) {
-          clearFormFields();
-          if (customLabel) {
-            customLabel.style.borderColor = "var(--accent)";
-            customLabel.classList.add("is-selected");
-          }
-          if (savedLabel) {
-            savedLabel.style.borderColor = "var(--border)";
-            savedLabel.classList.remove("is-selected");
-          }
+          const nameInput = document.getElementById("orderName");
+          const phoneInput = document.getElementById("orderPhone");
+          const emailInput = document.getElementById("orderEmail");
+          const addressInput = document.getElementById("orderAddress");
+          if (nameInput) nameInput.value = "";
+          if (phoneInput) phoneInput.value = "";
+          if (emailInput) emailInput.value = "";
+          if (addressInput) addressInput.value = "";
+          if (customLabel) customLabel.classList.add("is-selected");
+          if (savedLabel) savedLabel.classList.remove("is-selected");
         }
       });
     }
   }
 
-  /* --------------------------------------------------------------------------
-  3. RENDER SIDEBAR TÓM TẮT ĐƠN HÀNG
-  -------------------------------------------------------------------------- */
-  function renderOrderSummary() {
-    const listEl = document.getElementById("summaryItemsList");
-    const subtotalEl = document.getElementById("summarySubtotal");
-    const shippingEl = document.getElementById("summaryShipping");
-    const totalEl = document.getElementById("summaryTotal");
-    const emptyNotice = document.getElementById("checkoutEmptyNotice");
-    const mainLayout = document.getElementById("checkoutMainLayout");
-
-    if (!listEl || !subtotalEl || !totalEl) return;
-
-    const cart = typeof window.cartManager !== "undefined" && typeof window.cartManager.getCart === "function"
-      ? window.cartManager.getCart()
-      : (typeof window.getCart === "function" ? window.getCart() : JSON.parse(localStorage.getItem("nexus_cart") || "[]"));
-
-    if (cart.length === 0 && currentStep !== 3) {
-      if (emptyNotice) emptyNotice.hidden = false;
-      if (mainLayout) mainLayout.hidden = true;
-      return;
-    }
-
-    if (emptyNotice) emptyNotice.hidden = true;
-    if (mainLayout) mainLayout.hidden = false;
-
-    let subtotal = 0;
-    listEl.innerHTML = "";
-
-    cart.forEach(item => {
-      const product = (typeof window.PRODUCTS !== "undefined")
-        ? window.PRODUCTS.find(p => p.id === item.id)
-        : null;
-
-      const name = item.name || (product ? product.name : "NEXUS VR Device");
-      const img = item.image || (product && product.images ? product.images[0] : "assets/images/placeholder.svg");
-      const color = item.selectedColor || "";
-      const qty = item.qty || 1;
-      const lineTotal = (item.price || 0) * qty;
-      subtotal += lineTotal;
-
-      const itemEl = document.createElement("div");
-      itemEl.className = "summary-item";
-      itemEl.style.display = "flex";
-      itemEl.style.gap = "12px";
-      itemEl.style.marginBottom = "12px";
-      itemEl.style.alignItems = "center";
-
-      itemEl.innerHTML = `
-        <img src="${img}" alt="${name}" class="summary-item__img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null; this.src='assets/images/placeholder.svg';">
-        <div class="summary-item__info" style="flex: 1;">
-          <div class="summary-item__title" style="font-weight: 600; font-size: 0.875rem;">${name}</div>
-          <div class="summary-item__meta" style="font-size: 0.775rem; color: var(--text-secondary);">${color ? 'Màu: ' + color + ' • ' : ''}SL: ${qty}</div>
-        </div>
-        <div class="summary-item__price" style="font-weight: 600; font-size: 0.875rem;">${formatVND(lineTotal)}</div>
-      `;
-      listEl.appendChild(itemEl);
-    });
-
-    subtotalEl.textContent = formatVND(subtotal);
-    if (shippingEl) shippingEl.textContent = shippingFee === 0 ? "Miễn phí" : formatVND(shippingFee);
-    totalEl.textContent = formatVND(subtotal + shippingFee);
-  }
-
-  /* --------------------------------------------------------------------------
-  4. ĐIỀU HƯỚNG BƯỚC THANH TOÁN
-  -------------------------------------------------------------------------- */
-  function setStep(step) {
-    currentStep = step;
-    const step1Pill = document.getElementById("stepPill1");
-    const step2Pill = document.getElementById("stepPill2");
-    const step3Pill = document.getElementById("stepPill3");
-    const lineFill = document.getElementById("stepperLineFill");
-
-    if (step1Pill && step2Pill && step3Pill && lineFill) {
-      step1Pill.classList.toggle("is-active", step === 1);
-      step1Pill.classList.toggle("is-completed", step > 1);
-      step2Pill.classList.toggle("is-active", step === 2);
-      step2Pill.classList.toggle("is-completed", step > 2);
-      step3Pill.classList.toggle("is-active", step === 3);
-      lineFill.style.width = step === 1 ? "0%" : (step === 2 ? "50%" : "100%");
-    }
-
-    const step1Content = document.getElementById("checkoutStep1");
-    const step2Content = document.getElementById("checkoutStep2");
-    const step3Content = document.getElementById("checkoutStep3");
-    const sidebar = document.getElementById("checkoutSidebar");
-
-    if (step1Content) step1Content.hidden = (step !== 1);
-    if (step2Content) step2Content.hidden = (step !== 2);
-    if (step3Content) step3Content.hidden = (step !== 3);
-    if (sidebar) sidebar.hidden = (step === 3);
-
-    window.scrollTo({ top: 120, behavior: "smooth" });
-  }
-
-  function initStepNavigation() {
-    const toStep2Btn = document.getElementById("toStep2Btn");
-    if (toStep2Btn) {
-      toStep2Btn.addEventListener("click", () => {
-        if (validateStep1()) {
-          setStep(2);
-        }
-      });
-    }
-
-    const backToStep1Btn = document.getElementById("backToStep1Btn");
-    if (backToStep1Btn) {
-      backToStep1Btn.addEventListener("click", () => {
-        setStep(1);
-      });
-    }
-
-    const placeOrderBtn = document.getElementById("placeOrderBtn");
-    if (placeOrderBtn) {
-      placeOrderBtn.addEventListener("click", () => {
-        completeOrder();
-      });
-    }
-  }
-
-  /* --------------------------------------------------------------------------
-  5. VALIDATE STEP 1 (THÔNG TIN NGƯỜI NHẬN)
-  -------------------------------------------------------------------------- */
   function validateStep1() {
     const name = document.getElementById("orderName").value.trim();
     const phone = document.getElementById("orderPhone").value.trim();
@@ -271,142 +198,219 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN QUY TRÌNH THANH TOÁN 3 BƯỚC, AUTOFI
     const ward = document.getElementById("orderWard").value;
     const address = document.getElementById("orderAddress").value.trim();
 
-    const nameErr = document.getElementById("orderNameError");
-    const phoneErr = document.getElementById("orderPhoneError");
-    const emailErr = document.getElementById("orderEmailError");
-    const cityErr = document.getElementById("orderCityError");
-    const wardErr = document.getElementById("orderWardError");
-    const addressErr = document.getElementById("orderAddressError");
+    document.getElementById("orderNameError").textContent = name ? "" : "Vui lòng nhập họ tên.";
+    document.getElementById("orderPhoneError").textContent = phone ? "" : "Vui lòng nhập SĐT.";
+    document.getElementById("orderEmailError").textContent = email ? "" : "Vui lòng nhập email.";
+    document.getElementById("orderCityError").textContent = city ? "" : "Chọn Tỉnh/Thành.";
+    document.getElementById("orderWardError").textContent = ward ? "" : "Chọn Phường/Xã.";
+    document.getElementById("orderAddressError").textContent = address ? "" : "Vui lòng nhập địa chỉ.";
 
-    let isValid = true;
+    if (!name || !phone || !email || !city || !ward || !address) return false;
 
-    if (nameErr) nameErr.textContent = "";
-    if (phoneErr) phoneErr.textContent = "";
-    if (emailErr) emailErr.textContent = "";
-    if (cityErr) cityErr.textContent = "";
-    if (wardErr) wardErr.textContent = "";
-    if (addressErr) addressErr.textContent = "";
-
-    if (!name) {
-      if (nameErr) nameErr.textContent = "Vui lòng nhập họ và tên người nhận.";
-      isValid = false;
-    }
-
-    if (!phone) {
-      if (phoneErr) phoneErr.textContent = "Vui lòng nhập số điện thoại.";
-      isValid = false;
-    }
-
-    if (!email) {
-      if (emailErr) emailErr.textContent = "Vui lòng nhập email nhận thông báo.";
-      isValid = false;
-    }
-
-    if (!city) {
-      if (cityErr) cityErr.textContent = "Vui lòng chọn Tỉnh / Thành phố.";
-      isValid = false;
-    }
-
-    if (!ward) {
-      if (wardErr) wardErr.textContent = "Vui lòng chọn Phường / Xã.";
-      isValid = false;
-    }
-
-    if (!address) {
-      if (addressErr) addressErr.textContent = "Vui lòng nhập địa chỉ nhận hàng chi tiết.";
-      isValid = false;
-    }
-
-    if (isValid) {
-      const fullAddrStr = `${address}, ${ward}, ${city}`;
-      orderCustomerData = {
-        name,
-        phone,
-        email,
-        address: fullAddrStr,
-        note: document.getElementById("orderNote") ? document.getElementById("orderNote").value.trim() : ""
-      };
-    }
-
-    return isValid;
+    orderCustomerData = {
+      name, phone, email,
+      address: `${address}, ${ward}, ${city}`
+    };
+    return true;
   }
 
-  /* --------------------------------------------------------------------------
-  6. PHƯƠNG THỨC VẬN CHUYỂN VÀ THANH TOÁN
-  -------------------------------------------------------------------------- */
+  function validateCreditCard() {
+    const num = document.getElementById("cardNumInput")?.value.replace(/\s+/g, '') || '';
+    const exp = document.getElementById("cardExpInput")?.value.trim() || '';
+    const cvv = document.getElementById("cardCvvInput")?.value.trim() || '';
+
+    let valid = true;
+    if (num.length < 15) {
+      document.getElementById("cardNumError").textContent = "Số thẻ gồm 16 chữ số.";
+      valid = false;
+    } else document.getElementById("cardNumError").textContent = "";
+
+    if (!/^\d{2}\/\d{2}$/.test(exp)) {
+      document.getElementById("cardExpError").textContent = "Định dạng MM/YY.";
+      valid = false;
+    } else document.getElementById("cardExpError").textContent = "";
+
+    if (cvv.length < 3) {
+      document.getElementById("cardCvvError").textContent = "CVV gồm 3-4 số.";
+      valid = false;
+    } else document.getElementById("cardCvvError").textContent = "";
+
+    return valid;
+  }
+
+  function startQrTimer() {
+    clearInterval(qrTimerInterval);
+    remainingSeconds = 300;
+
+    const qrBlock = document.getElementById("bankTransferQrBlock");
+    const qrImg = document.getElementById("qrCodeImg");
+    const memoText = document.getElementById("qrMemoText");
+
+    const cart = getCartItems();
+    let total = 0;
+    cart.forEach(i => total += (i.price * i.qty));
+    total += shippingFee;
+
+    const phone = orderCustomerData.phone || "0379732971";
+    if (memoText) memoText.textContent = `NEXUS ${phone}`;
+
+    if (qrImg) {
+      qrImg.src = `https://api.vietqr.io/image/970422-0399887766-compact2.png?amount=${total}&addInfo=NEXUS%20${phone}`;
+    }
+
+    if (qrBlock) qrBlock.hidden = false;
+
+    updateTimerDisplay();
+
+    qrTimerInterval = setInterval(() => {
+      remainingSeconds--;
+      updateTimerDisplay();
+
+      if (remainingSeconds <= 0) {
+        clearInterval(qrTimerInterval);
+        if (qrBlock) qrBlock.hidden = true;
+        
+        const codRadio = document.querySelector('input[name="paymentMethod"][value="cod"]');
+        if (codRadio) {
+          codRadio.checked = true;
+          codRadio.dispatchEvent(new Event("change"));
+        }
+
+        if (typeof window.showToast === "function") {
+          window.showToast("Mã QR đã hết hạn! Vui lòng tích chọn lại VietQR nếu muốn tạo lại mã.", "warning");
+        }
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const timerEl = document.getElementById("qrTimerCountdown");
+    if (!timerEl) return;
+    const mins = Math.floor(remainingSeconds / 60);
+    const secs = remainingSeconds % 60;
+    // CHỈ HIỆN THỜI GIAN "05:00"
+    timerEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  function stopQrTimer() {
+    clearInterval(qrTimerInterval);
+    const qrBlock = document.getElementById("bankTransferQrBlock");
+    if (qrBlock) qrBlock.hidden = true;
+  }
+
+  function initQrButtons() {
+    document.getElementById("cancelQrBtn")?.addEventListener("click", () => {
+      stopQrTimer();
+      const codRadio = document.querySelector('input[name="paymentMethod"][value="cod"]');
+      if (codRadio) {
+        codRadio.checked = true;
+        codRadio.dispatchEvent(new Event("change"));
+      }
+    });
+
+    document.getElementById("confirmQrPaidBtn")?.addEventListener("click", () => {
+      stopQrTimer();
+      completeOrder("Chuyển khoản VietQR");
+    });
+  }
+
   function initShippingAndPaymentOptions() {
-    const shipOptions = document.querySelectorAll('input[name="shippingMethod"]');
-    shipOptions.forEach(opt => {
+    document.querySelectorAll('input[name="shippingMethod"]').forEach(opt => {
       opt.addEventListener("change", (e) => {
-        shippingFee = (e.target.value === "express") ? 150000 : 0;
+        shippingFee = Number(e.target.value) || 0;
         document.querySelectorAll(".shipping-card").forEach(c => c.classList.remove("is-selected"));
-        e.target.closest(".option-card").classList.add("is-selected");
+        e.target.closest(".option-card")?.classList.add("is-selected");
         renderOrderSummary();
       });
     });
 
-    const payOptions = document.querySelectorAll('input[name="paymentMethod"]');
-    const qrBlock = document.getElementById("bankTransferQrBlock");
-    const cardBlock = document.getElementById("creditCardBlock");
-
-    payOptions.forEach(opt => {
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(opt => {
       opt.addEventListener("change", (e) => {
         document.querySelectorAll(".payment-card").forEach(c => c.classList.remove("is-selected"));
-        e.target.closest(".option-card").classList.add("is-selected");
+        e.target.closest(".option-card")?.classList.add("is-selected");
+
         const val = e.target.value;
-        if (qrBlock) qrBlock.hidden = (val !== "bank");
+        const cardBlock = document.getElementById("creditCardBlock");
+
+        if (val === "bank") {
+          startQrTimer();
+        } else {
+          stopQrTimer();
+        }
+
         if (cardBlock) cardBlock.hidden = (val !== "card");
       });
     });
   }
 
-  /* --------------------------------------------------------------------------
-  7. HOÀN TẤT ĐƠN HÀNG
-  -------------------------------------------------------------------------- */
-  function completeOrder() {
+  function initStepNavigation() {
+    document.getElementById("toStep2Btn")?.addEventListener("click", () => {
+      if (validateStep1()) setStep(2);
+    });
+
+    document.getElementById("backToStep1Btn")?.addEventListener("click", () => {
+      stopQrTimer();
+      setStep(1);
+    });
+
+    document.getElementById("placeOrderBtn")?.addEventListener("click", () => {
+      const selectedPay = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod';
+
+      if (selectedPay === "cod") {
+        completeOrder("Thanh toán khi nhận hàng (COD)");
+      } else if (selectedPay === "bank") {
+        stopQrTimer();
+        completeOrder("Chuyển khoản VietQR");
+      } else if (selectedPay === "card") {
+        if (validateCreditCard()) {
+          completeOrder("Thẻ tín dụng / Quốc tế");
+        }
+      }
+    });
+  }
+
+  function completeOrder(payLabel) {
+    const cart = getCartItems();
+    let subtotal = 0;
+    cart.forEach(i => subtotal += (i.price * i.qty));
+    const finalTotal = subtotal + shippingFee;
+
     const orderCode = "#NX-" + Math.floor(100000 + Math.random() * 900000);
 
-    const codeEl = document.getElementById("confirmedOrderCode");
-    const nameEl = document.getElementById("confirmedCustomerName");
-    const nameDisplayEl = document.getElementById("confirmedCustomerNameDisplay");
-    const addrEl = document.getElementById("confirmedCustomerAddress");
-    const payEl = document.getElementById("confirmedPaymentMethod");
-    const totalEl = document.getElementById("confirmedTotalAmount");
+    const newOrder = {
+      id: "ORD_" + Date.now(),
+      code: orderCode,
+      createdAt: new Date().toLocaleString("vi-VN"),
+      customer: orderCustomerData,
+      items: cart,
+      shippingFee: shippingFee,
+      totalAmount: finalTotal,
+      paymentMethod: payLabel,
+      status: "active",
+      statusText: "Đơn hàng đã được xác nhận và vận chuyển",
+      rating: null,
+      reviewText: ""
+    };
 
-    const selectedPay = document.querySelector('input[name="paymentMethod"]:checked');
-    let payLabel = "Thanh toán khi nhận hàng (COD)";
-    if (selectedPay) {
-      if (selectedPay.value === "bank") payLabel = "Chuyển khoản VietQR";
-      if (selectedPay.value === "card") payLabel = "Thẻ Quốc Tế Visa/Mastercard";
+    try {
+      const existingOrders = JSON.parse(localStorage.getItem("nexus_orders") || "[]");
+      existingOrders.unshift(newOrder);
+      localStorage.setItem("nexus_orders", JSON.stringify(existingOrders));
+    } catch (e) {
+      console.error("Lỗi lưu đơn hàng:", e);
     }
 
-    if (codeEl) codeEl.textContent = orderCode;
-    if (nameEl) nameEl.textContent = orderCustomerData.name || "Quý khách";
-    if (nameDisplayEl) nameDisplayEl.textContent = orderCustomerData.name || "Quý khách";
-    if (addrEl) addrEl.textContent = orderCustomerData.address || "Địa chỉ mặc định";
-    if (payEl) payEl.textContent = payLabel;
-
-    const summaryTotal = document.getElementById("summaryTotal");
-    if (totalEl && summaryTotal) {
-      totalEl.textContent = summaryTotal.textContent;
-    }
-
-    if (window.cartManager && typeof window.cartManager.clear === "function") {
-      window.cartManager.clear();
-    } else if (typeof window.saveCart === "function") {
-      window.saveCart([]);
-    } else {
-      localStorage.setItem("nexus_cart", JSON.stringify([]));
-    }
-
-    if (typeof window.updateCartBadge === "function") {
-      window.updateCartBadge();
-    }
-
-    if (typeof window.showToast === "function") {
-      window.showToast(`Đơn hàng ${orderCode} đã được khởi tạo thành công!`, "success");
-    }
+    localStorage.removeItem("nexus_cart");
+    window.dispatchEvent(new CustomEvent("nexus:cart-updated"));
 
     setStep(3);
+
+    if (typeof window.showToast === "function") {
+      window.showToast(`Khởi tạo đơn hàng ${orderCode} thành công!`, "success");
+    }
+
+    setTimeout(() => {
+      window.location.href = "orders.html";
+    }, 1000);
   }
 })();
