@@ -1,6 +1,6 @@
 /* ==========================================================================
 NEXUS VR — controllers/login-controller.js
-TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KHOẢN
+TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI TIẾT
 ========================================================================== */
 (function () {
   "use strict";
@@ -22,10 +22,7 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
     initAvatarUploader();
     initAddressCascading();
     initDemoAccountFiller();
-    
-    // 1. Kích hoạt ràng buộc nhập liệu thời gian thực (Real-time formatting)
     initRealtimeInputFormatting();
-
     initLoginForm();
     initRegisterForm();
     initProfileDetailsForm();
@@ -36,7 +33,7 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
   1. HÀM RÀNG BUỘC NHẬP LIỆU THỜI GIAN THỰC (REALTIME FORMATTING)
   -------------------------------------------------------------------------- */
   function initRealtimeInputFormatting() {
-    // A. Ô NHẬP TÊN: Tự động in hoa chữ cái đầu tiên của mỗi chữ
+    // A. Ô nhập tên: Tự động in hoa chữ cái đầu tiên từng từ
     const nameInputs = [
       document.getElementById("detailName"),
       document.getElementById("registerName")
@@ -51,7 +48,7 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
       });
     });
 
-    // B. Ô SỐ ĐIỆN THOẠI: Chỉ cho phép nhập số, khống chế tối đa 10 số
+    // B. Ô số điện thoại: Chỉ nhận chữ số, giới hạn tối đa 10 số
     const phoneInputs = [
       document.getElementById("detailPhone"),
       document.getElementById("registerPhone")
@@ -68,12 +65,11 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
   }
 
   /* --------------------------------------------------------------------------
-  2. CÁC HÀM VALIDATE CHUYÊN BIỆT
+  2. CÁC HÀM XÁC THỰC DỮ LIỆU CHUYÊN BIỆT
   -------------------------------------------------------------------------- */
   function isValidGmail(email) {
     if (!email) return false;
-    const cleanEmail = email.trim().toLowerCase();
-    return /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(cleanEmail);
+    return /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email.trim().toLowerCase());
   }
 
   function isValidPhone10Digits(phone) {
@@ -82,6 +78,9 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
   }
 
   function getRegisteredUsers() {
+    if (window.storageService && typeof window.storageService.getRegisteredUsers === "function") {
+      return window.storageService.getRegisteredUsers();
+    }
     try {
       return JSON.parse(localStorage.getItem(REGISTERED_USERS_KEY)) || [];
     } catch (e) {
@@ -90,12 +89,16 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
   }
 
   function saveRegisteredUsers(users) {
-    localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
+    if (window.storageService && typeof window.storageService.saveRegisteredUsers === "function") {
+      window.storageService.saveRegisteredUsers(users);
+      return;
+    }
+    localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users || []));
   }
 
   function saveCurrentSession(userData) {
-    if (typeof window.saveCurrentUser === "function") {
-      window.saveCurrentUser(userData);
+    if (window.storageService && typeof window.storageService.saveCurrentUser === "function") {
+      window.storageService.saveCurrentUser(userData);
     } else {
       localStorage.setItem("nexus_user", JSON.stringify(userData));
     }
@@ -104,7 +107,7 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
   }
 
   /* --------------------------------------------------------------------------
-  3. CHUYỂN ĐỔI TAB & PHỤ TRỢ
+  3. CHUYỂN ĐỔI TAB & PHỤ TRỢ GIAO DIỆN
   -------------------------------------------------------------------------- */
   function initAuthTabs() {
     const tabLogin = document.getElementById("tabLoginBtn");
@@ -288,11 +291,15 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
       }
 
       initProfileState();
+
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1000);
     });
   }
 
   /* --------------------------------------------------------------------------
-  5. XỬ LÝ FORM ĐĂNG KÝ
+  5. XỬ LÝ FORM ĐĂNG KÝ (KHỞI TẠO BỘ NHỚ TRỐNG CHO TÀI KHOẢN MỚI)
   -------------------------------------------------------------------------- */
   function initRegisterForm() {
     const form = document.getElementById("registerForm");
@@ -365,6 +372,11 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
       saveRegisteredUsers(registeredUsers);
       saveCurrentSession(newUser);
 
+      // Tách biệt kho lưu trữ giỏ hàng & đơn hàng mới hoàn toàn trống cho tài khoản này
+      const userKey = "_" + accountVal.toLowerCase().replace(/[^a-z0-9]/g, "_");
+      localStorage.setItem("nexus_cart" + userKey, JSON.stringify([]));
+      localStorage.setItem("nexus_orders" + userKey, JSON.stringify([]));
+
       if (typeof window.showToast === "function") window.showToast("Đăng ký tài khoản thành công! Hãy hoàn tất thông tin cá nhân.", "success");
 
       form.hidden = true;
@@ -391,7 +403,7 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
   }
 
   /* --------------------------------------------------------------------------
-  6. XỬ LÝ FORM HOÀN TẤT HỒ SƠ (CÓ ĐIỀU HƯỚNG SANG TRANG CHỦ)
+  6. XỬ LÝ FORM HOÀN TẤT HỒ SƠ CHI TIẾT
   -------------------------------------------------------------------------- */
   function initProfileDetailsForm() {
     const form = document.getElementById("profileDetailsForm");
@@ -495,7 +507,6 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
 
       initProfileState();
 
-      // TỰ ĐỘNG CHUYỂN HƯỚNG VỀ TRANG CHỦ SAU 1.2 GIÂY
       setTimeout(() => {
         window.location.href = "index.html";
       }, 1200);
@@ -600,6 +611,8 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / QUẢN LÝ HỒ SƠ TÀI KH
         logoutBtn.onclick = () => {
           if (typeof window.clearCurrentUser === "function") {
             window.clearCurrentUser();
+          } else if (window.storageService && typeof window.storageService.clearCurrentUser === "function") {
+            window.storageService.clearCurrentUser();
           } else {
             localStorage.removeItem("nexus_user");
           }

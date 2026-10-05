@@ -1,61 +1,113 @@
-/* =========================================================
-   NEXUS VR — services/storage-service.js   [PHỤ TRÁCH: Đức Huy]
-   TẦNG 1 - DATA & SERVICES
-   Quản lý tập trung việc đọc/ghi localStorage. Các trang khác
-   (Hưng, Nhất Vũ, Tường) KHÔNG tự gọi localStorage.getItem()
-   trực tiếp — luôn gọi qua các hàm dưới đây để tránh sai key
-   hoặc sai định dạng dữ liệu.
+/* ==========================================================================
+NEXUS VR — services/storage-service.js
+QUẢN LÝ DỮ LIỆU PHÂN LẬP THEO TÀI KHOẢN (USER-SCOPED STORAGE)
+========================================================================== */
+(function () {
+  "use strict";
 
-   4 KEY DÙNG CHUNG TOÀN SITE (không tự đặt tên khác):
-   - nexus_cart     : [{ id, qty, color }, ...]
-   - nexus_wishlist : ["vr-001", "vr-002", ...]
-   - nexus_theme    : "dark" | "light"
-   - nexus_user     : { name, email } | null
-   ========================================================= */
+  const REGISTERED_USERS_KEY = "nexus_registered_users";
+  const CURRENT_USER_KEY = "nexus_user";
 
-/* ---------- GIỎ HÀNG ---------- */
-function getCart() {
-  try { return JSON.parse(localStorage.getItem("nexus_cart")) || []; }
-  catch (e) { return []; }
-}
-function saveCart(cart) {
-  localStorage.setItem("nexus_cart", JSON.stringify(cart));
-}
-function getCartCount() {
-  return getCart().reduce((sum, item) => sum + (item.qty || 1), 0);
-}
+  // Lấy đuôi key lưu trữ riêng theo Email hoặc Username của tài khoản hiện tại
+  function getUserKeySuffix() {
+    try {
+      const user = JSON.parse(localStorage.getItem(CURRENT_USER_KEY));
+      if (user && (user.email || user.account)) {
+        return "_" + (user.email || user.account).toLowerCase().replace(/[^a-z0-9]/g, "_");
+      }
+    } catch (e) {}
+    return "_guest";
+  }
 
-/* ---------- YÊU THÍCH (WISHLIST) ---------- */
-function getWishlist() {
-  try { return JSON.parse(localStorage.getItem("nexus_wishlist")) || []; }
-  catch (e) { return []; }
-}
-function saveWishlist(list) {
-  localStorage.setItem("nexus_wishlist", JSON.stringify(list));
-}
+  /* --------------------------------------------------------------------------
+  1. QUẢN LÝ GIỎ HÀNG THUỘC TÀI KHOẢN
+  -------------------------------------------------------------------------- */
+  function getCart() {
+    const key = "nexus_cart" + getUserKeySuffix();
+    try {
+      return JSON.parse(localStorage.getItem(key)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
 
-/* ---------- NGƯỜI DÙNG ĐĂNG NHẬP ---------- */
-function getCurrentUser() {
-  // Nhất Vũ: sau khi có API /api/auth/me thật (Ngày 8-9), có thể
-  // thay hàm này bằng bản gọi fetch() — nhưng giữ nguyên TÊN HÀM
-  // getCurrentUser() để các trang khác không phải sửa gì thêm.
-  try { return JSON.parse(localStorage.getItem("nexus_user")); }
-  catch (e) { return null; }
-}
-function saveCurrentUser(user) {
-  localStorage.setItem("nexus_user", JSON.stringify(user));
-}
-function clearCurrentUser() {
-  localStorage.removeItem("nexus_user");
-}
+  function saveCart(cart) {
+    const key = "nexus_cart" + getUserKeySuffix();
+    localStorage.setItem(key, JSON.stringify(cart || []));
+    window.dispatchEvent(new CustomEvent("nexus:cart-updated"));
+  }
 
-/* ---------- THEME ---------- */
-// [FIX #1] Giao diện MẶC ĐỊNH (không lưu gì / không có class) là bản
-// SÁNG (Warm Cream) — nên giá trị fallback đúng phải là "light",
-// không phải "dark" như trước (lúc đó bảng màu còn là Neon/Dark).
-function getSavedTheme() {
-  return localStorage.getItem("nexus_theme") || "light";
-}
-function saveTheme(mode) {
-  localStorage.setItem("nexus_theme", mode);
-}
+  function clearCart() {
+    saveCart([]);
+  }
+
+  /* --------------------------------------------------------------------------
+  2. QUẢN LÝ ĐƠN HÀNG THUỘC TÀI KHOẢN
+  -------------------------------------------------------------------------- */
+  function getOrders() {
+    const key = "nexus_orders" + getUserKeySuffix();
+    try {
+      return JSON.parse(localStorage.getItem(key)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveOrders(orders) {
+    const key = "nexus_orders" + getUserKeySuffix();
+    localStorage.setItem(key, JSON.stringify(orders || []));
+  }
+
+  /* --------------------------------------------------------------------------
+  3. QUẢN LÝ TÀI KHOẢN NGƯỜI DÙNG & DANH SÁCH ĐĂNG KÝ
+  -------------------------------------------------------------------------- */
+  function getCurrentUser() {
+    try {
+      return JSON.parse(localStorage.getItem(CURRENT_USER_KEY));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveCurrentUser(user) {
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+    window.dispatchEvent(new CustomEvent("nexus:user-updated"));
+  }
+
+  function clearCurrentUser() {
+    localStorage.removeItem(CURRENT_USER_KEY);
+    window.dispatchEvent(new CustomEvent("nexus:user-updated"));
+  }
+
+  function getRegisteredUsers() {
+    try {
+      return JSON.parse(localStorage.getItem(REGISTERED_USERS_KEY)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveRegisteredUsers(users) {
+    localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users || []));
+  }
+
+  // Export toàn bộ dịch vụ ra window
+  window.storageService = {
+    getUserKeySuffix,
+    getCart,
+    saveCart,
+    clearCart,
+    getOrders,
+    saveOrders,
+    getCurrentUser,
+    saveCurrentUser,
+    clearCurrentUser,
+    getRegisteredUsers,
+    saveRegisteredUsers
+  };
+
+  // Tạo sẵn các hàm fallback toàn cục
+  window.getCurrentUser = getCurrentUser;
+  window.saveCurrentUser = saveCurrentUser;
+  window.clearCurrentUser = clearCurrentUser;
+})();
