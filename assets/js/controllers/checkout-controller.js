@@ -1,5 +1,6 @@
 /* ==========================================================================
 NEXUS VR — controllers/checkout-controller.js
+TẦNG 3 - CONTROLLERS: QUY TRÌNH THANH TOÁN 3 BƯỚC & XỬ LÝ VIETQR
 ========================================================================== */
 (function () {
   "use strict";
@@ -8,7 +9,7 @@ NEXUS VR — controllers/checkout-controller.js
   let shippingFee = 0;
   let orderCustomerData = {};
   let qrTimerInterval = null;
-  let remainingSeconds = 300;
+  let remainingSeconds = 300; // 5 phút = 300 giây
 
   const formatVND = (num) => (num || 0).toLocaleString("vi-VN") + " ₫";
 
@@ -238,20 +239,39 @@ NEXUS VR — controllers/checkout-controller.js
     return valid;
   }
 
+  /* --------------------------------------------------------------------------
+  KHỞI TẠO BỘ ĐẾM VÀ MÃ QR CHUYỂN KHOẢN
+  -------------------------------------------------------------------------- */
   function startQrTimer() {
     clearInterval(qrTimerInterval);
-    remainingSeconds = 300;
+    remainingSeconds = 300; // Reset về 5 phút
 
     const qrBlock = document.getElementById("bankTransferQrBlock");
     const qrImg = document.getElementById("qrCodeImg");
+    const qrTimerCountdown = document.getElementById("qrTimerCountdown");
+    const qrSuccessBox = document.getElementById("qrSuccessSuccessBox");
+    const confirmBtn = document.getElementById("confirmQrPaidBtn");
     const memoText = document.getElementById("qrMemoText");
+
+    // Khôi phục giao diện mở lại QR
+    if (qrTimerCountdown) qrTimerCountdown.style.display = "block";
+    if (qrImg) qrImg.style.display = "block";
+    if (qrSuccessBox) qrSuccessBox.style.display = "none";
+
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.style.background = "#2e7d32";
+      confirmBtn.style.color = "#ffffff";
+      confirmBtn.style.cursor = "pointer";
+      confirmBtn.textContent = "Đã chuyển khoản";
+    }
 
     const cart = getCartItems();
     let total = 0;
-    cart.forEach(i => total += (i.price * i.qty));
+    cart.forEach(i => total += (Number(i.price) || 0) * (Number(i.qty) || 1));
     total += shippingFee;
 
-    const phone = orderCustomerData.phone || "0379732971";
+    const phone = orderCustomerData.phone || "0988123456";
     if (memoText) memoText.textContent = `NEXUS ${phone}`;
 
     if (qrImg) {
@@ -277,7 +297,7 @@ NEXUS VR — controllers/checkout-controller.js
         }
 
         if (typeof window.showToast === "function") {
-          window.showToast("Mã QR đã hết hạn! Vui lòng tích chọn lại VietQR nếu muốn tạo lại mã.", "warning");
+          window.showToast("Mã QR đã hết hạn! Vui lòng tích chọn lại VietQR nếu muốn tạo mã mới.", "warning");
         }
       }
     }, 1000);
@@ -288,7 +308,6 @@ NEXUS VR — controllers/checkout-controller.js
     if (!timerEl) return;
     const mins = Math.floor(remainingSeconds / 60);
     const secs = remainingSeconds % 60;
-    // CHỈ HIỆN THỜI GIAN "05:00"
     timerEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   }
 
@@ -298,8 +317,14 @@ NEXUS VR — controllers/checkout-controller.js
     if (qrBlock) qrBlock.hidden = true;
   }
 
+  /* --------------------------------------------------------------------------
+  XỬ LÝ NÚT BẤM TRONG KHỐI VIETQR
+  -------------------------------------------------------------------------- */
   function initQrButtons() {
-    document.getElementById("cancelQrBtn")?.addEventListener("click", () => {
+    const cancelBtn = document.getElementById("cancelQrBtn");
+    const confirmBtn = document.getElementById("confirmQrPaidBtn");
+
+    cancelBtn?.addEventListener("click", () => {
       stopQrTimer();
       const codRadio = document.querySelector('input[name="paymentMethod"][value="cod"]');
       if (codRadio) {
@@ -308,9 +333,32 @@ NEXUS VR — controllers/checkout-controller.js
       }
     });
 
-    document.getElementById("confirmQrPaidBtn")?.addEventListener("click", () => {
-      stopQrTimer();
-      completeOrder("Chuyển khoản VietQR");
+    confirmBtn?.addEventListener("click", () => {
+      // 1. Dừng ngay bộ đếm thời gian
+      clearInterval(qrTimerInterval);
+
+      // 2. Ẩn bộ đếm thời gian và Mã QR
+      const qrTimerCountdown = document.getElementById("qrTimerCountdown");
+      const qrImg = document.getElementById("qrCodeImg");
+      const qrSuccessBox = document.getElementById("qrSuccessSuccessBox");
+
+      if (qrTimerCountdown) qrTimerCountdown.style.display = "none";
+      if (qrImg) qrImg.style.display = "none";
+
+      // 3. Hiện Dấu tích xanh cùng dòng chữ "Chuyển khoản thành công"
+      if (qrSuccessBox) qrSuccessBox.style.display = "flex";
+
+      // 4. Đổi nút "Đã chuyển khoản" thành màu xám và vô hiệu hóa không cho bấm nữa
+      confirmBtn.disabled = true;
+      confirmBtn.style.background = "#9e9e9e";
+      confirmBtn.style.color = "#ffffff";
+      confirmBtn.style.cursor = "not-allowed";
+
+      if (typeof window.showToast === "function") {
+        window.showToast("Xác nhận chuyển khoản thành công!", "success");
+      }
+
+      // LƯU Ý: Trang web vẫn giữ nguyên ở đây, KHÔNG chuyển trang!
     });
   }
 
@@ -353,6 +401,7 @@ NEXUS VR — controllers/checkout-controller.js
       setStep(1);
     });
 
+    // BẤM NÚT "XÁC NHẬN ĐẶT HÀNG" -> LÚC NÀY MỚI HOÀN TẤT VÀ CHUYỂN TRANG
     document.getElementById("placeOrderBtn")?.addEventListener("click", () => {
       const selectedPay = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cod';
 
@@ -369,10 +418,13 @@ NEXUS VR — controllers/checkout-controller.js
     });
   }
 
+  /* --------------------------------------------------------------------------
+  HOÀN TẤT ĐƠN HÀNG -> CHUYỂN HƯỚNG TỚI ORDERS.HTML
+  -------------------------------------------------------------------------- */
   function completeOrder(payLabel) {
     const cart = getCartItems();
     let subtotal = 0;
-    cart.forEach(i => subtotal += (i.price * i.qty));
+    cart.forEach(i => subtotal += (Number(i.price) || 0) * (Number(i.qty) || 1));
     const finalTotal = subtotal + shippingFee;
 
     const orderCode = "#NX-" + Math.floor(100000 + Math.random() * 900000);
@@ -387,9 +439,7 @@ NEXUS VR — controllers/checkout-controller.js
       totalAmount: finalTotal,
       paymentMethod: payLabel,
       status: "active",
-      statusText: "Đơn hàng đã được xác nhận và vận chuyển",
-      rating: null,
-      reviewText: ""
+      statusText: "Đơn hàng đã được xác nhận và vận chuyển"
     };
 
     try {
