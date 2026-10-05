@@ -1,7 +1,6 @@
 /* ==========================================================================
 NEXUS VR — controllers/checkout-controller.js
-TẦNG 3 - CONTROLLERS: QUẢN LÝ LUỒNG THANH TOÁN 3 BƯỚC, KHÓA VẬN CHUYỂN & THANH TOÁN
-TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI BẤM "ĐÃ CHUYỂN KHOẢN"
+TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI VOUCHER GIẢM GIÁ
 ========================================================================== */
 (function () {
   "use strict";
@@ -15,12 +14,27 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
   let shippingFee = 0;
   let orderCustomerData = {};
   let qrTimerInterval = null;
-  let remainingSeconds = 300; // 5 phút đếm ngược
+  let remainingSeconds = 300;
   let isBankTransferConfirmed = false;
 
   const formatVND = (num) => (num || 0).toLocaleString("vi-VN") + " ₫";
 
-  // Hàm hỗ trợ lấy giỏ hàng chính xác theo tài khoản đang đăng nhập
+  function getUserKeySuffix() {
+    try {
+      if (window.storageService && typeof window.storageService.getUserKeySuffix === "function") {
+        return window.storageService.getUserKeySuffix();
+      }
+      const user = typeof window.getCurrentUser === "function"
+        ? window.getCurrentUser()
+        : JSON.parse(localStorage.getItem("nexus_user") || "null");
+
+      if (user && (user.email || user.account)) {
+        return "_" + (user.email || user.account).toLowerCase().replace(/[^a-z0-9]/g, "_");
+      }
+    } catch (e) {}
+    return "_guest";
+  }
+
   function getCartData() {
     if (window.cartManager && typeof window.cartManager.getCart === "function") {
       return window.cartManager.getCart();
@@ -28,17 +42,30 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
     if (window.storageService && typeof window.storageService.getCart === "function") {
       return window.storageService.getCart();
     }
+    const userKey = getUserKeySuffix();
     try {
-      const user = typeof window.getCurrentUser === "function"
-        ? window.getCurrentUser()
-        : JSON.parse(localStorage.getItem("nexus_user") || "null");
-      const userKey = user && (user.email || user.account)
-        ? "_" + (user.email || user.account).toLowerCase().replace(/[^a-z0-9]/g, "_")
-        : "_guest";
       return JSON.parse(localStorage.getItem("nexus_cart" + userKey) || localStorage.getItem("nexus_cart") || "[]");
     } catch (e) {
-      return JSON.parse(localStorage.getItem("nexus_cart") || "[]");
+      return [];
     }
+  }
+
+  function getAppliedCoupon() {
+    const userKey = getUserKeySuffix();
+    try {
+      const raw = localStorage.getItem("nexus_coupon" + userKey) || localStorage.getItem("nexus_coupon");
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function clearAppliedCoupon() {
+    const userKey = getUserKeySuffix();
+    try {
+      localStorage.removeItem("nexus_coupon" + userKey);
+      localStorage.removeItem("nexus_coupon");
+    } catch (e) {}
   }
 
   document.addEventListener("DOMContentLoaded", initCheckoutController);
@@ -88,40 +115,53 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
   }
 
   /* --------------------------------------------------------------------------
-  2. NHẬP VÀ XÁC THỰC THẺ TÍN DỤNG (KHÓA 16 SỐ & TỰ BÙ SỐ 0 NẾU NHẬP 1 SỐ)
+  2. NHẬP VÀ XÁC THỰC THẺ TÍN DỤNG (TÊN IN HOA KHÔNG DẤU, 16 SỐ, MM/YY, CVV)
   -------------------------------------------------------------------------- */
   function initCreditCardInputs() {
+    const cardHolderInput = document.getElementById("creditCardHolderName") || document.getElementById("cardHolderInput");
     const cardNumberInput = document.getElementById("creditCardNumber") || document.getElementById("cardNumInput");
     const expMonthInput = document.getElementById("creditCardExpMonth");
     const expYearInput = document.getElementById("creditCardExpYear");
     const cardCvvInput = document.getElementById("creditCardCvv") || document.getElementById("cardCvvInput");
 
+    const cardHolderError = document.getElementById("creditCardHolderNameError") || document.getElementById("cardHolderError");
     const cardNumberError = document.getElementById("creditCardNumberError") || document.getElementById("cardNumError");
     const cardExpiryError = document.getElementById("creditCardExpiryError") || document.getElementById("cardExpError");
     const cardCvvError = document.getElementById("creditCardCvvError") || document.getElementById("cardCvvError");
 
-    // 1. Ô SỐ THẺ TÍN DỤNG (KHÓA TỐI ĐA 16 SỐ)
+    // 1. Ô TÊN CHỦ THẺ IN HOA KHÔNG DẤU
+    if (cardHolderInput && !cardHolderInput.dataset.bound) {
+      cardHolderInput.dataset.bound = "true";
+      cardHolderInput.addEventListener("input", function () {
+        if (cardHolderError) cardHolderError.textContent = "";
+        let val = this.value
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/đ/g, "d")
+          .replace(/Đ/g, "D")
+          .replace(/[^a-zA-Z\s]/g, "");
+        this.value = val.toUpperCase();
+      });
+      cardHolderInput.addEventListener("blur", validateCreditCardHolderName);
+    }
+
+    // 2. Ô SỐ THẺ TÍN DỤNG (16 SỐ)
     if (cardNumberInput && !cardNumberInput.dataset.bound) {
       cardNumberInput.dataset.bound = "true";
       cardNumberInput.setAttribute("maxlength", "16");
-
       cardNumberInput.addEventListener("input", function () {
         if (cardNumberError) cardNumberError.textContent = "";
-        let digits = this.value.replace(/\D/g, "").slice(0, 16);
-        this.value = digits;
+        this.value = this.value.replace(/\D/g, "").slice(0, 16);
       });
-
       cardNumberInput.addEventListener("blur", validateCreditCardNumber);
     }
 
-    // 2. Ô THÁNG HẾT HẠN (MM: 01-12)
+    // 3. Ô THÁNG HẾT HẠN (MM: 01-12)
     if (expMonthInput && !expMonthInput.dataset.bound) {
       expMonthInput.dataset.bound = "true";
       expMonthInput.setAttribute("maxlength", "2");
-
       expMonthInput.addEventListener("input", function () {
         if (cardExpiryError) cardExpiryError.textContent = "";
-
         let val = this.value.replace(/\D/g, "").slice(0, 2);
         if (val.length === 2) {
           let mm = parseInt(val, 10);
@@ -130,7 +170,6 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
         }
         this.value = val;
       });
-
       expMonthInput.addEventListener("blur", function () {
         if (this.value.length === 1) {
           let mm = parseInt(this.value, 10);
@@ -140,16 +179,14 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
       });
     }
 
-    // 3. Ô NĂM HẾT HẠN (YY: 00-99)
+    // 4. Ô NĂM HẾT HẠN (YY: 00-99)
     if (expYearInput && !expYearInput.dataset.bound) {
       expYearInput.dataset.bound = "true";
       expYearInput.setAttribute("maxlength", "2");
-
       expYearInput.addEventListener("input", function () {
         if (cardExpiryError) cardExpiryError.textContent = "";
         this.value = this.value.replace(/\D/g, "").slice(0, 2);
       });
-
       expYearInput.addEventListener("blur", function () {
         if (this.value.length === 1) {
           this.value = "0" + this.value;
@@ -158,35 +195,40 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
       });
     }
 
-    // 4. Ô MÃ CVV (3 SỐ)
+    // 5. Ô MÃ CVV (3 SỐ)
     if (cardCvvInput && !cardCvvInput.dataset.bound) {
       cardCvvInput.dataset.bound = "true";
       cardCvvInput.setAttribute("maxlength", "3");
-
       cardCvvInput.addEventListener("input", function () {
         if (cardCvvError) cardCvvError.textContent = "";
         this.value = this.value.replace(/\D/g, "").slice(0, 3);
       });
-
       cardCvvInput.addEventListener("blur", validateCreditCardCvv);
     }
+  }
+
+  function validateCreditCardHolderName() {
+    const input = document.getElementById("creditCardHolderName") || document.getElementById("cardHolderInput");
+    const errorEl = document.getElementById("creditCardHolderNameError") || document.getElementById("cardHolderError");
+    if (!input || !errorEl) return true;
+    const val = input.value.trim();
+    if (!val) {
+      errorEl.textContent = "Vui lòng nhập tên chủ thẻ tín dụng.";
+      return false;
+    }
+    errorEl.textContent = "";
+    return true;
   }
 
   function validateCreditCardNumber() {
     const input = document.getElementById("creditCardNumber") || document.getElementById("cardNumInput");
     const errorEl = document.getElementById("creditCardNumberError") || document.getElementById("cardNumError");
     if (!input || !errorEl) return true;
-
     const rawDigits = input.value.replace(/\D/g, "");
-    if (!rawDigits) {
-      errorEl.textContent = "Vui lòng nhập số thẻ tín dụng.";
-      return false;
-    }
-    if (rawDigits.length !== 16) {
+    if (!rawDigits || rawDigits.length !== 16) {
       errorEl.textContent = "Số thẻ tín dụng phải bao gồm đúng và đủ 16 chữ số.";
       return false;
     }
-
     errorEl.textContent = "";
     return true;
   }
@@ -195,33 +237,17 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
     const monthInput = document.getElementById("creditCardExpMonth");
     const yearInput = document.getElementById("creditCardExpYear");
     const errorEl = document.getElementById("creditCardExpiryError") || document.getElementById("cardExpError");
-
     if (!monthInput || !yearInput || !errorEl) return true;
-
-    if (monthInput.value.length === 1) {
-      let mm = parseInt(monthInput.value, 10);
-      monthInput.value = mm === 0 ? "01" : "0" + mm;
-    }
-    if (yearInput.value.length === 1) {
-      yearInput.value = "0" + yearInput.value;
-    }
 
     const mmStr = monthInput.value.trim();
     const yyStr = yearInput.value.trim();
-
-    if (!mmStr || !yyStr) {
-      errorEl.textContent = "Vui lòng nhập đầy đủ tháng và năm hết hạn.";
-      return false;
-    }
-
-    if (mmStr.length !== 2 || yyStr.length !== 2) {
+    if (!mmStr || !yyStr || mmStr.length !== 2 || yyStr.length !== 2) {
       errorEl.textContent = "Ngày hết hạn phải gồm 2 số tháng (MM) và 2 số năm (YY).";
       return false;
     }
 
     const expMonth = parseInt(mmStr, 10);
     const expYear = parseInt(yyStr, 10);
-
     if (isNaN(expMonth) || expMonth < 1 || expMonth > 12) {
       errorEl.textContent = "Tháng hết hạn phải từ 01 đến 12.";
       return false;
@@ -235,7 +261,6 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
       errorEl.textContent = "Thẻ của quý khách đã hết hạn!";
       return false;
     }
-
     errorEl.textContent = "";
     return true;
   }
@@ -244,17 +269,11 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
     const input = document.getElementById("creditCardCvv") || document.getElementById("cardCvvInput");
     const errorEl = document.getElementById("creditCardCvvError") || document.getElementById("cardCvvError");
     if (!input || !errorEl) return true;
-
     const rawDigits = input.value.replace(/\D/g, "");
-    if (!rawDigits) {
-      errorEl.textContent = "Vui lòng nhập mã CVV.";
-      return false;
-    }
-    if (rawDigits.length !== 3) {
+    if (!rawDigits || rawDigits.length !== 3) {
       errorEl.textContent = "Mã CVV phải gồm đúng 3 chữ số.";
       return false;
     }
-
     errorEl.textContent = "";
     return true;
   }
@@ -262,41 +281,24 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
   function validateCreditCardForm() {
     const selectedPay = document.querySelector('input[name="paymentMethod"]:checked')?.value;
     if (selectedPay !== "card") return true;
-
-    const isNumValid = validateCreditCardNumber();
-    const isExpValid = validateCreditCardExpiry();
-    const isCvvValid = validateCreditCardCvv();
-
-    return isNumValid && isExpValid && isCvvValid;
+    return validateCreditCardHolderName() && validateCreditCardNumber() && validateCreditCardExpiry() && validateCreditCardCvv();
   }
 
   /* --------------------------------------------------------------------------
   3. VALIDATE BƯỚC 1 (THÔNG TIN KHÁCH HÀNG)
   -------------------------------------------------------------------------- */
   function isValidGmail(email) {
-    if (!email) return false;
-    return /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email.trim().toLowerCase());
+    return !!email && /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email.trim().toLowerCase());
   }
 
   function isValidPhone10Digits(phone) {
-    if (!phone) return false;
-    return /^0\d{9}$/.test(phone.trim());
+    return !!phone && /^0\d{9}$/.test(phone.trim());
   }
 
   function initAddressCascading() {
     if (window.AddressManager && typeof window.AddressManager.initAddressCascade === "function") {
       window.AddressManager.initAddressCascade("orderCity", "orderWard");
     }
-  }
-
-  function calculateShippingFee(subtotal) {
-    if (selectedShippingMethod === "150000" || selectedShippingMethod === "express") {
-      return EXPRESS_SHIPPING_FEE;
-    }
-    if (subtotal >= FREE_SHIPPING_THRESHOLD) {
-      return 0;
-    }
-    return DEFAULT_SHIPPING_FEE;
   }
 
   /* --------------------------------------------------------------------------
@@ -383,7 +385,7 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
   }
 
   /* --------------------------------------------------------------------------
-  5. RENDER SIDEBAR TÓM TẮT ĐƠN HÀNG
+  5. RENDER SIDEBAR TÓM TẮT ĐƠN HÀNG (ĐỌC VOUCHER & KÊ KHAI GIẢM TRỪ)
   -------------------------------------------------------------------------- */
   function renderOrderSummary() {
     const listEl = document.getElementById("summaryItemsList");
@@ -429,14 +431,66 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
       listEl.appendChild(itemEl);
     });
 
-    shippingFee = calculateShippingFee(subtotal);
+    // 1. Đọc mã giảm giá đã áp dụng
+    const coupon = getAppliedCoupon();
+    let discountFee = 0;
+
+    if (coupon) {
+      if (coupon.type === "percent") {
+        discountFee = Math.round(subtotal * (coupon.rate || 0.10));
+      }
+    }
+
+    // 2. Tính phí vận chuyển
+    const isFreeshipCoupon = coupon && coupon.type === "freeship";
+    if (selectedShippingMethod === "express" || selectedShippingMethod === "150000") {
+      shippingFee = EXPRESS_SHIPPING_FEE;
+    } else if (subtotal >= FREE_SHIPPING_THRESHOLD || isFreeshipCoupon) {
+      shippingFee = 0;
+    } else {
+      shippingFee = DEFAULT_SHIPPING_FEE;
+    }
 
     subtotalEl.textContent = formatVND(subtotal);
+
+    // 3. Tự động hiển thị/tạo dòng Giảm giá Voucher kê khai trong Sidebar Checkout
+    let discountRow = document.getElementById("summaryDiscountRow");
+    if (!discountRow && subtotalEl && subtotalEl.parentElement) {
+      discountRow = document.createElement("div");
+      discountRow.id = "summaryDiscountRow";
+      discountRow.className = "summary-line summary-discount";
+      discountRow.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; color: #2e7d32;";
+      discountRow.innerHTML = `<span>Giảm giá <b id="summaryCouponCode"></b></span><span id="summaryDiscountAmount" style="font-weight: 600;">-0 ₫</span>`;
+      subtotalEl.parentElement.insertAdjacentElement("afterend", discountRow);
+    }
+
+    if (discountRow) {
+      const couponCodeEl = document.getElementById("summaryCouponCode");
+      const discountAmtEl = document.getElementById("summaryDiscountAmount");
+
+      if (discountFee > 0) {
+        discountRow.style.display = "flex";
+        discountRow.hidden = false;
+        if (couponCodeEl) couponCodeEl.textContent = `(${coupon.code})`;
+        if (discountAmtEl) discountAmtEl.textContent = `- ${formatVND(discountFee)}`;
+      } else if (isFreeshipCoupon) {
+        discountRow.style.display = "flex";
+        discountRow.hidden = false;
+        if (couponCodeEl) couponCodeEl.textContent = `(FREESHIP)`;
+        if (discountAmtEl) discountAmtEl.textContent = `Miễn phí ship`;
+      } else {
+        discountRow.style.display = "none";
+        discountRow.hidden = true;
+      }
+    }
+
+    // 4. Cập nhật hiển thị phí vận chuyển
     if (shippingEl) {
       shippingEl.textContent = shippingFee === 0 ? "Miễn phí" : formatVND(shippingFee);
     }
 
-    const grandTotal = subtotal + shippingFee;
+    // 5. Tính Tổng cộng = Tạm tính - Giảm giá + Phí vận chuyển
+    const grandTotal = Math.max(0, subtotal - discountFee + shippingFee);
     totalEl.textContent = formatVND(grandTotal);
   }
 
@@ -469,7 +523,21 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
     const cart = getCartData();
     let subtotal = 0;
     cart.forEach((i) => (subtotal += (Number(i.price) || 0) * (Number(i.qty) || 1)));
-    const total = subtotal + shippingFee;
+
+    const coupon = getAppliedCoupon();
+    let discountVal = (coupon && coupon.type === "percent") ? Math.round(subtotal * (coupon.rate || 0.10)) : 0;
+    const isFreeshipCoupon = coupon && coupon.type === "freeship";
+
+    let calcShipping = shippingFee;
+    if (selectedShippingMethod === "express" || selectedShippingMethod === "150000") {
+      calcShipping = EXPRESS_SHIPPING_FEE;
+    } else if (subtotal >= FREE_SHIPPING_THRESHOLD || isFreeshipCoupon) {
+      calcShipping = 0;
+    } else {
+      calcShipping = DEFAULT_SHIPPING_FEE;
+    }
+
+    const total = Math.max(0, subtotal - discountVal + calcShipping);
 
     const phone = orderCustomerData.phone || "0988123456";
     if (memoText) memoText.textContent = `NEXUS ${phone}`;
@@ -518,7 +586,7 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
   }
 
   /* --------------------------------------------------------------------------
-  7. NÚT "ĐÃ CHUYỂN KHOẢN": KHÓA THANH TOÁN + VẬN CHUYỂN -> TẠO ĐƠN & CHUYỂN SANG ORDERS.HTML
+  7. NÚT "ĐÃ CHUYỂN KHOẢN": KHÓA PHƯƠNG THỨC -> LƯU ĐƠN & CHUYỂN TRANG ORDERS.HTML
   -------------------------------------------------------------------------- */
   function initQrButtons() {
     const cancelBtn = document.getElementById("cancelQrBtn");
@@ -551,7 +619,7 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
 
       isBankTransferConfirmed = true;
 
-      // A. KHÓA TẤT CẢ PHƯƠNG THỨC THANH TOÁN
+      // KHÓA TẤT CẢ PHƯƠNG THỨC THANH TOÁN & VẬN CHUYỂN
       document.querySelectorAll('input[name="paymentMethod"]').forEach((radio) => {
         radio.disabled = true;
         const parentCard = radio.closest(".payment-card, .option-card");
@@ -562,7 +630,6 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
         }
       });
 
-      // B. KHÓA TẤT CẢ PHƯƠNG THỨC VẬN CHUYỂN
       document.querySelectorAll('input[name="shippingMethod"]').forEach((radio) => {
         radio.disabled = true;
         const parentCard = radio.closest(".shipping-card, .option-card");
@@ -577,7 +644,6 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
         window.showToast("Xác nhận chuyển khoản thành công! Đang chuyển đến đơn hàng đã đặt...", "success");
       }
 
-      // C. TỰ ĐỘNG KHỞI TẠO ĐƠN HÀNG VÀ CHUYỂN THẲNG TỚI TRANG ORDERS.HTML
       setTimeout(() => {
         completeOrder("bank");
       }, 1000);
@@ -585,7 +651,7 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
   }
 
   /* --------------------------------------------------------------------------
-  8. ĐIỀU HƯỚNG BƯỚC VÀ HOÀN TẤT ĐẶT HÀNG
+  8. ĐIỀU HƯỚNG BƯỚC & TẠO ĐƠN HÀNG
   -------------------------------------------------------------------------- */
   function setStep(step) {
     currentStep = step;
@@ -741,7 +807,7 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
     const shipOptions = document.querySelectorAll('input[name="shippingMethod"]');
     shipOptions.forEach((opt) => {
       opt.addEventListener("change", (e) => {
-        if (isBankTransferConfirmed) return; // Nếu đã khóa thì không cho chọn
+        if (isBankTransferConfirmed) return;
         selectedShippingMethod = e.target.value;
         document.querySelectorAll(".shipping-card").forEach((c) => c.classList.remove("is-selected"));
         e.target.closest(".option-card")?.classList.add("is-selected");
@@ -752,7 +818,7 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
     const payOptions = document.querySelectorAll('input[name="paymentMethod"]');
     payOptions.forEach((opt) => {
       opt.addEventListener("change", (e) => {
-        if (isBankTransferConfirmed) return; // Nếu đã khóa thì không cho chọn
+        if (isBankTransferConfirmed) return;
 
         document.querySelectorAll(".payment-card").forEach((c) => c.classList.remove("is-selected"));
         e.target.closest(".option-card")?.classList.add("is-selected");
@@ -772,7 +838,7 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
   }
 
   /* --------------------------------------------------------------------------
-  9. LƯU ĐƠN HÀNG THÀNH CÔNG VÀ TỰ ĐỘNG CHUYỂN HƯỚNG TỚI ORDERS.HTML
+  9. LƯU ĐƠN HÀNG THÀNH CÔNG VÀ CHUYỂN SANG ORDERS.HTML
   -------------------------------------------------------------------------- */
   function completeOrder(paymentType) {
     const cart = getCartData();
@@ -786,7 +852,21 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
 
     let subtotal = 0;
     cart.forEach((i) => (subtotal += (Number(i.price) || 0) * (Number(i.qty) || 1)));
-    const finalTotal = subtotal + shippingFee;
+
+    const coupon = getAppliedCoupon();
+    let discountFee = (coupon && coupon.type === "percent") ? Math.round(subtotal * (coupon.rate || 0.10)) : 0;
+    const isFreeshipCoupon = coupon && coupon.type === "freeship";
+
+    let calcShipping = shippingFee;
+    if (selectedShippingMethod === "express" || selectedShippingMethod === "150000") {
+      calcShipping = EXPRESS_SHIPPING_FEE;
+    } else if (subtotal >= FREE_SHIPPING_THRESHOLD || isFreeshipCoupon) {
+      calcShipping = 0;
+    } else {
+      calcShipping = DEFAULT_SHIPPING_FEE;
+    }
+
+    const finalTotal = Math.max(0, subtotal - discountFee + calcShipping);
     const orderCode = "#NX-" + Math.floor(100000 + Math.random() * 900000);
 
     let cleanPaymentLabel = "Thanh toán khi nhận hàng (COD)";
@@ -802,7 +882,10 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
       createdAt: new Date().toLocaleString("vi-VN"),
       customer: orderCustomerData,
       items: cart,
-      shippingFee: shippingFee,
+      subtotal: subtotal,
+      discountFee: discountFee,
+      couponCode: coupon ? coupon.code : null,
+      shippingFee: calcShipping,
       totalAmount: finalTotal,
       paymentMethod: cleanPaymentLabel,
       status: "active",
@@ -833,7 +916,7 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
     existingOrders.unshift(newOrder);
     localStorage.setItem(orderKey, JSON.stringify(existingOrders));
 
-    // Xóa giỏ hàng chuẩn theo tài khoản đang đăng nhập
+    // Xóa giỏ hàng và xóa voucher đã sử dụng
     if (window.cartManager && typeof window.cartManager.clear === "function") {
       window.cartManager.clear();
     } else if (window.storageService && typeof window.storageService.clearCart === "function") {
@@ -843,8 +926,10 @@ TỰ ĐỘNG LƯU ĐƠN HÀNG VÀ CHUYỂN HƯỚNG TỚI TRANG ORDERS.HTML KHI 
       localStorage.setItem("nexus_cart", JSON.stringify([]));
     }
 
+    clearAppliedCoupon();
+
     if (typeof window.showToast === "function") {
-      window.showToast(`Đặt hàng ${orderCode} thành công! Đang chuyển tới trang đơn hàng đã đặt...`, "success");
+      window.showToast(`Đặt hàng ${orderCode} thành công! Đang chuyển đến trang đơn hàng đã đặt...`, "success");
     }
 
     setTimeout(() => {
