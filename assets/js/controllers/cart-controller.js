@@ -1,136 +1,512 @@
-/* ==========================================================================
-NEXUS VR — controllers/cart-controller.js
-TẦNG 3 - CONTROLLERS: QUẢN LÝ GIỎ HÀNG, TÍNH PHÍ SHIP & MÃ GIẢM GIÁ
-========================================================================== */
-(function () {
-  "use strict";
+/* =========================================================
+   NEXUS VR — CART MANAGER
+   File: assets/js/modules/cart-manager.js
+   Manages cart state, color variants, free shipping threshold,
+   promo vouchers, and UI updates across all pages.
+   ========================================================= */
 
-  const FREE_SHIPPING_THRESHOLD = 50000000; // Ngưỡng 50.000.000 ₫ để nhận Freeship
-  const DEFAULT_SHIPPING_FEE = 30000;     // Phí giao hàng tiêu chuẩn: 30.000 ₫ khi chưa đủ chỉ tiêu
+(function (global) {
+  'use strict';
 
-  const COUPONS = {
+  const CART_KEY = 'nexus_cart';
+  const FREE_SHIPPING_THRESHOLD = 50000000; // 50.000.000đ
+  const VALID_COUPONS = {
     'KM10VR': { type: 'percent', rate: 0.10, label: 'Giảm 10%' },
+    'NEXUS10': { type: 'percent', rate: 0.10, label: 'Giảm 10%' },
     'FREESHIP': { type: 'freeship', rate: 0, label: 'Miễn phí vận chuyển' }
   };
 
   let activeCoupon = null;
 
-  const formatVND = (num) => (num || 0).toLocaleString("vi-VN") + " ₫";
-
-  document.addEventListener("DOMContentLoaded", initCartController);
-  if (document.readyState === "interactive" || document.readyState === "complete") {
-    initCartController();
-  }
-
-  function initCartController() {
-    if (window.__nexusCartInitialized) return;
-    window.__nexusCartInitialized = true;
-
-    renderCart();
-    bindEvents();
-  }
-
-  /* --------------------------------------------------------------------------
-  1. ĐỌC VÀ LƯU DỮ LIỆU GIỎ HÀNG
-  -------------------------------------------------------------------------- */
-  function getCart() {
-    if (window.cartManager && typeof window.cartManager.getCart === "function") {
-      return window.cartManager.getCart();
-    }
-    if (window.storageService && typeof window.storageService.getCart === "function") {
-      return window.storageService.getCart();
+  function getUserKeySuffix() {
+    if (window.storageService && typeof window.storageService.getUserKeySuffix === 'function') {
+      return window.storageService.getUserKeySuffix();
     }
     try {
-      return JSON.parse(localStorage.getItem("nexus_cart") || "[]");
-    } catch (e) {
+      const user = typeof window.getCurrentUser === 'function'
+        ? window.getCurrentUser()
+        : JSON.parse(localStorage.getItem('nexus_user') || 'null');
+
+      if (user && (user.email || user.account)) {
+        return '_' + (user.email || user.account).toLowerCase().replace(/[^a-z0-9]/g, '_');
+      }
+    } catch (e) {}
+    return '_guest';
+  }
+
+  function getStorageService() {
+    return (
+      window.storageService &&
+      typeof window.storageService.getCart === 'function' &&
+      typeof window.storageService.saveCart === 'function'
+    )
+      ? window.storageService
+      : null;
+  }
+
+  function readCart() {
+    const storageService = getStorageService();
+    try {
+      if (storageService) {
+        const cart = storageService.getCart();
+        return Array.isArray(cart) ? cart : [];
+      }
+      const key = CART_KEY + getUserKeySuffix();
+      const raw = localStorage.getItem(key) || localStorage.getItem(CART_KEY);
+      const cart = raw ? JSON.parse(raw) : [];
+      return Array.isArray(cart) ? cart : [];
+    } catch (error) {
+      console.warn('[cart-manager] Không đọc được giỏ hàng:', error);
       return [];
     }
   }
 
-  function saveCart(cart) {
-    if (window.cartManager && typeof window.cartManager.saveCart === "function") {
-      window.cartManager.saveCart(cart);
-    } else if (window.storageService && typeof window.storageService.saveCart === "function") {
-      window.storageService.saveCart(cart);
-    } else {
-      localStorage.setItem("nexus_cart", JSON.stringify(cart));
+  function writeCart(cart) {
+    const safeCart = Array.isArray(cart) ? cart : [];
+    const storageService = getStorageService();
+
+    try {
+      if (storageService) {
+        storageService.saveCart(safeCart);
+      } else {
+        const key = CART_KEY + getUserKeySuffix();
+        localStorage.setItem(key, JSON.stringify(safeCart));
+        localStorage.setItem(CART_KEY, JSON.stringify(safeCart));
+      }
+    } catch (error) {
+      console.error('[cart-manager] Không lưu được giỏ hàng:', error);
+      return false;
     }
-    window.dispatchEvent(new CustomEvent("nexus:cart-updated"));
+
+    notifyCartChanged(safeCart);
+    return true;
   }
 
-  /* --------------------------------------------------------------------------
-  2. HIỂN THỊ BẢNG SẢN PHẨM VÀ TÍNH TOÁN DỮ LIỆU
-  -------------------------------------------------------------------------- */
-  function renderCart() {
+  function normalizeQuantity(value) {
+    const qty = Number(value);
+    if (!Number.isFinite(qty)) return 1;
+    return Math.max(1, Math.floor(qty));
+  }
+
+  function normalizeCartItem(item) {
+    if (!item || typeof item !== 'object') return null;
+
+    const id = String(item.id ?? '').trim();
+    if (!id) return null;
+
+    const price = Number(item.price);
+    const qty = normalizeQuantity(item.qty);
+
+    return {
+      id,
+      name: String(item.name ?? 'Sản phẩm NEXUS VR'),
+      price: Number.isFinite(price) ? price : 0,
+      image: String(item.image ?? item.img ?? ''),
+      selectedColor: String(item.selectedColor || ''),
+      selectedColorHex: String(item.selectedColorHex || ''),
+      colorIndex: Number.isFinite(Number(item.colorIndex)) ? Number(item.colorIndex) : 0,
+      qty
+    };
+  }
+
+  function cleanCart(cart) {
+    const source = Array.isArray(cart) ? cart : [];
+    const result = [];
+
+    source.forEach((item) => {
+      const normalized = normalizeCartItem(item);
+      if (!normalized) return;
+
+      const existing = result.find(
+        (cartItem) => cartItem.id === normalized.id && cartItem.selectedColor === normalized.selectedColor
+      );
+
+      if (existing) {
+        existing.qty += normalized.qty;
+      } else {
+        result.push(normalized);
+      }
+    });
+
+    return result;
+  }
+
+  function getProductById(id) {
+    const products = (typeof PRODUCTS !== 'undefined' && Array.isArray(PRODUCTS))
+      ? PRODUCTS
+      : (window.PRODUCTS && Array.isArray(window.PRODUCTS) ? window.PRODUCTS : []);
+
+    return products.find((product) => String(product.id) === String(id)) || null;
+  }
+
+  function buildCartItemFromProduct(product, qty, colorNameOrIndex) {
+    if (!product) return null;
+
+    let chosenColor = null;
+    let chosenIndex = 0;
+
+    if (product.colors && product.colors.length > 0) {
+      if (typeof colorNameOrIndex === 'number' && product.colors[colorNameOrIndex]) {
+        chosenColor = product.colors[colorNameOrIndex];
+        chosenIndex = colorNameOrIndex;
+      } else if (typeof colorNameOrIndex === 'string' && colorNameOrIndex.trim()) {
+        const queryColor = colorNameOrIndex.trim().toLowerCase();
+        const foundIdx = product.colors.findIndex(
+          (c) => c && c.name && c.name.toLowerCase() === queryColor
+        );
+        if (foundIdx > -1) {
+          chosenColor = product.colors[foundIdx];
+          chosenIndex = foundIdx;
+        } else {
+          chosenColor = product.colors[0];
+          chosenIndex = 0;
+        }
+      } else {
+        chosenColor = product.colors[0];
+        chosenIndex = 0;
+      }
+    }
+
+    const imageSrc = chosenColor && chosenColor.image 
+      ? chosenColor.image 
+      : (product.images && product.images[0] ? product.images[0] : (product.image || 'assets/images/placeholder.svg'));
+
+    return {
+      id: String(product.id),
+      name: String(product.name ?? 'Sản phẩm NEXUS VR'),
+      price: Number(product.price) || 0,
+      image: imageSrc,
+      selectedColor: chosenColor ? (chosenColor.name || '') : '',
+      selectedColorHex: chosenColor ? (chosenColor.hex || '') : '',
+      colorIndex: chosenIndex,
+      qty: normalizeQuantity(qty)
+    };
+  }
+
+  function getCart() {
+    return cleanCart(readCart());
+  }
+
+  function getTotalQuantity(cart = getCart()) {
+    return cart.reduce((total, item) => total + normalizeQuantity(item.qty), 0);
+  }
+
+  function getSubtotal(cart = getCart()) {
+    return cart.reduce((total, item) => total + (Number(item.price) || 0) * normalizeQuantity(item.qty), 0);
+  }
+
+  function formatVND(amount) {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      maximumFractionDigits: 0
+    }).format(Math.max(0, Number(amount) || 0));
+  }
+
+  function updateBadge(count = getTotalQuantity()) {
+    const badges = document.querySelectorAll('#cartBadge, #cart-badge, .cart-badge, .navbar-cart-count, #navCartCount, [data-cart-count]');
+    badges.forEach((badge) => {
+      badge.textContent = String(count);
+      badge.hidden = count <= 0;
+      if (count > 0) {
+        badge.style.display = 'inline-flex';
+      }
+    });
+  }
+
+  function notifyCartChanged(cart = getCart()) {
+    const detail = {
+      cart: cleanCart(cart),
+      totalQuantity: getTotalQuantity(cart)
+    };
+
+    updateBadge(detail.totalQuantity);
+    window.dispatchEvent(new CustomEvent('nexus:cart-updated', { detail }));
+  }
+
+  function add(id, qty = 1, colorNameOrIndex = null) {
+    const product = getProductById(id);
+
+    if (!product) {
+      console.warn(`[cart-manager] Không tìm thấy sản phẩm id="${id}" trong PRODUCTS.`);
+      return false;
+    }
+
+    const amount = normalizeQuantity(qty);
+    const newItem = buildCartItemFromProduct(product, amount, colorNameOrIndex);
+
+    if (!newItem) return false;
+
     const cart = getCart();
-    const tableBody = document.getElementById("cartTableBody");
-    const tableWrap = document.getElementById("cartTableWrap");
-    const emptyNotice = document.getElementById("emptyCartNotice");
-    const clearBtn = document.getElementById("clearCartBtn");
+    const existing = cart.find(
+      (item) => String(item.id) === String(newItem.id) && item.selectedColor === newItem.selectedColor
+    );
 
-    if (!tableBody) return;
+    if (existing) {
+      existing.qty += amount;
+    } else {
+      cart.push(newItem);
+    }
 
-    if (!cart || cart.length === 0) {
+    const saved = writeCart(cart);
+
+    if (saved) {
+      notifyCartChanged(cart);
+      const colorLabel = newItem.selectedColor ? ` (${newItem.selectedColor})` : '';
+      if (typeof window.showToast === 'function') {
+        window.showToast(`Đã thêm ${amount} ${newItem.name}${colorLabel} vào giỏ hàng`, 'success');
+      }
+    }
+
+    return saved;
+  }
+
+  function remove(index) {
+    const cart = getCart();
+    const numericIndex = Number(index);
+
+    if (!Number.isInteger(numericIndex) || !cart[numericIndex]) {
+      return false;
+    }
+
+    cart.splice(numericIndex, 1);
+    return writeCart(cart);
+  }
+
+  function updateQuantity(index, change) {
+    const cart = getCart();
+    const numericIndex = Number(index);
+
+    if (!Number.isInteger(numericIndex) || !cart[numericIndex]) {
+      return false;
+    }
+
+    const nextQty = normalizeQuantity(cart[numericIndex].qty) + Number(change || 0);
+
+    if (nextQty <= 0) {
+      return remove(numericIndex);
+    } else {
+      cart[numericIndex].qty = Math.floor(nextQty);
+    }
+
+    return writeCart(cart);
+  }
+
+  function updateItemColor(index, newColorIndex) {
+    const cart = getCart();
+    const numericIndex = Number(index);
+
+    if (!Number.isInteger(numericIndex) || !cart[numericIndex]) return false;
+
+    const item = cart[numericIndex];
+    const product = getProductById(item.id);
+    if (!product || !product.colors || !product.colors[newColorIndex]) return false;
+
+    const chosenColor = product.colors[newColorIndex];
+    item.selectedColor = chosenColor.name;
+    item.selectedColorHex = chosenColor.hex;
+    item.colorIndex = newColorIndex;
+    item.image = chosenColor.image || (product.images && product.images[0] ? product.images[0] : item.image);
+
+    const saved = writeCart(cart);
+    if (saved && typeof window.showToast === 'function') {
+      window.showToast(`Đã đổi màu sản phẩm thành ${chosenColor.name}`, 'info');
+    }
+    return saved;
+  }
+
+  function setQuantity(index, quantity) {
+    const cart = getCart();
+    const numericIndex = Number(index);
+
+    if (!Number.isInteger(numericIndex) || !cart[numericIndex]) {
+      return false;
+    }
+
+    const nextQty = Math.floor(Number(quantity));
+
+    if (!Number.isFinite(nextQty) || nextQty <= 0) {
+      return remove(numericIndex);
+    } else {
+      cart[numericIndex].qty = nextQty;
+    }
+
+    return writeCart(cart);
+  }
+
+  function clear() {
+    return writeCart([]);
+  }
+
+  function applyCoupon(code) {
+    const normalized = String(code || '').trim().toUpperCase();
+
+    if (VALID_COUPONS[normalized]) {
+      activeCoupon = {
+        code: normalized,
+        ...VALID_COUPONS[normalized]
+      };
+      return {
+        valid: true,
+        code: normalized,
+        label: activeCoupon.label,
+        rate: activeCoupon.rate
+      };
+    }
+
+    activeCoupon = null;
+    return { valid: false, code: null, rate: 0 };
+  }
+
+  function getDiscount(subtotal = getSubtotal()) {
+    if (!activeCoupon) return 0;
+    if (activeCoupon.type === 'percent') {
+      return Math.round(subtotal * activeCoupon.rate);
+    }
+    return 0;
+  }
+
+  function getFinalTotal(subtotal = getSubtotal()) {
+    return Math.max(0, subtotal - getDiscount(subtotal));
+  }
+
+  function renderCartTable() {
+    const tbody = document.getElementById('cartTableBody');
+    const tableWrap = document.getElementById('cartTableWrap');
+    const emptyNotice = document.getElementById('emptyCartNotice');
+    const crossSellMount = document.getElementById('cartCrossSellMount');
+
+    if (!tbody) return;
+
+    const cart = getCart();
+    tbody.innerHTML = '';
+
+    if (cart.length === 0) {
       if (tableWrap) tableWrap.hidden = true;
       if (emptyNotice) emptyNotice.hidden = false;
-      if (clearBtn) clearBtn.style.display = "none";
-      renderFreeShippingProgress(0);
+      if (crossSellMount) renderCrossSell([]);
+      updateBadge(0);
       renderSummary(0);
+      renderFreeShippingProgress(0);
       return;
     }
 
     if (tableWrap) tableWrap.hidden = false;
     if (emptyNotice) emptyNotice.hidden = true;
-    if (clearBtn) clearBtn.style.display = "inline-block";
-
-    tableBody.innerHTML = "";
-    let subtotal = 0;
 
     cart.forEach((item, index) => {
-      const price = Number(item.price) || 0;
-      const qty = Number(item.qty) || 1;
-      const lineTotal = price * qty;
-      subtotal += lineTotal;
+      const product = getProductById(item.id);
+      const row = document.createElement('tr');
 
-      const name = item.name || "Sản phẩm NEXUS VR";
-      const img = item.image || "assets/images/placeholder.svg";
-      const color = item.selectedColor || "Xám Than";
+      const productCell = document.createElement('td');
+      const productBox = document.createElement('div');
+      productBox.className = 'cart-product';
 
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="cart-product-cell">
-          <div class="cart-product-info" style="display: flex; align-items: center; gap: 16px;">
-            <img src="${img}" alt="${name}" class="cart-product-img" style="width: 64px; height: 64px; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null; this.src='assets/images/placeholder.svg';">
-            <div>
-              <strong class="cart-product-name" style="display: block; font-size: 0.95rem;">${name}</strong>
-              <span class="cart-product-meta" style="font-size: 0.825rem; color: var(--text-secondary);">Màu: ${color}</span>
-            </div>
-          </div>
-        </td>
-        <td class="cart-price-cell"><strong>${formatVND(price)}</strong></td>
-        <td class="cart-qty-cell">
-          <div class="cart-qty-control" style="display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 6px;">
-            <button type="button" class="btn-qty-minus" data-index="${index}" style="padding: 4px 10px; cursor: pointer; background: none; border: none;">-</button>
-            <span style="padding: 0 10px; font-weight: 600;">${qty}</span>
-            <button type="button" class="btn-qty-plus" data-index="${index}" style="padding: 4px 10px; cursor: pointer; background: none; border: none;">+</button>
-          </div>
-        </td>
-        <td class="cart-subtotal-cell"><strong style="color: var(--accent);">${formatVND(lineTotal)}</strong></td>
-        <td class="cart-action-cell">
-          <button type="button" class="btn-remove-item" data-index="${index}" title="Xóa sản phẩm" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); font-size: 1.2rem;">&times;</button>
-        </td>
-      `;
-      tableBody.appendChild(tr);
+      const image = document.createElement('img');
+      image.className = 'cart-product__image';
+      image.src = item.image || 'assets/images/placeholder.svg';
+      image.alt = item.name;
+      image.loading = 'lazy';
+      image.onerror = function () {
+        this.onerror = null;
+        this.src = 'assets/images/placeholder.svg';
+      };
+
+      const info = document.createElement('div');
+      info.className = 'cart-product__info';
+
+      const name = document.createElement('a');
+      name.className = 'cart-product__name';
+      name.href = `product.html?id=${encodeURIComponent(item.id)}`;
+      name.textContent = item.name;
+
+      const colorWrap = document.createElement('div');
+      colorWrap.className = 'cart-product__color-selector';
+
+      if (product && product.colors && product.colors.length > 0) {
+        const select = document.createElement('select');
+        select.className = 'cart-color-select';
+        select.ariaLabel = `Chọn màu cho ${item.name}`;
+
+        product.colors.forEach((c, cIdx) => {
+          const opt = document.createElement('option');
+          opt.value = cIdx;
+          opt.textContent = `Màu: ${c.name}`;
+          if (c.name === item.selectedColor || cIdx === item.colorIndex) {
+            opt.selected = true;
+          }
+          select.appendChild(opt);
+        });
+
+        select.addEventListener('change', (e) => {
+          updateItemColor(index, Number(e.target.value));
+        });
+
+        const colorDot = document.createElement('span');
+        colorDot.className = 'cart-color-dot';
+        colorDot.style.backgroundColor = item.selectedColorHex || '#9F9FA1';
+
+        colorWrap.append(colorDot, select);
+      } else {
+        colorWrap.textContent = item.selectedColor ? `Màu: ${item.selectedColor}` : '';
+      }
+
+      info.append(name, colorWrap);
+      productBox.append(image, info);
+      productCell.appendChild(productBox);
+
+      const priceCell = document.createElement('td');
+      const price = document.createElement('span');
+      price.className = 'cart-price';
+      price.textContent = formatVND(item.price);
+      priceCell.appendChild(price);
+
+      const qtyCell = document.createElement('td');
+      const qtyBox = document.createElement('div');
+      qtyBox.className = 'cart-qty';
+
+      const minus = document.createElement('button');
+      minus.type = 'button';
+      minus.textContent = '−';
+      minus.addEventListener('click', () => updateQuantity(index, -1));
+
+      const qtyText = document.createElement('span');
+      qtyText.textContent = String(item.qty);
+
+      const plus = document.createElement('button');
+      plus.type = 'button';
+      plus.textContent = '+';
+      plus.addEventListener('click', () => updateQuantity(index, 1));
+
+      qtyBox.append(minus, qtyText, plus);
+      qtyCell.appendChild(qtyBox);
+
+      const totalCell = document.createElement('td');
+      const total = document.createElement('span');
+      total.className = 'cart-item-total';
+      total.textContent = formatVND(item.price * item.qty);
+      totalCell.appendChild(total);
+
+      const removeCell = document.createElement('td');
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'cart-remove-btn';
+      removeBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+      removeBtn.title = 'Xóa sản phẩm';
+      removeBtn.addEventListener('click', () => remove(index));
+      removeCell.appendChild(removeBtn);
+
+      row.append(productCell, priceCell, qtyCell, totalCell, removeCell);
+      tbody.appendChild(row);
     });
 
-    renderFreeShippingProgress(subtotal);
+    const subtotal = getSubtotal(cart);
+    updateBadge(getTotalQuantity(cart));
     renderSummary(subtotal);
-    bindTableActions();
+    renderFreeShippingProgress(subtotal);
+    if (crossSellMount) renderCrossSell(cart);
   }
 
-  /* --------------------------------------------------------------------------
-  3. TIẾN TRÌNH MIỄN PHÍ VẬN CHUYỂN
-  -------------------------------------------------------------------------- */
   function renderFreeShippingProgress(subtotal) {
     const progressFill = document.getElementById('freeShipProgressFill');
     const statusText = document.getElementById('freeShipStatusText');
@@ -138,7 +514,7 @@ TẦNG 3 - CONTROLLERS: QUẢN LÝ GIỎ HÀNG, TÍNH PHÍ SHIP & MÃ GIẢM GI�
 
     if (subtotal >= FREE_SHIPPING_THRESHOLD) {
       progressFill.style.width = '100%';
-      statusText.innerHTML = `<strong>Chúc mừng!</strong> Bạn đã đạt chỉ tiêu và được <strong>Miễn phí vận chuyển</strong>.`;
+      statusText.innerHTML = `<strong>Chúc mừng!</strong> Bạn đã được <strong>Miễn phí vận chuyển</strong> cho đơn hàng này.`;
     } else {
       const remaining = FREE_SHIPPING_THRESHOLD - subtotal;
       const percent = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
@@ -147,164 +523,153 @@ TẦNG 3 - CONTROLLERS: QUẢN LÝ GIỎ HÀNG, TÍNH PHÍ SHIP & MÃ GIẢM GI�
     }
   }
 
-  /* --------------------------------------------------------------------------
-  4. CẬP NHẬT TÓM TẮT ĐƠN HÀNG & TÍNH PHÍ VẬN CHUYỂN MỚI
-  -------------------------------------------------------------------------- */
   function renderSummary(subtotal) {
     const subTotalEl = document.getElementById('subTotal');
     const discountRow = document.getElementById('discountRow');
     const couponCodeLabel = document.getElementById('couponCodeLabel');
-    const discountAmountEl = document.getElementById('discountAmount');
-    const shippingEl = document.querySelector('.shipping-free') || document.getElementById('shippingFeeDisplay');
-    const originalTotalEl = document.getElementById('originalTotal');
-    const finalTotalEl = document.getElementById('finalTotal');
+    const discountAmount = document.getElementById('discountAmount');
+    const originalTotal = document.getElementById('originalTotal');
+    const finalTotal = document.getElementById('finalTotal');
+    const checkoutBtn = document.getElementById('checkoutBtn');
 
-    if (subTotalEl) subTotalEl.textContent = formatVND(subtotal);
+    if (!subTotalEl || !finalTotal) return;
 
-    // 1. Tính số tiền Giảm giá từ Coupon
-    let discountVal = 0;
-    if (activeCoupon) {
-      if (activeCoupon.type === 'percent') {
-        discountVal = Math.round(subtotal * activeCoupon.rate);
-      }
+    const discount = getDiscount(subtotal);
+    const final = Math.max(0, subtotal - discount);
+
+    subTotalEl.textContent = formatVND(subtotal);
+    finalTotal.textContent = formatVND(final);
+
+    if (discount > 0) {
       if (discountRow) discountRow.hidden = false;
-      if (couponCodeLabel) couponCodeLabel.textContent = `(${activeCoupon.code || ''})`;
-      if (discountAmountEl) discountAmountEl.textContent = `- ${formatVND(discountVal)}`;
+      if (couponCodeLabel) couponCodeLabel.textContent = `(${activeCoupon ? activeCoupon.code : ''})`;
+      if (discountAmount) discountAmount.textContent = `-${formatVND(discount)}`;
+      if (originalTotal) {
+        originalTotal.hidden = false;
+        originalTotal.textContent = formatVND(subtotal);
+      }
     } else {
       if (discountRow) discountRow.hidden = true;
+      if (originalTotal) originalTotal.hidden = true;
     }
 
-    // 2. Phí vận chuyển: Đủ chỉ tiêu >= 50 triệu HOẶC dùng mã FREESHIP => Miễn phí (0 ₫), Ngược lại => 30.000 ₫
-    const isFreeshipEligible = (subtotal >= FREE_SHIPPING_THRESHOLD) || (activeCoupon && activeCoupon.type === 'freeship');
-    const actualShippingFee = (subtotal > 0 && !isFreeshipEligible) ? DEFAULT_SHIPPING_FEE : 0;
-
-    if (shippingEl) {
-      if (subtotal === 0) {
-        shippingEl.textContent = "0 ₫";
-        shippingEl.style.color = "var(--text-primary)";
-      } else if (actualShippingFee === 0) {
-        shippingEl.textContent = "Miễn phí";
-        shippingEl.style.color = "var(--success, #2e7d32)";
-      } else {
-        shippingEl.textContent = formatVND(actualShippingFee);
-        shippingEl.style.color = "var(--text-primary)";
-      }
-    }
-
-    // 3. Tính Tổng cộng = Tạm tính - Giảm giá + Phí vận chuyển
-    const finalTotal = subtotal === 0 ? 0 : Math.max(0, subtotal - discountVal + actualShippingFee);
-
-    if (originalTotalEl) {
-      if (discountVal > 0) {
-        originalTotalEl.hidden = false;
-        originalTotalEl.textContent = formatVND(subtotal + actualShippingFee);
-      } else {
-        originalTotalEl.hidden = true;
-      }
-    }
-
-    if (finalTotalEl) {
-      finalTotalEl.textContent = formatVND(finalTotal);
+    if (checkoutBtn) {
+      checkoutBtn.disabled = subtotal <= 0;
     }
   }
 
-  /* --------------------------------------------------------------------------
-  5. XỬ LÝ TƯƠNG TÁC SỐ LƯỢNG & NÚT BẤM GIỎ HÀNG
-  -------------------------------------------------------------------------- */
-  function bindTableActions() {
-    const cart = getCart();
+  function renderCrossSell(cart) {
+    const container = document.getElementById('cartCrossSellMount');
+    if (!container || typeof PRODUCTS === 'undefined') return;
 
-    document.querySelectorAll(".btn-qty-minus").forEach((btn) => {
-      btn.addEventListener("click", function () {
-        const idx = Number(this.getAttribute("data-index"));
-        if (cart[idx]) {
-          if (cart[idx].qty > 1) {
-            cart[idx].qty--;
-          } else {
-            cart.splice(idx, 1);
-          }
-          saveCart(cart);
-          renderCart();
-        }
-      });
-    });
+    const cartIds = cart.map((i) => i.id);
+    const suggestions = PRODUCTS.filter((p) => !cartIds.includes(String(p.id))).slice(0, 3);
 
-    document.querySelectorAll(".btn-qty-plus").forEach((btn) => {
-      btn.addEventListener("click", function () {
-        const idx = Number(this.getAttribute("data-index"));
-        if (cart[idx]) {
-          cart[idx].qty = (Number(cart[idx].qty) || 1) + 1;
-          saveCart(cart);
-          renderCart();
-        }
-      });
-    });
+    if (suggestions.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
 
-    document.querySelectorAll(".btn-remove-item").forEach((btn) => {
-      btn.addEventListener("click", function () {
-        const idx = Number(this.getAttribute("data-index"));
-        if (cart[idx]) {
-          cart.splice(idx, 1);
-          saveCart(cart);
-          renderCart();
-          if (typeof window.showToast === "function") window.showToast("Đã xóa sản phẩm khỏi giỏ hàng", "info");
-        }
-      });
-    });
+    container.innerHTML = `
+      <div class="cart-cross-sell">
+        <h3 class="cart-cross-sell__title">Có thể bạn cũng thích</h3>
+        <div class="cart-cross-sell__grid">
+          ${suggestions
+            .map((p) => {
+              const img = p.images && p.images[0] ? p.images[0] : 'assets/images/placeholder.svg';
+              return `
+                <div class="cross-sell-item">
+                  <img src="${img}" alt="${p.name}" class="cross-sell-item__img" loading="lazy">
+                  <div class="cross-sell-item__info">
+                    <h4 class="cross-sell-item__name">${p.name}</h4>
+                    <span class="cross-sell-item__price">${formatVND(p.price)}</span>
+                  </div>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="window.cartManager.add('${p.id}', 1)">
+                    + Thêm
+                  </button>
+                </div>
+              `;
+            })
+            .join('')}
+        </div>
+      </div>
+    `;
   }
 
   function bindEvents() {
-    // Xóa tất cả sản phẩm
-    const clearBtn = document.getElementById("clearCartBtn");
-    if (clearBtn) {
-      clearBtn.addEventListener("click", function () {
-        if (confirm("Bạn có chắc chắn muốn xóa toàn bộ giỏ hàng?")) {
-          saveCart([]);
-          renderCart();
-          if (typeof window.showToast === "function") window.showToast("Đã xóa toàn bộ giỏ hàng", "info");
-        }
-      });
-    }
+    window.addEventListener('nexus:cart-updated', () => {
+      renderCartTable();
+      updateBadge();
+    });
 
-    // Áp dụng Mã giảm giá
-    const applyBtn = document.getElementById("btnApplyCoupon");
-    const couponInput = document.getElementById("couponInput");
-    const couponMessage = document.getElementById("couponMessage");
+    window.addEventListener('storage', (event) => {
+      if (event.key && event.key.startsWith(CART_KEY)) {
+        renderCartTable();
+        updateBadge();
+      }
+    });
 
-    if (applyBtn && couponInput) {
-      applyBtn.addEventListener("click", function () {
-        const code = couponInput.value.trim().toUpperCase();
-        if (!code) return;
-
-        if (COUPONS[code]) {
-          activeCoupon = { ...COUPONS[code], code };
-          if (couponMessage) {
-            couponMessage.textContent = `Đã áp dụng mã ${code} thành công!`;
-            couponMessage.style.color = "var(--success, #2e7d32)";
-          }
-          if (typeof window.showToast === "function") window.showToast(`Áp dụng mã ${code} thành công!`, "success");
-        } else {
-          if (couponMessage) {
-            couponMessage.textContent = "Mã không hợp lệ. Thử mã KM10VR hoặc FREESHIP.";
-            couponMessage.style.color = "var(--error, #d32f2f)";
-          }
-          if (typeof window.showToast === "function") window.showToast("Mã giảm giá không hợp lệ!", "error");
-        }
-        renderCart();
-      });
-    }
-
-    // Chuyển sang bước Thanh toán
-    const checkoutBtn = document.getElementById("checkoutBtn");
-    if (checkoutBtn) {
-      checkoutBtn.addEventListener("click", function () {
+    // CHUYỂN TRANG SANG CHECKOUT KHI BẤM NÚT THANH TOÁN TẠI CART.HTML
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('#checkoutBtn, .btn-checkout, [data-action="checkout"]');
+      if (btn) {
+        e.preventDefault();
         const cart = getCart();
-        if (!cart || cart.length === 0) {
-          if (typeof window.showToast === "function") window.showToast("Giỏ hàng của bạn đang trống!", "warning");
-          return;
+        if (cart.length > 0) {
+          window.location.href = 'checkout.html';
+        } else {
+          if (typeof window.showToast === 'function') {
+            window.showToast('Giỏ hàng của bạn đang trống!', 'warning');
+          }
         }
-        window.location.href = "checkout.html";
-      });
-    }
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => updateBadge());
+    document.addEventListener('nexus:navbar-loaded', () => updateBadge());
+    window.addEventListener('pageshow', () => updateBadge());
+    window.addEventListener('load', () => updateBadge());
   }
-})();
+
+  function init() {
+    bindEvents();
+    const cleaned = cleanCart(readCart());
+
+    if (JSON.stringify(cleaned) !== JSON.stringify(readCart())) {
+      writeCart(cleaned);
+    }
+
+    updateBadge(getTotalQuantity(cleaned));
+    renderCartTable();
+  }
+
+  // EXPORT TOÀN CỤC
+  global.cartManager = {
+    add,
+    remove,
+    updateQuantity,
+    updateItemColor,
+    setQuantity,
+    clear,
+    clearCart: clear,
+    getCart,
+    getTotalQuantity,
+    getSubtotal,
+    formatVND,
+    applyCoupon,
+    getDiscount,
+    getFinalTotal,
+    renderCartTable,
+    updateBadge
+  };
+
+  global.addToCart = function (id, qty = 1, colorNameOrIndex = null) {
+    return add(id, qty, colorNameOrIndex);
+  };
+
+  global.addProductToCart = function (id, qty = 1, colorNameOrIndex = null) {
+    return add(id, qty, colorNameOrIndex);
+  };
+
+  document.addEventListener('DOMContentLoaded', init);
+})(typeof window !== 'undefined' ? window : this);

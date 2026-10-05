@@ -1,11 +1,14 @@
 /* ==========================================================================
 NEXUS VR — controllers/orders-controller.js
 QUẢN LÝ ĐƠN HÀNG PHÂN LẬP THEO TÀI KHOẢN (USER-SCOPED ORDERS)
+XÁC NHẬN "ĐÃ NHẬN" VÀ "HỦY ĐƠN" QUA BẢNG MODAL APPLE GLASSMORPHISM
 ========================================================================== */
 (function () {
   "use strict";
 
   let currentTab = "active";
+  let pendingOrderIdToConfirm = null; // Lưu ID đơn hàng chờ xác nhận "Đã nhận"
+  let pendingOrderIdToCancel = null;  // Lưu ID đơn hàng chờ xác nhận "Hủy đơn"
 
   const formatVND = (num) => (num || 0).toLocaleString("vi-VN") + " ₫";
 
@@ -13,6 +16,8 @@ QUẢN LÝ ĐƠN HÀNG PHÂN LẬP THEO TÀI KHOẢN (USER-SCOPED ORDERS)
 
   function initOrdersController() {
     initTabs();
+    initConfirmReceivedModal();
+    initConfirmCancelModal();
     renderOrders();
   }
 
@@ -150,40 +155,130 @@ QUẢN LÝ ĐƠN HÀNG PHÂN LẬP THEO TÀI KHOẢN (USER-SCOPED ORDERS)
   }
 
   function bindOrderActionEvents() {
-    // HỦY ĐƠN HÀNG
+    // 1. BẤM "HỦY ĐƠN" -> MỞ MODAL XÁC NHẬN HỦY ĐƠN APPLE GLASSMORPHISM
     document.querySelectorAll(".btn-cancel").forEach((btn) => {
       btn.addEventListener("click", function () {
-        const orderId = this.getAttribute("data-id");
-        if (confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) {
-          const orders = getOrders();
-          const target = orders.find((o) => o.id === orderId);
-          if (target) {
-            target.status = "cancelled";
-            target.statusText = "Đã hủy đơn hàng";
-            saveOrders(orders);
-            renderOrders();
-            if (typeof window.showToast === "function") window.showToast("Đã hủy đơn hàng thành công.", "info");
-          }
-        }
+        pendingOrderIdToCancel = this.getAttribute("data-id");
+        openConfirmCancelModal();
       });
     });
 
-    // BẤM "ĐÃ NHẬN" -> CHUYỂN SANG ĐÃ MUA
+    // 2. BẤM "ĐÃ NHẬN" -> MỞ MODAL XÁC NHẬN ĐÃ NHẬN APPLE GLASSMORPHISM
     document.querySelectorAll(".btn-received").forEach((btn) => {
       btn.addEventListener("click", function () {
-        const orderId = this.getAttribute("data-id");
-        if (confirm("Xác nhận bạn đã nhận được sản phẩm?")) {
-          const orders = getOrders();
-          const target = orders.find((o) => o.id === orderId);
-          if (target) {
-            target.status = "completed";
-            target.statusText = "Giao hàng thành công";
-            saveOrders(orders);
-            renderOrders();
-            if (typeof window.showToast === "function") window.showToast("Xác nhận đã nhận hàng thành công!", "success");
-          }
-        }
+        pendingOrderIdToConfirm = this.getAttribute("data-id");
+        openConfirmReceivedModal();
       });
+    });
+  }
+
+  /* --------------------------------------------------------------------------
+  3. BỘ ĐIỀU KHIỂN MODAL XÁC NHẬN "ĐÃ NHẬN HÀNG" (APPLE STYLE)
+  -------------------------------------------------------------------------- */
+  function openConfirmReceivedModal() {
+    const modal = document.getElementById("confirmReceivedModal");
+    if (modal) modal.hidden = false;
+  }
+
+  function closeConfirmReceivedModal() {
+    const modal = document.getElementById("confirmReceivedModal");
+    if (modal) modal.hidden = true;
+    pendingOrderIdToConfirm = null;
+  }
+
+  function initConfirmReceivedModal() {
+    const modal = document.getElementById("confirmReceivedModal");
+    const cancelBtn = document.getElementById("btnCancelReceivedModal");
+    const confirmBtn = document.getElementById("btnConfirmReceivedModal");
+
+    // Bấm "Hủy" -> Đóng modal, giữ nguyên đơn hàng, KHÔNG thông báo
+    cancelBtn?.addEventListener("click", closeConfirmReceivedModal);
+
+    // Bấm "Xác nhận" -> Đổi trạng thái đơn sang "completed" + Hiện Toast thành công
+    confirmBtn?.addEventListener("click", () => {
+      if (!pendingOrderIdToConfirm) return;
+
+      const orders = getOrders();
+      const target = orders.find((o) => o.id === pendingOrderIdToConfirm);
+
+      if (target) {
+        target.status = "completed";
+        target.statusText = "Giao hàng thành công";
+        saveOrders(orders);
+        closeConfirmReceivedModal();
+        renderOrders();
+
+        if (typeof window.showToast === "function") {
+          window.showToast("Xác nhận đã nhận hàng thành công!", "success");
+        }
+      }
+    });
+
+    // Bấm ra vùng mờ bên ngoài -> Đóng modal
+    modal?.addEventListener("click", (e) => {
+      if (e.target === modal) closeConfirmReceivedModal();
+    });
+
+    // Nhấn ESC -> Đóng modal
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal && !modal.hidden) {
+        closeConfirmReceivedModal();
+      }
+    });
+  }
+
+  /* --------------------------------------------------------------------------
+  4. BỘ ĐIỀU KHIỂN MODAL XÁC NHẬN "HỦY ĐƠN HÀNG" (APPLE STYLE)
+  -------------------------------------------------------------------------- */
+  function openConfirmCancelModal() {
+    const modal = document.getElementById("confirmCancelModal");
+    if (modal) modal.hidden = false;
+  }
+
+  function closeConfirmCancelModal() {
+    const modal = document.getElementById("confirmCancelModal");
+    if (modal) modal.hidden = true;
+    pendingOrderIdToCancel = null;
+  }
+
+  function initConfirmCancelModal() {
+    const modal = document.getElementById("confirmCancelModal");
+    const closeBtn = document.getElementById("btnCloseCancelModal");
+    const confirmBtn = document.getElementById("btnConfirmCancelModal");
+
+    // Bấm "Hủy" -> Đóng modal, giữ nguyên đơn hàng, KHÔNG thông báo
+    closeBtn?.addEventListener("click", closeConfirmCancelModal);
+
+    // Bấm "Xác nhận" -> Đổi trạng thái đơn sang "cancelled" + Hiện Toast báo đã hủy
+    confirmBtn?.addEventListener("click", () => {
+      if (!pendingOrderIdToCancel) return;
+
+      const orders = getOrders();
+      const target = orders.find((o) => o.id === pendingOrderIdToCancel);
+
+      if (target) {
+        target.status = "cancelled";
+        target.statusText = "Đã hủy đơn hàng";
+        saveOrders(orders);
+        closeConfirmCancelModal();
+        renderOrders();
+
+        if (typeof window.showToast === "function") {
+          window.showToast("Đã hủy đơn hàng thành công.", "info");
+        }
+      }
+    });
+
+    // Bấm ra vùng mờ bên ngoài -> Đóng modal
+    modal?.addEventListener("click", (e) => {
+      if (e.target === modal) closeConfirmCancelModal();
+    });
+
+    // Nhấn ESC -> Đóng modal
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal && !modal.hidden) {
+        closeConfirmCancelModal();
+      }
     });
   }
 })();

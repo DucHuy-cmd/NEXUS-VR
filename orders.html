@@ -176,6 +176,137 @@
     .btn-received:hover {
       opacity: 0.9;
     }
+
+    /* ==========================================================================
+    GIAO DIỆN MODAL APPLE GLASSMORPHISM (KÍNH MỜ NỀN)
+    ========================================================================== */
+    .apple-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.38);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: appleFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .apple-modal-overlay[hidden] {
+      display: none !important;
+    }
+
+    .apple-modal-card {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 400px;
+      padding: 28px 24px 24px;
+      text-align: center;
+      animation: applePopIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;
+    }
+
+    @keyframes appleFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes applePopIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .apple-modal-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+    }
+
+    .apple-modal-icon.green-icon {
+      background: rgba(46, 125, 50, 0.12);
+      color: #2e7d32;
+    }
+
+    .apple-modal-icon.red-icon {
+      background: rgba(211, 47, 47, 0.12);
+      color: #d32f2f;
+    }
+
+    .apple-modal-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #231f1c;
+      margin-bottom: 8px;
+    }
+
+    .apple-modal-desc {
+      font-size: 0.875rem;
+      color: #726657;
+      line-height: 1.5;
+      margin-bottom: 22px;
+    }
+
+    .apple-modal-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-apple-secondary {
+      flex: 1;
+      padding: 11px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(35, 31, 28, 0.12);
+      background: rgba(255, 255, 255, 0.8);
+      color: #231f1c;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-apple-secondary:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-apple-primary {
+      flex: 1;
+      padding: 11px 16px;
+      border-radius: 12px;
+      border: none;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-apple-primary.btn-apple-success {
+      background: #2e7d32;
+      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+    }
+    .btn-apple-primary.btn-apple-success:hover {
+      background: #236327;
+      box-shadow: 0 6px 16px rgba(46, 125, 50, 0.35);
+    }
+
+    .btn-apple-primary.btn-apple-danger {
+      background: #d32f2f;
+      box-shadow: 0 4px 12px rgba(211, 47, 47, 0.25);
+    }
+    .btn-apple-primary.btn-apple-danger:hover {
+      background: #b71c1c;
+      box-shadow: 0 6px 16px rgba(211, 47, 47, 0.35);
+    }
   </style>
 </head>
 <body data-page="orders">
@@ -214,6 +345,47 @@
     </div>
   </main>
 
+  <!-- MODAL 1: XÁC NHẬN ĐÃ NHẬN HÀNG (APPLE GLASSMORPHISM) -->
+  <div id="confirmReceivedModal" class="apple-modal-overlay" hidden>
+    <div class="apple-modal-card">
+      <div class="apple-modal-icon green-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="16 10 11 15 8 12"></polyline>
+        </svg>
+      </div>
+      <h3 class="apple-modal-title">Xác nhận đã nhận hàng?</h3>
+      <p class="apple-modal-desc">
+        Bạn có chắc chắn đã nhận đầy đủ sản phẩm và muốn chuyển đơn hàng này sang mục <strong>"Lịch sử đã mua"</strong> không?
+      </p>
+      <div class="apple-modal-actions">
+        <button type="button" id="btnCancelReceivedModal" class="btn-apple-secondary">Hủy</button>
+        <button type="button" id="btnConfirmReceivedModal" class="btn-apple-primary btn-apple-success">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: XÁC NHẬN HỦY ĐƠN HÀNG (APPLE GLASSMORPHISM) -->
+  <div id="confirmCancelModal" class="apple-modal-overlay" hidden>
+    <div class="apple-modal-card">
+      <div class="apple-modal-icon red-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </div>
+      <h3 class="apple-modal-title">Xác nhận hủy đơn hàng?</h3>
+      <p class="apple-modal-desc">
+        Bạn có chắc chắn muốn hủy đơn hàng này không? Đơn hàng sẽ được chuyển sang mục <strong>"Đơn hàng đã hủy"</strong>.
+      </p>
+      <div class="apple-modal-actions">
+        <button type="button" id="btnCloseCancelModal" class="btn-apple-secondary">Hủy</button>
+        <button type="button" id="btnConfirmCancelModal" class="btn-apple-primary btn-apple-danger">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
   <!-- FOOTER ROOT (Tự động nạp bởi layout-loader.js) -->
   <div id="footer-root"></div>
 
@@ -227,5 +399,6 @@
 
   <!-- TẦNG 3: CONTROLLER -->
   <script src="assets/js/controllers/orders-controller.js"></script>
+  
 </body>
 </html>

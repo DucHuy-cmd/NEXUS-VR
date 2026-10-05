@@ -4,136 +4,134 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thanh Toán | NEXUS VR — Quiet Luxury Spatial Computing</title>
-  <meta name="description" content="Thanh toán đơn hàng sản phẩm kính điện toán không gian NEXUS VR an toàn và tiện lợi.">
+  <meta name="description" content="Hoàn tất đơn hàng và trải nghiệm quy trình mua sắm an toàn, tinh tế tại NEXUS VR.">
   <meta name="theme-color" content="#F9F6F0">
-
-  <!-- FONTS -->
+  
+  <!-- FONTS: Space Grotesk & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- CSS FOUNDATION & COMPONENTS -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- TẦNG 1: FOUNDATION -->
   <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/reset.css">
   <link rel="stylesheet" href="assets/css/global.css">
+  
+  <!-- TẦNG 2: COMPONENTS -->
   <link rel="stylesheet" href="assets/css/components/navbar.css">
   <link rel="stylesheet" href="assets/css/components/footer.css">
   <link rel="stylesheet" href="assets/css/components/toast.css">
+  <link rel="stylesheet" href="assets/css/components/cart-drawer.css">
+  
+  <!-- TẦNG 3: PAGE CSS -->
   <link rel="stylesheet" href="assets/css/pages/checkout.css">
 </head>
-
 <body data-page="checkout">
-  <!-- NAVBAR ROOT -->
+
+  <!-- NAVBAR -->
   <div id="navbar-root"></div>
 
   <main class="checkout-page" id="main-content">
     <div class="checkout-container">
+      
       <!-- BREADCRUMB -->
       <nav class="checkout-breadcrumb" aria-label="Breadcrumb">
-        <a href="index.html">Trang chủ</a> <span>/</span>
-        <a href="cart.html">Giỏ hàng</a> <span>/</span>
+        <a href="index.html">Trang chủ</a>
+        <span>/</span>
+        <a href="cart.html">Giỏ hàng</a>
+        <span>/</span>
         <strong>Thanh toán</strong>
       </nav>
 
-      <!-- THÔNG BÁO GIỎ HÀNG TRỐNG -->
+      <!-- EMPTY STATE -->
       <div class="checkout-empty-state" id="checkoutEmptyNotice" hidden>
-        <h2>Giỏ hàng của bạn đang trống</h2>
-        <p style="color: var(--text-secondary); margin-top: 8px; margin-bottom: 24px;">Bạn chưa chọn sản phẩm nào để thanh toán.</p>
-        <a href="shop.html" class="btn btn-primary" style="padding: 12px 28px; border-radius: 999px; text-decoration: none; display: inline-block;">Khám phá cửa hàng</a>
+        <div style="margin-bottom: 12px;" aria-label="Giỏ hàng trống">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+        </div>
+        <h2 class="checkout-empty-title">Giỏ hàng của bạn đang trống</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 24px;">Bạn chưa chọn sản phẩm nào để thanh toán. Hãy ghé qua cửa hàng để khám phá.</p>
+        <a href="shop.html" class="btn btn-primary">Khám phá cửa hàng</a>
       </div>
 
-      <!-- BỐ CỤC CHÍNH THANH TOÁN -->
       <div id="checkoutMainLayout">
-        <!-- STEPPER THANH TOÁN 3 BƯỚC -->
-        <div class="checkout-stepper">
-          <div class="checkout-stepper__line">
-            <div class="checkout-stepper__line-fill" id="stepperLineFill"></div>
-          </div>
+        <!-- STEPPER -->
+        <div class="checkout-stepper" id="checkoutStepper">
+          <div class="checkout-stepper__line"><div class="checkout-stepper__line-fill" id="stepperLineFill"></div></div>
           <div class="checkout-step is-active" id="stepPill1">
             <div class="checkout-step__num">1</div>
-            <div class="checkout-step__label">GIAO HÀNG</div>
+            <div class="checkout-step__label">Thông Tin</div>
           </div>
           <div class="checkout-step" id="stepPill2">
             <div class="checkout-step__num">2</div>
-            <div class="checkout-step__label">THANH TOÁN</div>
+            <div class="checkout-step__label">Thanh Toán</div>
           </div>
           <div class="checkout-step" id="stepPill3">
             <div class="checkout-step__num">3</div>
-            <div class="checkout-step__label">HOÀN TẤT</div>
+            <div class="checkout-step__label">Hoàn Tất</div>
           </div>
         </div>
 
         <div class="checkout-layout">
-          <!-- BẢNG CHÍNH ĐIỀU HƯỚNG BƯỚC -->
+          <!-- CỘT CHÍNH (FORM) -->
           <div class="checkout-main-panel">
-            <!-- ==========================================
-            BƯỚC 1: THÔNG TIN GIAO HÀNG
-            ========================================== -->
+            
+            <!-- BƯỚC 1: THÔNG TIN GIAO HÀNG -->
             <div class="checkout-step-content" id="checkoutStep1">
-              <h2 class="checkout-section-title">Thông tin người nhận</h2>
+              <h2 class="checkout-section-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                Thông tin người nhận
+              </h2>
               
-              <!-- CỤM THẺ TÙY CHỌN THÔNG TIN GIAO HÀNG CĂN BẰNG NHAU -->
-              <div id="accountInfoSelection" style="display: none;">
-                <div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">Tùy chọn thông tin giao hàng:</div>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                  
-                  <!-- THẺ 1: SỬ DỤNG THÔNG TIN ĐÃ LƯU -->
-                  <label class="option-card is-selected" id="optSavedLabel">
+              <div id="accountInfoSelection" style="margin-bottom: 24px; display: none;">
+                <div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 10px;">Tùy chọn thông tin giao hàng:</div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <label class="option-card is-selected" id="optSavedLabel" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--accent); border-radius: 12px; cursor: pointer;">
                     <input type="radio" name="infoSource" value="saved" id="useSavedInfoRadio" checked>
-                    <div style="flex: 1;">
-                      <strong>Sử dụng thông tin tài khoản đã đăng ký</strong>
-                      <span id="savedInfoPreviewText">Đang tải thông tin...</span>
+                    <div>
+                      <strong style="display: block; font-size: 0.95rem;">Sử dụng thông tin tài khoản đã đăng ký</strong>
+                      <span id="savedInfoPreviewText" style="font-size: 0.825rem; color: var(--text-secondary);">Đang tải thông tin...</span>
                     </div>
                   </label>
-
-                  <!-- THẺ 2: NHẬP THÔNG TIN MỚI -->
-                  <label class="option-card" id="optCustomLabel">
+                  <label class="option-card" id="optCustomLabel" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; cursor: pointer;">
                     <input type="radio" name="infoSource" value="custom" id="useCustomInfoRadio">
-                    <div style="flex: 1;">
-                      <strong>Nhập thông tin giao hàng mới</strong>
-                      <span>Nhập thông tin người nhận khác cho đơn hàng này</span>
+                    <div>
+                      <strong style="display: block; font-size: 0.95rem;">Nhập thông tin giao hàng mới</strong>
+                      <span style="font-size: 0.825rem; color: var(--text-secondary);">Nhập thông tin người nhận khác cho đơn hàng này</span>
                     </div>
                   </label>
-
                 </div>
               </div>
 
-              <!-- FORM BẢNG NHẬP LIỆU GIAO HÀNG -->
               <div class="checkout-form-grid">
                 <div class="form-field full-col">
                   <label for="orderName" class="form-label">Họ và tên người nhận *</label>
                   <input type="text" id="orderName" class="form-input" placeholder="Trần Tưởng" required>
                   <span class="field-error" id="orderNameError"></span>
                 </div>
-                
                 <div class="form-field">
                   <label for="orderPhone" class="form-label">Số điện thoại *</label>
                   <input type="tel" id="orderPhone" class="form-input" placeholder="0988123456" required>
                   <span class="field-error" id="orderPhoneError"></span>
                 </div>
-                
                 <div class="form-field">
                   <label for="orderEmail" class="form-label">Địa chỉ Email *</label>
                   <input type="email" id="orderEmail" class="form-input" placeholder="tuong@gmail.com" required>
                   <span class="field-error" id="orderEmailError"></span>
                 </div>
-                
                 <div class="form-field">
                   <label for="orderCity" class="form-label">Tỉnh / Thành phố *</label>
-                  <select id="orderCity" class="form-input" required>
-                    <option value="">-- Chọn Tỉnh / Thành phố --</option>
-                  </select>
+                  <select id="orderCity" class="form-input" required><option value="">-- Chọn Tỉnh/Thành --</option></select>
                   <span class="field-error" id="orderCityError"></span>
                 </div>
-                
                 <div class="form-field">
                   <label for="orderWard" class="form-label">Phường / Xã *</label>
-                  <select id="orderWard" class="form-input" disabled required>
-                    <option value="">-- Chọn Phường / Xã --</option>
-                  </select>
+                  <select id="orderWard" class="form-input" disabled required><option value="">-- Chọn Phường/Xã --</option></select>
                   <span class="field-error" id="orderWardError"></span>
                 </div>
-                
                 <div class="form-field full-col">
                   <label for="orderAddress" class="form-label">Địa chỉ chi tiết (Số nhà, tên đường) *</label>
                   <input type="text" id="orderAddress" class="form-input" placeholder="Số 123 Nguyễn Huệ" required>
@@ -147,9 +145,7 @@
               </div>
             </div>
 
-            <!-- ==========================================
-            BƯỚC 2: PHƯƠNG THỨC THANH TOÁN & VẬN CHUYỂN
-            ========================================== -->
+            <!-- BƯỚC 2: PHƯƠNG THỨC THANH TOÁN -->
             <div class="checkout-step-content" id="checkoutStep2" hidden>
               <h2 class="checkout-section-title">Phương thức vận chuyển</h2>
               <div class="option-cards-group">
@@ -163,7 +159,6 @@
                   </div>
                   <div class="option-card__price">Miễn phí</div>
                 </label>
-
                 <label class="option-card shipping-card">
                   <div class="option-card__left">
                     <input type="radio" name="shippingMethod" value="150000" class="option-card__radio">
@@ -209,36 +204,36 @@
                 </label>
               </div>
 
-              <!-- KHỐI MÃ QR VIETQR CÓ BỘ ĐẾM 5 PHÚT & TRẠNG THÁI THÀNH CÔNG -->
-              <div id="bankTransferQrBlock" style="margin-top: 20px; padding: 24px; border-radius: 16px; background: #FFFFFF; border: 1.5px solid var(--accent, #A67C52); text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.04);" hidden>
+              <!-- KHỐI MÃ QR VIETQR CÓ BỘ ĐẾM VÀ TRẠNG THÁI THÀNH CÔNG -->
+              <div id="bankTransferQrBlock" style="margin-top: 20px; padding: 24px; border-radius: 16px; background: #fff; border: 1.5px solid var(--accent, #A67C52); text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.04);" hidden>
                 
                 <!-- HEADER KHỐI QR VÀ BỘ ĐẾM -->
                 <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px;" id="qrHeaderBox">
                   <span style="font-weight: 700; font-size: 1.05rem; color: var(--text-primary);">Mã QR chuyển khoản</span>
-                  <div id="qrTimerCountdown" style="background: #FFEBEE; border: 1px solid #EF5350; color: #D32F2F; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 1.1rem; font-family: monospace;">
+                  <div id="qrTimerCountdown" style="background: #ffebee; border: 1px solid #ef5350; color: #d32f2f; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 1.1rem; font-family: monospace;">
                     05:00
                   </div>
                 </div>
 
                 <!-- Ô CHỨA MÃ QR HOẶC DẤU TÍCH XANH THÀNH CÔNG -->
-                <div id="qrDisplayContainer" style="background: #FFFFFF; padding: 16px; border-radius: 12px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 220px; min-height: 220px; margin-bottom: 16px; border: 1px solid var(--border, #E5DECE); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div id="qrDisplayContainer" style="background: #fff; padding: 16px; border-radius: 12px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 220px; min-height: 220px; margin-bottom: 16px; border: 1px solid var(--border, #e0e0e0); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                   
-                  <!-- MÃ QR VIETQR -->
+                  <!-- MÃ QR BAN ĐẦU -->
                   <img id="qrCodeImg" src="" alt="Mã VietQR" style="width: 200px; height: 200px; object-fit: contain; display: block; margin: 0 auto;">
 
-                  <!-- DẤU TÍCH XANH LÁ CHUYỂN KHOẢN THÀNH CÔNG -->
+                  <!-- DẤU TÍCH VÀ DÒNG CHỮ CHUYỂN KHOẢN THÀNH CÔNG (ẨN BAN ĐẦU) -->
                   <div id="qrSuccessSuccessBox" style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 12px 0;">
-                    <div style="width: 72px; height: 72px; border-radius: 50%; background: #2E7D32; color: #FFFFFF; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(46,125,50,0.25);">
+                    <div style="width: 72px; height: 72px; border-radius: 50%; background: #2e7d32; color: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(46,125,50,0.25);">
                       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
                     </div>
-                    <span style="font-size: 1.15rem; font-weight: 700; color: #2E7D32;">Chuyển khoản thành công</span>
+                    <span style="font-size: 1.15rem; font-weight: 700; color: #2e7d32;">Chuyển khoản thành công</span>
                   </div>
 
                 </div>
 
-                <!-- THÔNG TIN NGÂN HÀNG -->
+                <!-- THÔNG TIN TÀI KHOẢN NGÂN HÀNG -->
                 <div style="text-align: left; max-width: 380px; margin: 0 auto 20px; background: var(--bg-secondary, #F2ECE4); padding: 14px 18px; border-radius: 12px; font-size: 0.875rem; line-height: 1.6;">
                   <div>Ngân hàng: <strong>MB BANK (Quân Đội)</strong></div>
                   <div>Số tài khoản: <strong>0399887766</strong></div>
@@ -246,31 +241,42 @@
                   <div>Nội dung CK: <strong id="qrMemoText" style="color: var(--accent, #A67C52);">NEXUS [SĐT]</strong></div>
                 </div>
 
-                <!-- NÚT BẤM DÒNG XÁC NHẬN -->
+                <!-- HÀNG NÚT BẤM -->
                 <div style="display: flex; gap: 12px; justify-content: center; max-width: 380px; margin: 0 auto;">
-                  <button type="button" id="cancelQrBtn" style="flex: 1; padding: 11px; border-radius: 10px; border: 1px solid var(--border); color: var(--text-secondary); background: #FFFFFF; font-weight: 600; cursor: pointer;">Đóng QR</button>
-                  <button type="button" id="confirmQrPaidBtn" style="flex: 1; padding: 11px; border-radius: 10px; border: none; background: #2E7D32; color: #FFFFFF; font-weight: 700; cursor: pointer; transition: all 0.2s;">Đã chuyển khoản</button>
+                  <button type="button" id="cancelQrBtn" style="flex: 1; padding: 11px; border-radius: 10px; border: 1px solid var(--border); color: var(--text-secondary); background: #fff; font-weight: 600; cursor: pointer;">Đóng QR</button>
+                  <button type="button" id="confirmQrPaidBtn" style="flex: 1; padding: 11px; border-radius: 10px; border: none; background: #2e7d32; color: #fff; font-weight: 700; cursor: pointer; transition: all 0.2s;">Đã chuyển khoản</button>
                 </div>
               </div>
 
-              <!-- KHỐI NHẬP THẺ TÍN DỤNG -->
-              <div id="creditCardBlock" style="margin-top: 16px; padding: 20px; border-radius: 12px; background: var(--bg-secondary, #F2ECE4);" hidden>
-                <div class="checkout-form-grid">
-                  <div class="form-field full-col">
-                    <label class="form-label">Số thẻ tín dụng (16 số) *</label>
-                    <input type="text" id="cardNumInput" class="form-input" placeholder="4123 4567 8901 9988" maxlength="19">
-                    <span class="field-error" id="cardNumError"></span>
+              <!-- KHỐI THANH TOÁN THẺ TÍN DỤNG (ĐÃ TÁCH 2 Ô THÁNG/NĂM & GIỚI HẠN 16 SỐ) -->
+              <div class="card-details-box" id="creditCardBlock" style="margin-top: 16px; padding: 20px; border-radius: 14px; background: var(--bg-secondary, #F2ECE4);" hidden>
+                <div class="checkout-form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                  
+                  <!-- Số thẻ tín dụng (Khóa cứng tối đa đúng 16 số, không thể gõ số 17) -->
+                  <div class="form-field" style="grid-column: span 2;">
+                    <label for="creditCardNumber" class="form-label" style="font-weight: 600; font-size: 0.875rem; display: block; margin-bottom: 6px;">Số thẻ tín dụng (16 số) *</label>
+                    <input type="text" id="creditCardNumber" class="form-input" placeholder="1234567890123456" maxlength="16" inputmode="numeric" autocomplete="cc-number">
+                    <span class="field-error" id="creditCardNumberError" style="color: #d32f2f; font-size: 0.8rem; margin-top: 4px; display: block;" aria-live="polite"></span>
                   </div>
+
+                  <!-- Ngày hết hạn (Chia 2 ô riêng MM và YY phân cách bằng dấu /) -->
                   <div class="form-field">
-                    <label class="form-label">Ngày hết hạn (MM/YY) *</label>
-                    <input type="text" id="cardExpInput" class="form-input" placeholder="12/28" maxlength="5">
-                    <span class="field-error" id="cardExpError"></span>
+                    <label class="form-label" style="font-weight: 600; font-size: 0.875rem; display: block; margin-bottom: 6px;">Ngày hết hạn (MM/YY) *</label>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <input type="text" id="creditCardExpMonth" class="form-input" placeholder="MM" maxlength="2" inputmode="numeric" style="text-align: center; width: 70px;">
+                      <span style="font-weight: 700; font-size: 1.2rem; color: var(--text-primary, #333);">/</span>
+                      <input type="text" id="creditCardExpYear" class="form-input" placeholder="YY" maxlength="2" inputmode="numeric" style="text-align: center; width: 70px;">
+                    </div>
+                    <span class="field-error" id="creditCardExpiryError" style="color: #d32f2f; font-size: 0.8rem; margin-top: 4px; display: block;" aria-live="polite"></span>
                   </div>
+
+                  <!-- Mã CVV (3 số) -->
                   <div class="form-field">
-                    <label class="form-label">Mã CVV *</label>
-                    <input type="password" id="cardCvvInput" class="form-input" placeholder="123" maxlength="3">
-                    <span class="field-error" id="cardCvvError"></span>
+                    <label for="creditCardCvv" class="form-label" style="font-weight: 600; font-size: 0.875rem; display: block; margin-bottom: 6px;">Mã CVV *</label>
+                    <input type="password" id="creditCardCvv" class="form-input" placeholder="123" maxlength="3" inputmode="numeric" autocomplete="cc-csc">
+                    <span class="field-error" id="creditCardCvvError" style="color: #d32f2f; font-size: 0.8rem; margin-top: 4px; display: block;" aria-live="polite"></span>
                   </div>
+
                 </div>
               </div>
 
@@ -280,36 +286,30 @@
               </div>
             </div>
 
-            <!-- ==========================================
-            BƯỚC 3: XÁC NHẬN HOÀN TẤT ĐƠN HÀNG
-            ========================================== -->
+            <!-- BƯỚC 3: XÁC NHẬN HOÀN TẤT ĐƠN HÀNG -->
             <div class="checkout-step-content" id="checkoutStep3" hidden>
               <div class="order-success-card" style="text-align: center; padding: 32px 16px;">
-                <div style="width: 64px; height: 64px; border-radius: 50%; background: #2E7D32; color: #FFFFFF; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 2rem;">✓</div>
-                <h2 style="font-size: 1.8rem; margin-bottom: 8px; color: var(--text-primary);">Đặt hàng thành công!</h2>
-                <div id="confirmedOrderCode" style="font-size: 1.2rem; font-weight: 700; color: var(--accent, #A67C52); margin-bottom: 16px;">#NX-000000</div>
-                <p style="color: var(--text-secondary, #726657); max-width: 500px; margin: 0 auto 24px;">Đang chuyển tới trang quản lý đơn hàng...</p>
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: #2e7d32; color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 2rem;">✓</div>
+                <h2 style="font-size: 1.8rem; margin-bottom: 8px;">Đặt hàng thành công!</h2>
+                <div id="confirmedOrderCode" style="font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 16px;">#NX-000000</div>
+                <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 24px;">Đang chuyển tới trang quản lý đơn hàng...</p>
               </div>
             </div>
           </div>
 
-          <!-- SIDEBAR TÓM TẮT ĐƠN HÀNG -->
+          <!-- SIDEBAR TÓM TẮT -->
           <aside class="checkout-sidebar" id="checkoutSidebar">
             <h3 class="summary-heading">Tóm tắt đơn hàng</h3>
             <div class="summary-items-list" id="summaryItemsList"></div>
-            
-            <div style="border-top: 1px solid var(--border, #E5DECE); padding-top: 16px; margin-top: 16px;">
-              <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
-                <span>Tạm tính</span>
-                <span id="summarySubtotal" style="font-weight: 600;">0 ₫</span>
+            <div class="summary-lines" style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px;">
+              <div class="summary-line" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span>Tạm tính</span><span id="summarySubtotal">0 ₫</span>
               </div>
-              <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
-                <span>Phí vận chuyển</span>
-                <span id="summaryShipping" style="font-weight: 600;">Miễn phí</span>
+              <div class="summary-line" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span>Phí vận chuyển</span><span id="summaryShipping">Miễn phí</span>
               </div>
-              <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; color: var(--accent, #A67C52); border-top: 1px dashed var(--border, #E5DECE); padding-top: 12px; margin-top: 12px;">
-                <span>Tổng cộng</span>
-                <span id="summaryTotal">0 ₫</span>
+              <div class="summary-line summary-total" style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; color: var(--accent); border-top: 1px dashed var(--border); padding-top: 12px; margin-top: 12px;">
+                <span>Tổng cộng</span><span id="summaryTotal">0 ₫</span>
               </div>
             </div>
           </aside>
@@ -318,7 +318,6 @@
     </div>
   </main>
 
-  <!-- FOOTER ROOT -->
   <div id="footer-root"></div>
 
   <!-- SCRIPTS -->

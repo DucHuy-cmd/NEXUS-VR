@@ -128,11 +128,17 @@ function renderLayout() {
   if (navRoot) navRoot.innerHTML = NAVBAR_HTML;
   if (footerRoot) footerRoot.innerHTML = FOOTER_HTML;
 
-  const page = document.body.dataset.page;
+  const page = document.body ? document.body.dataset.page : "";
   if (page) {
     const link = document.querySelector(`.navbar__links a[data-nav="${page}"]`);
     if (link) link.classList.add("is-active");
   }
+
+  document.dispatchEvent(new CustomEvent("nexus:navbar-loaded"));
+  document.dispatchEvent(new CustomEvent("nexus:layout-loaded"));
+
+  updateCartBadge();
+  updateUserState();
 }
 
 function initScrollGlass() {
@@ -180,14 +186,28 @@ function initMobileMenu() {
 function updateCartBadge() {
   const badge = document.getElementById("cart-badge");
   if (!badge) return;
+  
   let count = 0;
   if (window.cartManager && typeof window.cartManager.getTotalQuantity === "function") {
     count = window.cartManager.getTotalQuantity();
   } else if (typeof getCartCount === "function") {
     count = getCartCount();
   }
-  badge.textContent = String(count);
-  badge.classList.toggle("has-items", count > 0);
+  
+  const strCount = String(count);
+  if (badge.textContent !== strCount) {
+    badge.textContent = strCount;
+  }
+  
+  if (count > 0) {
+    badge.hidden = false;
+    badge.style.display = "inline-flex";
+    badge.classList.add("has-items");
+  } else {
+    badge.hidden = true;
+    badge.style.display = "none";
+    badge.classList.remove("has-items");
+  }
 }
 
 function updateUserState() {
@@ -270,7 +290,7 @@ window.updateCartBadge = updateCartBadge;
 window.updateUserState = updateUserState;
 
 window.addEventListener("storage", (e) => {
-  if (e.key === "nexus_cart") updateCartBadge();
+  if (e.key && (e.key.startsWith("nexus_cart") || e.key === "nexus_cart")) updateCartBadge();
   if (e.key === "nexus_user" || e.key === "currentUser") updateUserState();
 });
 

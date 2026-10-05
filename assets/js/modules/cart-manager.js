@@ -2,14 +2,14 @@
    NEXUS VR — CART MANAGER
    File: assets/js/modules/cart-manager.js
    Manages cart state, color variants, free shipping threshold,
-   promo vouchers, and UI updates.
+   promo vouchers, and UI updates across all pages.
    ========================================================= */
 
-(function () {
+(function (global) {
   'use strict';
 
   const CART_KEY = 'nexus_cart';
-  const FREE_SHIPPING_THRESHOLD = 50000000; // 50 triệu hoặc 5 triệu tuỳ chọn, let's set 5.000.000đ
+  const FREE_SHIPPING_THRESHOLD = 50000000; // 50.000.000đ
   const VALID_COUPONS = {
     'KM10VR': { type: 'percent', rate: 0.10, label: 'Giảm 10%' },
     'NEXUS10': { type: 'percent', rate: 0.10, label: 'Giảm 10%' },
@@ -17,6 +17,22 @@
   };
 
   let activeCoupon = null;
+
+  function getUserKeySuffix() {
+    if (window.storageService && typeof window.storageService.getUserKeySuffix === 'function') {
+      return window.storageService.getUserKeySuffix();
+    }
+    try {
+      const user = typeof window.getCurrentUser === 'function'
+        ? window.getCurrentUser()
+        : JSON.parse(localStorage.getItem('nexus_user') || 'null');
+
+      if (user && (user.email || user.account)) {
+        return '_' + (user.email || user.account).toLowerCase().replace(/[^a-z0-9]/g, '_');
+      }
+    } catch (e) {}
+    return '_guest';
+  }
 
   function getStorageService() {
     return (
@@ -35,7 +51,8 @@
         const cart = storageService.getCart();
         return Array.isArray(cart) ? cart : [];
       }
-      const raw = localStorage.getItem(CART_KEY);
+      const key = CART_KEY + getUserKeySuffix();
+      const raw = localStorage.getItem(key) || localStorage.getItem(CART_KEY);
       const cart = raw ? JSON.parse(raw) : [];
       return Array.isArray(cart) ? cart : [];
     } catch (error) {
@@ -52,6 +69,8 @@
       if (storageService) {
         storageService.saveCart(safeCart);
       } else {
+        const key = CART_KEY + getUserKeySuffix();
+        localStorage.setItem(key, JSON.stringify(safeCart));
         localStorage.setItem(CART_KEY, JSON.stringify(safeCart));
       }
     } catch (error) {
@@ -98,7 +117,6 @@
       const normalized = normalizeCartItem(item);
       if (!normalized) return;
 
-      // Group by ID AND selected color variant
       const existing = result.find(
         (cartItem) => cartItem.id === normalized.id && cartItem.selectedColor === normalized.selectedColor
       );
@@ -114,9 +132,9 @@
   }
 
   function getProductById(id) {
-    const products = typeof PRODUCTS !== 'undefined' && Array.isArray(PRODUCTS)
+    const products = (typeof PRODUCTS !== 'undefined' && Array.isArray(PRODUCTS))
       ? PRODUCTS
-      : [];
+      : (window.PRODUCTS && Array.isArray(window.PRODUCTS) ? window.PRODUCTS : []);
 
     return products.find((product) => String(product.id) === String(id)) || null;
   }
@@ -131,9 +149,10 @@
       if (typeof colorNameOrIndex === 'number' && product.colors[colorNameOrIndex]) {
         chosenColor = product.colors[colorNameOrIndex];
         chosenIndex = colorNameOrIndex;
-      } else if (typeof colorNameOrIndex === 'string' && colorNameOrIndex) {
+      } else if (typeof colorNameOrIndex === 'string' && colorNameOrIndex.trim()) {
+        const queryColor = colorNameOrIndex.trim().toLowerCase();
         const foundIdx = product.colors.findIndex(
-          (c) => c.name.toLowerCase() === colorNameOrIndex.toLowerCase()
+          (c) => c && c.name && c.name.toLowerCase() === queryColor
         );
         if (foundIdx > -1) {
           chosenColor = product.colors[foundIdx];
@@ -150,15 +169,15 @@
 
     const imageSrc = chosenColor && chosenColor.image 
       ? chosenColor.image 
-      : (product.images && product.images[0] ? product.images[0] : '');
+      : (product.images && product.images[0] ? product.images[0] : (product.image || 'assets/images/placeholder.svg'));
 
     return {
       id: String(product.id),
       name: String(product.name ?? 'Sản phẩm NEXUS VR'),
       price: Number(product.price) || 0,
       image: imageSrc,
-      selectedColor: chosenColor ? chosenColor.name : '',
-      selectedColorHex: chosenColor ? chosenColor.hex : '',
+      selectedColor: chosenColor ? (chosenColor.name || '') : '',
+      selectedColorHex: chosenColor ? (chosenColor.hex || '') : '',
       colorIndex: chosenIndex,
       qty: normalizeQuantity(qty)
     };
@@ -184,11 +203,25 @@
     }).format(Math.max(0, Number(amount) || 0));
   }
 
+  // TỐI ƯU CẬP NHẬT BADGE VỚI MUTATION OBSERVER ĐỂ BẮT ĐÚNG THỜI ĐIỂM NAVBAR XUẤT HIỆN
   function updateBadge(count = getTotalQuantity()) {
-    const badges = document.querySelectorAll('#cartBadge, #cart-badge, .cart-badge');
+    const badges = document.querySelectorAll('#cartBadge, #cart-badge, .cart-badge, .navbar-cart-count, #navCartCount, .navbar__cart-badge, [data-cart-count]');
+    const strCount = String(count);
+
     badges.forEach((badge) => {
-      badge.textContent = String(count);
-      badge.hidden = count <= 0;
+      if (badge.textContent !== strCount) {
+        badge.textContent = strCount;
+      }
+
+      if (count > 0) {
+        if (badge.hidden) badge.hidden = false;
+        if (badge.style.display !== 'inline-flex') badge.style.display = 'inline-flex';
+        if (!badge.classList.contains('has-items')) badge.classList.add('has-items');
+      } else {
+        if (!badge.hidden) badge.hidden = true;
+        if (badge.style.display !== 'none') badge.style.display = 'none';
+        if (badge.classList.contains('has-items')) badge.classList.remove('has-items');
+      }
     });
   }
 
@@ -199,7 +232,6 @@
     };
 
     updateBadge(detail.totalQuantity);
-
     window.dispatchEvent(new CustomEvent('nexus:cart-updated', { detail }));
   }
 
@@ -218,7 +250,7 @@
 
     const cart = getCart();
     const existing = cart.find(
-      (item) => item.id === newItem.id && item.selectedColor === newItem.selectedColor
+      (item) => String(item.id) === String(newItem.id) && item.selectedColor === newItem.selectedColor
     );
 
     if (existing) {
@@ -248,13 +280,8 @@
       return false;
     }
 
-    const removedItem = cart[numericIndex];
     cart.splice(numericIndex, 1);
-    const result = writeCart(cart);
-    if (result && typeof window.showToast === 'function') {
-      window.showToast(`Đã xóa ${removedItem.name} khỏi giỏ hàng`, 'info');
-    }
-    return result;
+    return writeCart(cart);
   }
 
   function updateQuantity(index, change) {
@@ -290,7 +317,7 @@
     item.selectedColor = chosenColor.name;
     item.selectedColorHex = chosenColor.hex;
     item.colorIndex = newColorIndex;
-    item.image = chosenColor.image || product.images[0];
+    item.image = chosenColor.image || (product.images && product.images[0] ? product.images[0] : item.image);
 
     const saved = writeCart(cart);
     if (saved && typeof window.showToast === 'function') {
@@ -354,7 +381,6 @@
     return Math.max(0, subtotal - getDiscount(subtotal));
   }
 
-  /* RENDER CART TABLE & SUMMARY */
   function renderCartTable() {
     const tbody = document.getElementById('cartTableBody');
     const tableWrap = document.getElementById('cartTableWrap');
@@ -383,7 +409,6 @@
       const product = getProductById(item.id);
       const row = document.createElement('tr');
 
-      // Product Info Cell
       const productCell = document.createElement('td');
       const productBox = document.createElement('div');
       productBox.className = 'cart-product';
@@ -406,7 +431,6 @@
       name.href = `product.html?id=${encodeURIComponent(item.id)}`;
       name.textContent = item.name;
 
-      // Color Variant Selector / Badge
       const colorWrap = document.createElement('div');
       colorWrap.className = 'cart-product__color-selector';
 
@@ -442,14 +466,12 @@
       productBox.append(image, info);
       productCell.appendChild(productBox);
 
-      // Price Cell
       const priceCell = document.createElement('td');
       const price = document.createElement('span');
       price.className = 'cart-price';
       price.textContent = formatVND(item.price);
       priceCell.appendChild(price);
 
-      // Quantity Cell
       const qtyCell = document.createElement('td');
       const qtyBox = document.createElement('div');
       qtyBox.className = 'cart-qty';
@@ -457,7 +479,6 @@
       const minus = document.createElement('button');
       minus.type = 'button';
       minus.textContent = '−';
-      minus.setAttribute('aria-label', `Giảm số lượng ${item.name}`);
       minus.addEventListener('click', () => updateQuantity(index, -1));
 
       const qtyText = document.createElement('span');
@@ -466,27 +487,23 @@
       const plus = document.createElement('button');
       plus.type = 'button';
       plus.textContent = '+';
-      plus.setAttribute('aria-label', `Tăng số lượng ${item.name}`);
       plus.addEventListener('click', () => updateQuantity(index, 1));
 
       qtyBox.append(minus, qtyText, plus);
       qtyCell.appendChild(qtyBox);
 
-      // Total Price Cell
       const totalCell = document.createElement('td');
       const total = document.createElement('span');
       total.className = 'cart-item-total';
       total.textContent = formatVND(item.price * item.qty);
       totalCell.appendChild(total);
 
-      // Remove Cell
       const removeCell = document.createElement('td');
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
       removeBtn.className = 'cart-remove-btn';
       removeBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
       removeBtn.title = 'Xóa sản phẩm';
-      removeBtn.setAttribute('aria-label', `Xóa ${item.name}`);
       removeBtn.addEventListener('click', () => remove(index));
       removeCell.appendChild(removeBtn);
 
@@ -554,10 +571,11 @@
 
   function renderCrossSell(cart) {
     const container = document.getElementById('cartCrossSellMount');
-    if (!container || typeof PRODUCTS === 'undefined') return;
+    const products = (typeof PRODUCTS !== 'undefined' && Array.isArray(PRODUCTS)) ? PRODUCTS : (window.PRODUCTS || []);
+    if (!container || products.length === 0) return;
 
     const cartIds = cart.map((i) => i.id);
-    const suggestions = PRODUCTS.filter((p) => !cartIds.includes(p.id)).slice(0, 3);
+    const suggestions = products.filter((p) => !cartIds.includes(String(p.id))).slice(0, 3);
 
     if (suggestions.length === 0) {
       container.innerHTML = '';
@@ -570,7 +588,7 @@
         <div class="cart-cross-sell__grid">
           ${suggestions
             .map((p) => {
-              const img = p.images && p.images[0] ? p.images[0] : 'assets/images/placeholder.svg';
+              const img = p.images && p.images[0] ? p.images[0] : (p.image || 'assets/images/placeholder.svg');
               return `
                 <div class="cross-sell-item">
                   <img src="${img}" alt="${p.name}" class="cross-sell-item__img" loading="lazy">
@@ -590,87 +608,33 @@
     `;
   }
 
-  function showCouponMessage(message, type) {
-    const messageEl = document.getElementById('couponMessage');
-    if (!messageEl) return;
-    messageEl.textContent = message;
-
-    if (type === 'success') {
-      messageEl.style.color = 'var(--success, #527A4B)';
-    } else if (type === 'error') {
-      messageEl.style.color = 'var(--error, #A83A2E)';
-    } else {
-      messageEl.style.color = 'var(--text-muted, #7E7368)';
-    }
-  }
-
-  function handleApplyCoupon() {
-    const input = document.getElementById('couponInput');
-    if (!input) return;
-
-    const code = input.value.trim().toUpperCase();
-    if (!code) {
-      activeCoupon = null;
-      showCouponMessage('Vui lòng nhập mã khuyến mãi.', 'error');
-      renderCartTable();
-      return;
-    }
-
-    const result = applyCoupon(code);
-    if (result.valid) {
-      input.value = result.code;
-      showCouponMessage(`Đã áp dụng mã ${result.code} (${result.label})!`, 'success');
-    } else {
-      showCouponMessage('Mã khuyến mãi không hợp lệ. Thử mã KM10VR hoặc FREESHIP.', 'error');
-    }
-
-    renderCartTable();
-  }
-
-  function proceedToCheckout() {
-    const cart = getCart();
-    if (cart.length === 0) {
-      showCouponMessage('Giỏ hàng đang trống.', 'error');
-      return;
-    }
-    window.location.href = 'checkout.html';
-  }
-
   function bindEvents() {
-    document.getElementById('clearCartBtn')?.addEventListener('click', () => {
-      const cart = getCart();
-      if (cart.length === 0) return;
-
-      if (window.confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng không?')) {
-        activeCoupon = null;
-        const input = document.getElementById('couponInput');
-        if (input) input.value = '';
-        showCouponMessage('', 'normal');
-        clear();
-        renderCartTable();
-      }
-    });
-
-    document.getElementById('btnApplyCoupon')?.addEventListener('click', handleApplyCoupon);
-
-    document.getElementById('couponInput')?.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        handleApplyCoupon();
-      }
-    });
-
-    document.getElementById('checkoutBtn')?.addEventListener('click', proceedToCheckout);
-
     window.addEventListener('nexus:cart-updated', () => {
       renderCartTable();
+      updateBadge();
     });
 
     window.addEventListener('storage', (event) => {
-      if (event.key === CART_KEY) {
+      if (event.key && (event.key.startsWith(CART_KEY) || event.key === 'nexus_cart')) {
         renderCartTable();
+        updateBadge();
       }
     });
+
+    document.addEventListener('DOMContentLoaded', () => updateBadge());
+    document.addEventListener('nexus:navbar-loaded', () => updateBadge());
+    document.addEventListener('nexus:layout-loaded', () => updateBadge());
+    window.addEventListener('pageshow', () => updateBadge());
+    window.addEventListener('load', () => updateBadge());
+
+    // Quan sát riêng #navbar-root để cập nhật badge ngay khi Navbar được render
+    const navRoot = document.getElementById('navbar-root');
+    if (navRoot) {
+      const observer = new MutationObserver(() => {
+        updateBadge();
+      });
+      observer.observe(navRoot, { childList: true, subtree: true });
+    }
   }
 
   function init() {
@@ -685,13 +649,15 @@
     renderCartTable();
   }
 
-  window.cartManager = {
+  // EXPORT TOÀN CỤC
+  global.cartManager = {
     add,
     remove,
     updateQuantity,
     updateItemColor,
     setQuantity,
     clear,
+    clearCart: clear,
     getCart,
     getTotalQuantity,
     getSubtotal,
@@ -699,8 +665,19 @@
     applyCoupon,
     getDiscount,
     getFinalTotal,
-    renderCartTable
+    renderCartTable,
+    updateBadge
   };
 
+  global.addToCart = function (id, qty = 1, colorNameOrIndex = null) {
+    return add(id, qty, colorNameOrIndex);
+  };
+
+  global.addProductToCart = function (id, qty = 1, colorNameOrIndex = null) {
+    return add(id, qty, colorNameOrIndex);
+  };
+
+  global.updateCartBadge = updateBadge;
+
   document.addEventListener('DOMContentLoaded', init);
-})();
+})(typeof window !== 'undefined' ? window : this);
