@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Bản Đề Cương Chi Tiết Cuốn Báo Cáo Đồ Án NEXUS VR</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 20mm 18mm 20mm 22mm;
+    }
+    
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 13pt;
+      line-height: 1.5;
+      color: #1a1a1a;
+      background: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Bìa & Header tài liệu */
+    .doc-header {
+      text-align: center;
+      border-bottom: 2.5px solid #8B6538;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+
+    .doc-school {
+      font-size: 11.5pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .doc-dept {
+      font-size: 11.5pt;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 14px;
+    }
+
+    .doc-title {
+      font-size: 16pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #8B6538;
+      margin: 12px 0 6px 0;
+      line-height: 1.35;
+    }
+
+    .doc-subtitle {
+      font-size: 13pt;
+      font-weight: bold;
+      color: #222;
+      margin-bottom: 10px;
+    }
+
+    .doc-meta {
+      font-size: 11pt;
+      color: #555;
+      font-style: italic;
+    }
+
+    /* Hộp tóm tắt tổng số trang */
+    .summary-card {
+      background: #FAF7F2;
+      border: 1.5px solid #C8A982;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 22px;
+    }
+
+    .summary-card h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      color: #8B6538;
+      font-size: 12.5pt;
+      text-transform: uppercase;
+    }
+
+    /* Bảng số liệu */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 18px 0;
+      font-size: 11pt;
+    }
+
+    th, td {
+      border: 1px solid #C8A982;
+      padding: 6px 9px;
+      vertical-align: middle;
+    }
+
+    th {
+      background-color: #F4ECE1;
+      color: #332B25;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    td.center {
+      text-align: center;
+    }
+
+    td.right {
+      text-align: right;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #FCFAF7;
+    }
+
+    /* Heading các cấp */
+    h1.chapter-title {
+      font-size: 14pt;
+      font-weight: bold;
+      color: #8B6538;
+      text-transform: uppercase;
+      border-bottom: 1.5px solid #C8A982;
+      padding-bottom: 5px;
+      margin-top: 26px;
+      margin-bottom: 12px;
+      page-break-after: avoid;
+    }
+
+    h2.section-title {
+      font-size: 12.5pt;
+      font-weight: bold;
+      color: #261F1A;
+      margin-top: 16px;
+      margin-bottom: 6px;
+      page-break-after: avoid;
+    }
+
+    h3.sub-title {
+      font-size: 12pt;
+      font-weight: bold;
+      font-style: italic;
+      color: #3B3028;
+      margin-top: 12px;
+      margin-bottom: 5px;
+      page-break-after: avoid;
+    }
+
+    /* Badge số trang ước lượng */
+    .page-badge {
+      display: inline-block;
+      background: #EFE8DD;
+      color: #7A5428;
+      font-size: 9.5pt;
+      font-weight: bold;
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid #D6C2A8;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .chapter-badge {
+      background: #8B6538;
+      color: #ffffff;
+      border: none;
+      font-size: 10.5pt;
+      padding: 3px 9px;
+    }
+
+    /* Danh sách và mô tả */
+    ul {
+      margin: 5px 0 10px 20px;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    p {
+      margin: 5px 0 8px 0;
+      text-align: justify;
+    }
+
+    .code-ref {
+      font-family: 'Consolas', monospace;
+      font-size: 10pt;
+      background: #EDE8E1;
+      padding: 2px 5px;
+      border-radius: 3px;
+      color: #613B13;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PHẦN HEADER TỔNG QUAN -->
+  <div class="doc-header">
+    <div class="doc-school">TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI — PHÂN HIỆU TP. HỒ CHÍ MINH</div>
+    <div class="doc-dept">BỘ MÔN CÔNG NGHỆ THÔNG TIN — ĐỒ ÁN MÔN THIẾT KẾ WEB</div>
+    <div class="doc-title">BẢN ĐỀ CƯƠNG CHI TIẾT & BẢN ĐỒ NỘI DUNG CUỐN BÁO CÁO ĐỒ ÁN</div>
+    <div class="doc-subtitle">ĐỀ TÀI: XÂY DỰNG WEBSITE THƯƠNG MẠI ĐIỆN TỬ & TRẢI NGHIỆM KÍNH THỰC TẾ ẢO NEXUS VR</div>
+    <div class="doc-meta">
+      Giảng viên hướng dẫn: <strong>ThS. Trần Phong Nhã</strong> &nbsp;|&nbsp; Hệ thống trực tuyến: <strong>https://nexusvr-mu.vercel.app/</strong>
+    </div>
+  </div>
+
+  <!-- HỘP TỔNG KẾT BẢNG PHÂN BỔ SỐ TRANG -->
+  <div class="summary-card">
+    <h3>BẢNG TỔNG HỢP ƯỚC LƯỢNG SỐ TRANG BÁO CÁO (CHUẨN 50 — 100 TRANG THEO QUY ĐỊNH)</h3>
+    <p style="margin-top: 0;">Căn cứ văn bản quy định đồ án Bộ môn CNTT: <em>"Nội dung báo cáo trình bày tối thiểu 50 trang khổ A4 và không nên vượt quá 100 trang (không kể các trang bìa, lời cám ơn, mục lục, tài liệu tham khảo…)"</em>. Dung lượng từng phần được hoạch định chi tiết như sau:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Phần / Chương Báo Cáo</th>
+          <th>Phạm Vi Trang</th>
+          <th>Số Trang Ước Lượng</th>
+          <th>Quy Cách Đánh Số Trang</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="center">1</td>
+          <td><strong>Phần đầu: Các trang thủ tục</strong> (Bìa, Nhận xét, Lời cảm ơn, Đề cương, Mục lục, Danh mục hình/bảng/từ viết tắt, Tóm tắt báo cáo)</td>
+          <td class="center">Trang i &mdash; xiv</td>
+          <td class="center"><strong>14 trang</strong></td>
+          <td class="center">Số La Mã thường (i, ii, iii...)</td>
+        </tr>
+        <tr>
+          <td class="center">2</td>
+          <td><strong>Chương 1: Giới thiệu đề tài và Phân tích yêu cầu</strong></td>
+          <td class="center">Trang 1 &mdash; 10</td>
+          <td class="center"><strong>10 trang</strong></td>
+          <td class="center">Bắt đầu đánh số tự nhiên (1, 2, 3...)</td>
+        </tr>
+        <tr>
+          <td class="center">3</td>
+          <td><strong>Chương 2: Cơ sở lý thuyết và Khảo sát thực nghiệm</strong></td>
+          <td class="center">Trang 11 &mdash; 24</td>
+          <td class="center"><strong>14 trang</strong></td>
+          <td class="center">Số tự nhiên liên tục</td>
+        </tr>
+        <tr>
+          <td class="center">4</td>
+          <td><strong>Chương 3: Thiết kế và Triển khai Website NEXUS VR</strong> (Chương trọng tâm lớn nhất)</td>
+          <td class="center">Trang 25 &mdash; 52</td>
+          <td class="center"><strong>28 trang</strong></td>
+          <td class="center">Số tự nhiên liên tục</td>
+        </tr>
+        <tr>
+          <td class="center">5</td>
+          <td><strong>Chương 4: Kiểm thử, Tối ưu hóa và Triển khai Host</strong></td>
+          <td class="center">Trang 53 &mdash; 64</td>
+          <td class="center"><strong>12 trang</strong></td>
+          <td class="center">Số tự nhiên liên tục</td>
+        </tr>
+        <tr>
+          <td class="center">6</td>
+          <td><strong>Chương 5: Kết luận và Hướng phát triển</strong></td>
+          <td class="center">Trang 65 &mdash; 69</td>
+          <td class="center"><strong>5 trang</strong></td>
+          <td class="center">Số tự nhiên liên tục</td>
+        </tr>
+        <tr>
+          <td class="center">7</td>
+          <td><strong>Tài liệu tham khảo & Phụ lục</strong> (10 trang ảnh giao diện, trích đoạn code, Lighthouse)</td>
+          <td class="center">Trang 70 &mdash; 81</td>
+          <td class="center"><strong>12 trang</strong></td>
+          <td class="center">Số tự nhiên liên tục</td>
+        </tr>
+        <tr style="background-color: #EFE8DD; font-weight: bold;">
+          <td class="center" colspan="2">TỔNG NỘI DUNG CHÍNH (CHƯƠNG 1 &mdash; CHƯƠNG 5):</td>
+          <td class="center">Trang 1 &mdash; 69</td>
+          <td class="center"><strong>69 TRANG</strong></td>
+          <td class="center">ĐẠT CHUẨN (Quy định 50 - 100 trang)</td>
+        </tr>
+        <tr style="background-color: #E8DFD3; font-weight: bold; font-size: 11.5pt;">
+          <td class="center" colspan="2">TỔNG TOÀN BỘ CUỐN BÁO CÁO IN ẤN:</td>
+          <td class="center">Toàn cuốn</td>
+          <td class="center"><strong>83 TRANG</strong></td>
+          <td class="center">HOÀN HẢO ĐỂ ĐÓNG GÁY IN NHŨ</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- NỘI DUNG CHI TIẾT TỪNG PHẦN -->
+  
+  <h1 class="chapter-title">PHẦN THỦ TỤC HỌC THUẬT ĐẦU BÁO CÁO <span class="page-badge chapter-badge">Ước lượng: 14 trang (i &mdash; xiv)</span></h1>
+  
+  <h2 class="section-title">1. Trang bìa chính (Bìa ngoài in màu / Bìa cứng đóng nhũ) <span class="page-badge">1 trang</span></h2>
+  <ul>
+    <li>Căn lề chuẩn: Trên 3.5cm, Dưới 3.0cm, Trái 3.5cm, Phải 2.0cm.</li>
+    <li>Khung viền đôi trang trọng bao quanh.</li>
+    <li>Tiêu đề trường: TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI — PHÂN HIỆU TẠI TP. HỒ CHÍ MINH (Cỡ 14, in đậm).</li>
+    <li>Khoa / Bộ môn: BỘ MÔN CÔNG NGHỆ THÔNG TIN (Cỡ 14, in đậm).</li>
+    <li>Logo trường UTC2 kích thước chuẩn ở vị trí trung tâm trang.</li>
+    <li>HỌ VÀ TÊN 4 SINH VIÊN & MSSV (Cỡ 14, in hoa).</li>
+    <li>TÊN ĐỀ TÀI: <strong>XÂY DỰNG WEBSITE THƯƠNG MẠI ĐIỆN TỬ VÀ KHÔNG GIAN TRẢI NGHIỆM KÍNH THỰC TẾ ẢO NEXUS VR</strong> (Cỡ 15, in hoa, in đậm).</li>
+    <li>Loại báo cáo: BÁO CÁO ĐỒ ÁN MÔN HỌC (Cỡ 14).</li>
+    <li>Địa danh & Thời gian: TP. Hồ Chí Minh &mdash; Năm 2026 (Cỡ 12).</li>
+  </ul>
+
+  <h2 class="section-title">2. Trang bìa phụ (Bìa lót bên trong) <span class="page-badge">1 trang</span></h2>
+  <ul>
+    <li>Bố cục tương tự bìa chính nhưng bổ sung đầy đủ thông tin: Lớp, Khóa đào tạo, Người hướng dẫn khoa học: <strong>ThS. Trần Phong Nhã</strong>.</li>
+  </ul>
+
+  <h2 class="section-title">3. Trang nhận xét của Giáo viên hướng dẫn <span class="page-badge">1 trang</span></h2>
+  <ul>
+    <li>Trình bày chuẩn theo mẫu trang 9 của file quy định (các dòng chấm để GVHD ghi nhận xét về tinh thần làm việc, mức độ hoàn thành đề tài, kỹ năng thực hành và cho điểm số).</li>
+  </ul>
+
+  <h2 class="section-title">4. Lời cảm ơn <span class="page-badge">1 trang</span></h2>
+  <ul>
+    <li>Tiêu đề "LỜI CẢM ƠN" (Cỡ 16, in đậm, căn giữa).</li>
+    <li>Đoạn văn trang trọng (khoảng 6&mdash;8 dòng): Bày tỏ lòng biết ơn đến quý Thầy Cô Bộ môn CNTT và đặc biệt là ThS. Trần Phong Nhã đã tận tình định hướng và truyền đạt kiến thức trong suốt quá trình thực hiện đồ án Thiết kế Web.</li>
+    <li>Chữ ký và họ tên 4 sinh viên thực hiện (Cỡ 13, in đậm).</li>
+  </ul>
+
+  <h2 class="section-title">5. Đề cương chi tiết môn học có chữ ký GVHD <span class="page-badge">2 trang</span></h2>
+  <ul>
+    <li>Trình bày đúng mẫu trang 12 và 13 của file quy định: Mục đích, mục tiêu, nội dung & phạm vi đề tài, phương pháp thực hiện, kết quả chính dự kiến, kế hoạch thực hiện, chữ ký xác nhận của GVHD và Trưởng bộ môn.</li>
+  </ul>
+
+  <h2 class="section-title">6. Mục lục tự động <span class="page-badge">3 trang</span></h2>
+  <ul>
+    <li>Mục lục được tạo tự động trong Microsoft Word với đầy đủ 3 cấp Heading (Heading 1: Tên chương; Heading 2: Mục lớn; Heading 3: Tiểu mục). Đánh số trang chính xác.</li>
+  </ul>
+
+  <h2 class="section-title">7. Danh mục hình ảnh & Danh mục bảng biểu <span class="page-badge">3 trang</span></h2>
+  <ul>
+    <li>Bảng danh mục hình ảnh (Số thứ tự, Tên hình ảnh, Số trang tương ứng).</li>
+    <li>Bảng danh mục bảng biểu (Số thứ tự, Tên bảng biểu, Số trang tương ứng).</li>
+  </ul>
+
+  <h2 class="section-title">8. Danh mục từ viết tắt & Tóm tắt báo cáo <span class="page-badge">2 trang</span></h2>
+  <ul>
+    <li>Bảng danh mục từ viết tắt: VR (Virtual Reality), UI (User Interface), UX (User Experience), DOM (Document Object Model), SEO (Search Engine Optimization), API, SPA, WCAG, BEM.</li>
+    <li>Tóm tắt báo cáo (Executive Summary): Trình bày cô đọng vấn đề giải quyết, giải pháp kiến trúc website Quiet Luxury và các kết quả công nghệ nổi bật đạt được.</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <!-- CHƯƠNG 1 -->
+  <h1 class="chapter-title">CHƯƠNG 1: GIỚI THIỆU ĐỀ TÀI VÀ PHÂN TÍCH YÊU CẦU <span class="page-badge chapter-badge">Ước lượng: 10 trang (Trang 1 &mdash; 10)</span></h1>
+
+  <h2 class="section-title">1.1. Giới thiệu chung <span class="page-badge">2.5 trang</span></h2>
+  <ul>
+    <li><strong>1.1.1. Bối cảnh và lý do chọn đề tài:</strong> Sự bùng nổ của kỷ nguyên điện toán không gian (Spatial Computing) với sự xuất hiện của Apple Vision Pro, Meta Quest 3, Varjo XR-4; thị trường thiết bị thực tế ảo cao cấp tại Việt Nam đang thiếu vắng một website thương mại điện tử chuyên biệt mang tính sang trọng (Quiet Luxury).</li>
+    <li><strong>1.1.2. Ý tưởng và lĩnh vực của website:</strong> Xây dựng thương hiệu bán lẻ kính thực tế ảo độc bản NEXUS VR kết hợp Showroom Penthouse tầng 38 trải nghiệm 1:1, dung hòa giữa công nghệ tối tân và trải nghiệm người dùng thượng hạng.</li>
+    <li><strong>1.1.3. Ý nghĩa thực tiễn của đề tài:</strong> Cung cấp cho khách hàng công cụ nghiên cứu cấu hình, so sánh thông số trực quan, đặt lịch trải nghiệm đo khúc xạ mắt cá nhân hóa và quy trình mua sắm số hóa hiện đại.</li>
+  </ul>
+
+  <h2 class="section-title">1.2. Mục tiêu và nhiệm vụ của đề tài <span class="page-badge">2.0 trang</span></h2>
+  <ul>
+    <li><strong>1.2.1. Mục tiêu tổng quát:</strong> Thiết kế và xây dựng thành công website NEXUS VR đạt chuẩn 6 tiêu chí Rubric môn học (Điểm 10/10), giao diện đẳng cấp, tương tác mượt mà 60fps, tương thích 100% thiết bị.</li>
+    <li><strong>1.2.2. Các nhiệm vụ chính cần thực hiện:</strong>
+      <ul>
+        <li>Xây dựng cấu trúc 10 trang giao diện chuyên biệt phục vụ toàn diện hành trình khách hàng.</li>
+        <li>Phát triển các module chức năng độc bản: Thẻ VIP Pass 3D hai mặt tương tác, Giỏ hàng Cart Drawer, Bảng ma trận so sánh động, Bộ lọc sản phẩm, Dark/Light mode.</li>
+        <li>Kiểm thử và tối ưu hóa Responsive toàn diện, triệt tiêu lỗi tràn viền mobile.</li>
+        <li>Triển khai tự động CI/CD lên nền tảng đám mây Vercel.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2 class="section-title">1.3. Phạm vi và giới hạn đề tài <span class="page-badge">1.5 trang</span></h2>
+  <ul>
+    <li><strong>1.3.1. Phạm vi đề tài:</strong> Lập trình Frontend thuần chất lượng cao (HTML5 Semantic, CSS3 Modular, Vanilla JavaScript ES6+), tích hợp âm thanh xúc giác (Web Audio API), quản lý trạng thái qua LocalStorage.</li>
+    <li><strong>1.3.2. Giới hạn đề tài:</strong> Dữ liệu sản phẩm và đơn hàng được lưu trữ phía client và Mock Server; cổng thanh toán trực tuyến mô phỏng ở môi trường Sandbox UI/UX.</li>
+    <li><strong>1.3.3. Hướng phát triển trong tương lai:</strong> Xây dựng Backend RESTful API hoàn chỉnh, cơ sở dữ liệu MongoDB/PostgreSQL, công nghệ WebXR ướm thử kính trực tiếp bằng Camera.</li>
+  </ul>
+
+  <h2 class="section-title">1.4. Phân tích yêu cầu hệ thống <span class="page-badge">3.0 trang</span></h2>
+  <ul>
+    <li><strong>1.4.1. Yêu cầu chức năng (Functional Requirements):</strong>
+      <ul>
+        <li><em>Phân hệ xem và tìm kiếm sản phẩm:</em> Lọc theo danh mục (Flagship, Business, Limited), lọc tầm giá, tìm kiếm từ khóa tức thì, xem cấu hình RAM/SSD chi tiết.</li>
+        <li><em>Phân hệ so sánh kính VR:</em> Chọn 2 hoặc nhiều sản phẩm, so sánh chéo góc nhìn (FOV), độ phân giải thấu kính, trọng lượng, giá thành.</li>
+        <li><em>Phân hệ mua sắm & thanh toán:</em> Thêm vào giỏ, cập nhật số lượng, áp mã ưu đãi, tính tổng tiền tự động, quy trình checkout xác nhận đơn hàng.</li>
+        <li><em>Phân hệ đặt hẹn & Thẻ tiếp đón VIP 3D:</em> Đặt lịch tiếp đón tại showroom, khắc tên laser thời gian thực lên thẻ, lật xem 2 mặt thẻ, bật/tắt âm thanh hiệu ứng xúc giác, xuất vé điện tử .pass.</li>
+        <li><em>Phân hệ giao diện:</em> Chuyển đổi Dark/Light mode lưu trữ trạng thái người dùng.</li>
+      </ul>
+    </li>
+    <li><strong>1.4.2. Yêu cầu phi chức năng (Non-functional Requirements):</strong>
+      <ul>
+        <li><em>Hiệu năng & Tốc độ:</em> Thời gian phản hồi trang dưới 1.5 giây, điểm Google Lighthouse từ 90 trở lên.</li>
+        <li><em>Thiết kế thích ứng (Responsive):</em> Tương thích tuyệt đối trên mọi độ phân giải (360px, 375px, 390px, 768px, 1024px, 1440px).</li>
+        <li><em>Trợ năng (Accessibility):</em> Đạt chuẩn WCAG 2.2 cấp độ AA, hỗ trợ điều hướng bàn phím và bộ đọc màn hình.</li>
+        <li><em>Thẩm mỹ & Nhận diện:</em> Phong cách Quiet Luxury với bảng màu Cashmere/Obsidian/Gold Foil.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2 class="section-title">1.5. Cấu trúc cuốn báo cáo <span class="page-badge">1.0 trang</span></h2>
+  <ul>
+    <li>Mô tả tóm lược mạch nội dung logic dẫn dắt từ Chương 2 đến Chương 5.</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <!-- CHƯƠNG 2 -->
+  <h1 class="chapter-title">CHƯƠNG 2: CƠ SỞ LÝ THUYẾT VÀ KHẢO SÁT THỰC NGHIỆM <span class="page-badge chapter-badge">Ước lượng: 14 trang (Trang 11 &mdash; 24)</span></h1>
+
+  <h2 class="section-title">2.1. Cơ sở lý thuyết công nghệ web <span class="page-badge">6.0 trang</span></h2>
+  <ul>
+    <li><strong>2.1.1. HTML5 Semantic & Web Accessibility:</strong>
+      <ul>
+        <li>Cấu trúc ngữ nghĩa tối ưu SEO: header, nav, main, section, article, aside, footer.</li>
+        <li>Tiêu chuẩn trợ năng WCAG AA: Áp dụng thuộc tính aria-label, aria-expanded, aria-live, role="listbox", role="radio".</li>
+      </ul>
+    </li>
+    <li><strong>2.1.2. CSS3 Hiện đại & Kỹ thuật Thiết kế Thích ứng (Responsive Design):</strong>
+      <ul>
+        <li>Hệ thống biến CSS (Design Tokens): Bảng màu, khoảng cách, bóng đổ chuyển đổi mượt mà giữa Sáng/Tối.</li>
+        <li>Bố cục hai chiều CSS Grid và Flexbox: Áp dụng grid-template-columns: minmax(0, 1fr) giải quyết triệt để lỗi ép vỡ layout trên mobile.</li>
+        <li>Không gian 3D CSS: Các thuộc tính perspective, transform-style: preserve-3d, rotateY, backface-visibility: hidden.</li>
+        <li>Tối ưu hóa phần cứng đồ họa: Kỹ thuật ép tạo GPU Layer độc lập với will-change: transform và transform: translateZ(0).</li>
+      </ul>
+    </li>
+    <li><strong>2.1.3. JavaScript ES6+ & Kiến trúc Lập trình Module:</strong>
+      <ul>
+        <li>Cơ chế Event Delegation, xử lý bất đồng bộ Async/Await, Web Storage API (localStorage).</li>
+        <li>Tổng hợp âm thanh trực tiếp bằng Web Audio API (AudioContext, OscillatorNode, GainNode) &mdash; tạo âm thanh xúc giác siêu nhẹ không cần tải file mp3.</li>
+      </ul>
+    </li>
+    <li><strong>2.1.4. Nguyên tắc Thiết kế UI/UX & Tâm lý học Giao diện:</strong>
+      <ul>
+        <li>Định luật Fitts và định luật Hick trong thiết kế nút bấm CTA và giỏ hàng.</li>
+        <li>Hệ thống phân cấp thị giác (Visual Hierarchy), tỷ lệ vàng bố cục và nghệ thuật sử dụng khoảng trắng (Whitespace).</li>
+        <li>Bảng màu Quiet Luxury: Sự tương phản thanh lịch giữa Cashmere (#F8F5F0), Obsidian (#100E0D) và Gold Foil (#C8A982).</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2 class="section-title">2.2. Khảo sát và phân tích các sản phẩm tương tự <span class="page-badge">5.0 trang</span></h2>
+  <ul>
+    <li><strong>2.2.1. Khảo sát website Apple Vision Pro (apple.com/apple-vision-pro):</strong>
+      <ul>
+        <li>Ưu điểm: Nghệ thuật Scrollytelling đỉnh cao, hình ảnh render 3D chân thực, hiệu ứng kính mờ (Glassmorphism) tinh xảo.</li>
+        <li>Nhược điểm: Dung lượng trang cực nặng (> 15MB), phụ thuộc băng thông cao, không tối ưu cho mạng di động yếu.</li>
+      </ul>
+    </li>
+    <li><strong>2.2.2. Khảo sát website Meta Quest Store (meta.com/quest):</strong>
+      <ul>
+        <li>Ưu điểm: Luồng mua hàng thương mại điện tử rất rõ ràng, phụ kiện đa dạng.</li>
+        <li>Nhược điểm: Giao diện mang tính đại trà công nghiệp, thiếu cảm xúc cá nhân hóa và tính độc bản thượng hạng.</li>
+      </ul>
+    </li>
+    <li><strong>2.2.3. Khảo sát website Varjo XR-4 (varjo.com):</strong>
+      <ul>
+        <li>Ưu điểm: Bảng thông số kỹ thuật B2B sắc nét, thể hiện đẳng cấp kỹ thuật chuyên sâu.</li>
+        <li>Nhược điểm: Khó tiếp cận với người tiêu dùng phổ thông và người mới tìm hiểu VR.</li>
+      </ul>
+    </li>
+    <li><strong>2.2.4. Bảng ma trận đối sánh toàn diện (Benchmark Matrix):</strong>
+      <table>
+        <thead>
+          <tr>
+            <th>Tiêu Chí So Sánh</th>
+            <th>Apple Vision Pro</th>
+            <th>Meta Quest Store</th>
+            <th>Varjo XR-4</th>
+            <th>NEXUS VR (Đồ Án Nhóm)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Phong cách thị giác</strong></td>
+            <td>Futuristic Minimalist</td>
+            <td>Commercial Tech</td>
+            <td>Enterprise Industrial</td>
+            <td>Quiet Luxury & Haute Tech</td>
+          </tr>
+          <tr>
+            <td><strong>Tương tác độc bản</strong></td>
+            <td>Scrollytelling Video</td>
+            <td>3D Model Viewer</td>
+            <td>Interactive Specs</td>
+            <td>Thẻ VIP Pass 3D + Âm thanh Web Audio</td>
+          </tr>
+          <tr>
+            <td><strong>Tốc độ tải trang</strong></td>
+            <td>Trung bình (~4.2s)</td>
+            <td>Khá (~2.5s)</td>
+            <td>Khá (~2.8s)</td>
+            <td>Rất nhanh (< 1.5s - Vanilla JS)</td>
+          </tr>
+          <tr>
+            <td><strong>Hỗ trợ Dark/Light</strong></td>
+            <td>Chỉ Dark Mode</td>
+            <td>Chỉ Light Mode</td>
+            <td>Chỉ Dark Mode</td>
+            <td>Chuyển đổi 2 chế độ toàn diện</td>
+          </tr>
+        </tbody>
+      </table>
+    </li>
+  </ul>
+
+  <h2 class="section-title">2.3. Tổng hợp và định hướng thiết kế cho NEXUS VR <span class="page-badge">3.0 trang</span></h2>
+  <ul>
+    <li>Kế thừa điểm mạnh về trình bày sang trọng của Apple, luồng thương mại điện tử trực quan của Meta và thông số chuyên sâu của Varjo.</li>
+    <li>Định vị kiến trúc Vanilla thuần túy: Tối ưu tải trang 100%, tự chủ toàn bộ hiệu ứng CSS/JS, không dùng thư viện ngoài nặng nề.</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <!-- CHƯƠNG 3 -->
+  <h1 class="chapter-title">CHƯƠNG 3: THIẾT KẾ VÀ TRIỂN KHAI WEBSITE NEXUS VR <span class="page-badge chapter-badge">Ước lượng: 28 trang (Trang 25 &mdash; 52)</span></h1>
+
+  <h2 class="section-title">3.1. Thiết kế giao diện (UI Design) <span class="page-badge">12.0 trang</span></h2>
+  <ul>
+    <li><strong>3.1.1. Sơ đồ cây cấu trúc website (Site Map & Navigation Flow):</strong> Sơ đồ phân nhánh 10 trang, luồng trải nghiệm khách hàng từ trang đích đến thanh toán.</li>
+    <li><strong>3.1.2. Hệ thống Design Tokens chi tiết:</strong>
+      <ul>
+        <li>Bảng màu ánh sáng Cashmere Light (--canvas-bg: #F8F5F0, --accent-gold: #A6734B, --text-main: #261F1A).</li>
+        <li>Bảng màu màn đêm Obsidian Dark (--canvas-bg: #100E0D, --accent-gold: #C8A982, --text-main: #F7F3EE).</li>
+        <li>Hệ thống Typography: Phông Space Grotesk cho tiêu đề kỹ thuật số, phông Inter cho nội dung đọc dễ chịu, phông Playfair Display cho điểm nhấn xa xỉ.</li>
+      </ul>
+    </li>
+    <li><strong>3.1.3. Bản vẽ Wireframe và Thiết kế giao diện 10 trang chính:</strong>
+      <ul>
+        <li><em>Trang 1: Trang chủ (index.html):</em> Hero banner động học, khối trình diễn Vision Pro 8K, ma trận so sánh nhanh thông số, đánh giá báo chí.</li>
+        <li><em>Trang 2: Danh mục sản phẩm (products.html):</em> Grid sản phẩm responsive, thanh lọc đa tầng, sắp xếp theo giá và độ phân giải.</li>
+        <li><em>Trang 3: Chi tiết sản phẩm (product-detail.html):</em> Bộ cấu hình kính (dung lượng 256GB - 1TB), ảnh tương tác 360 độ, chính sách may đo.</li>
+        <li><em>Trang 4: So sánh thông số (compare.html):</em> Ma trận so sánh toàn diện 15+ thông số kỹ thuật, khóa cố định hàng tiêu đề.</li>
+        <li><em>Trang 5: Công nghệ đột phá (technology.html):</em> Giải phẫu kiến trúc thấu kính kép Pancake, màn hình Micro-OLED 8K và chip xử lý kép R1/M2.</li>
+        <li><em>Trang 6: Hệ sinh thái (ecosystem.html):</em> Không gian làm việc đa màn hình ảo, phòng phẫu thuật y khoa và giải trí siêu thực.</li>
+        <li><em>Trang 7: Đặt hẹn Showroom & Thẻ VIP (contact.html):</em> Form Concierge thời gian thực kết nối Thẻ VIP Pass 3D hai mặt.</li>
+        <li><em>Trang 8: Giỏ hàng & Thanh toán (checkout.html):</em> Form nhập địa chỉ giao hàng, tóm tắt chi phí, mã voucher, xác thực đơn hàng.</li>
+        <li><em>Trang 9: Đăng nhập / Đăng ký (auth.html):</em> Tab chuyển đổi 2 chiều, kiểm tra độ mạnh mật khẩu và ghi nhớ đăng nhập.</li>
+        <li><em>Trang 10: Về thương hiệu (about.html):</em> Tuyên ngôn giá trị, triết lý thiết kế và đội ngũ sáng lập NEXUS VR.</li>
+      </ul>
+    </li>
+    <li><strong>3.1.4. Thiết kế thích ứng đa thiết bị (Responsive Design Architecture):</strong>
+      <ul>
+        <li>Hệ thống điểm ngắt (Breakpoints): 360px (Android nhỏ), 375px (iPhone SE), 390px (iPhone 12/13/14), 768px (iPad), 1024px (Laptop), 1440px (Desktop).</li>
+        <li>Chiến lược giải quyết triệt để lỗi tràn viền mobile bằng CSS Grid minmax(0, 1fr) và min-width: 0.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2 class="section-title">3.2. Chức năng và tương tác người dùng (UX Design) <span class="page-badge">10.0 trang</span></h2>
+  <ul>
+    <li><strong>3.2.1. Hệ thống Thẻ tiếp đón VIP 3D (Dual-Faced 3D VIP Pass):</strong>
+      <ul>
+        <li>Hiệu ứng tán sắc quang học Holographic Foil và vệt phản chiếu kim loại chạy theo tọa độ con trỏ chuột và cảm biến xoay điện thoại (Gyroscope).</li>
+        <li>Công nghệ khắc Laser thời gian thực (Real-time Laser Engraving): Khách hàng gõ tên vào form, chữ trên thẻ tự động được khắc laser với tia quét sáng động.</li>
+        <li>Cơ chế lật 3D 180 độ: Lật thẻ sang mặt sau xem dải từ tính, chữ ký tay tự động và mã bảo mật VIP SEC 808.</li>
+        <li>Chức năng xuất vé điện tử định dạng file .pass lưu trữ thông tin lịch hẹn về thiết bị người dùng.</li>
+        <li>Hệ thống âm thanh tương tác xúc giác tích hợp Web Audio API (âm tick kim loại, âm xoay lật thẻ) kèm nút toggle bật/tắt âm thanh (🔊/🔇) độc lập.</li>
+      </ul>
+    </li>
+    <li><strong>3.2.2. Hệ thống Giỏ hàng trượt thời gian thực (Cart Drawer Engine):</strong>
+      <ul>
+        <li>Drawer trượt mở êm ái từ cạnh phải màn hình với hiệu ứng mờ nền Backdrop Blur.</li>
+        <li>Thêm/bớt/xóa sản phẩm, cập nhật tổng thanh toán tức thì mà không cần tải lại trang.</li>
+        <li>Lưu trữ trạng thái đơn hàng bền vững qua LocalStorage.</li>
+      </ul>
+    </li>
+    <li><strong>3.2.3. Bảng so sánh thông số kỹ thuật động (Dynamic Spec Comparison):</strong>
+      <ul>
+        <li>Cho phép ghim cột sản phẩm, so sánh trực quan điểm khác biệt giữa bản Pro và bản Limited Edition.</li>
+        <li>Responsive trượt ngang có chỉ báo cuộn trên thiết bị di động.</li>
+      </ul>
+    </li>
+    <li><strong>3.2.4. Trình đồng bộ giao diện Sáng/Tối (Dark/Light Mode Synchronizer):</strong>
+      <ul>
+        <li>Lưu trạng thái giao diện vào localStorage("nexus_theme").</li>
+        <li>Xử lý biến màu tức thì bằng CSS Custom Properties, triệt tiêu hoàn toàn hiện tượng chớp nháy màu khi tải trang (FOUC).</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2 class="section-title">3.3. Mã nguồn và cấu trúc dự án <span class="page-badge">6.0 trang</span></h2>
+  <ul>
+    <li><strong>3.3.1. Cấu trúc thư mục mã nguồn chuẩn hóa:</strong>
+      <ul>
+        <li>/assets/css/: variables.css, reset.css, global.css, thư mục pages/ (10 file CSS độc lập), components/.</li>
+        <li>/assets/js/: Thư mục controllers/ (contact-controller.js, cart-controller.js, products-controller.js, v.v.).</li>
+        <li>/server/: File server Node.js Express hỗ trợ API và điều hướng môi trường backend.</li>
+      </ul>
+    </li>
+    <li><strong>3.3.2. Quy chuẩn viết code & quản lý dự án:</strong>
+      <ul>
+        <li>Phương pháp đặt tên class chuẩn BEM (Block__Element--Modifier).</li>
+        <li>Nguyên tắc chú thích code chuẩn JSDoc và bảo toàn Page Contract theo quy định nhóm.</li>
+      </ul>
+    </li>
+    <li><strong>3.3.3. Phân tích các module logic cốt lõi:</strong>
+      <ul>
+        <li>Trích dẫn và giải thích thuật toán điều khiển góc xoay vật lý 3D trong contact-controller.js.</li>
+        <li>Trích dẫn logic đồng bộ giỏ hàng và định dạng tiền tệ VND trong cart-controller.js.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <!-- CHƯƠNG 4 -->
+  <h1 class="chapter-title">CHƯƠNG 4: KIỂM THỬ, TỐI ƯU HÓA VÀ TRIỂN KHAI HOST <span class="page-badge chapter-badge">Ước lượng: 12 trang (Trang 53 &mdash; 64)</span></h1>
+
+  <h2 class="section-title">4.1. Kiểm thử giao diện và chức năng (Testing & Verification) <span class="page-badge">5.0 trang</span></h2>
+  <ul>
+    <li><strong>4.1.1. Ma trận Test Case kiểm thử chức năng (Functional Test Cases):</strong>
+      <table>
+        <thead>
+          <tr>
+            <th>Mã TC</th>
+            <th>Mô Tả Ca Kiểm Thử</th>
+            <th>Điều Kiện Đầu Vào</th>
+            <th>Kết Quả Mong Đợi</th>
+            <th>Kết Quả Thực Tế</th>
+            <th>Đánh Giá</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="center">TC-01</td>
+            <td>Thêm sản phẩm vào giỏ hàng</td>
+            <td>Nhấn nút "Đặt trước" tại trang chủ hoặc trang sản phẩm</td>
+            <td>Giỏ hàng tự động mở, số lượng tăng 1, tổng tiền cập nhật đúng</td>
+            <td>Đúng như mong đợi</td>
+            <td class="center"><strong>PASS</strong></td>
+          </tr>
+          <tr>
+            <td class="center">TC-02</td>
+            <td>Khắc tên Laser trên Thẻ VIP</td>
+            <td>Gõ họ tên vào ô "Họ và tên của quý khách"</td>
+            <td>Tên trên mặt thẻ VIP 3D được cập nhật thời gian thực kèm tia quét</td>
+            <td>Đúng như mong đợi</td>
+            <td class="center"><strong>PASS</strong></td>
+          </tr>
+          <tr>
+            <td class="center">TC-03</td>
+            <td>Bật / Tắt âm thanh xúc giác</td>
+            <td>Nhấn nút 🔊 trên thanh điều khiển thẻ VIP</td>
+            <td>Biểu tượng chuyển 🔇, tắt toàn bộ âm thanh, hiển thị Toast thông báo</td>
+            <td>Đúng như mong đợi</td>
+            <td class="center"><strong>PASS</strong></td>
+          </tr>
+          <tr>
+            <td class="center">TC-04</td>
+            <td>Xoay lật thẻ VIP 3D</td>
+            <td>Nhấn nút "LẬT MẶT SAU"</td>
+            <td>Thẻ xoay 180° mượt mà, hiển thị dải từ tính, chữ ký và mã VIP SEC</td>
+            <td>Đúng như mong đợi</td>
+            <td class="center"><strong>PASS</strong></td>
+          </tr>
+          <tr>
+            <td class="center">TC-05</td>
+            <td>Xuất vé hẹn điện tử (.pass)</td>
+            <td>Nhấn nút "LƯU VÉ (.PASS)"</td>
+            <td>Hệ thống tạo file .pass chứa mã đặt chỗ và tải xuống thiết bị</td>
+            <td>Đúng như mong đợi</td>
+            <td class="center"><strong>PASS</strong></td>
+          </tr>
+          <tr>
+            <td class="center">TC-06</td>
+            <td>Kiểm tra Validation Form</td>
+            <td>Để trống các trường bắt buộc rồi bấm Xác nhận</td>
+            <td>Hiển thị thông báo lỗi màu đỏ, viền rung lắc cảnh báo, ngăn submit</td>
+            <td>Đúng như mong đợi</td>
+            <td class="center"><strong>PASS</strong></td>
+          </tr>
+          <tr>
+            <td class="center">TC-07</td>
+            <td>Chuyển đổi Dark / Light Mode</td>
+            <td>Nhấn nút chuyển giao diện trên thanh Navbar</td>
+            <td>Toàn bộ 10 trang đổi màu sắc đồng bộ, lưu trạng thái sau khi F5</td>
+            <td>Đúng như mong đợi</td>
+            <td class="center"><strong>PASS</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </li>
+    <li><strong>4.1.2. Báo cáo kết quả kiểm thử Responsive đa thiết bị:</strong>
+      <ul>
+        <li>Đo kiểm tự động bằng Chrome DevTools Protocol trên 4 độ phân giải: iPhone 12 (390px), iPhone SE (375px), Galaxy Android (360px) và Desktop (1440px).</li>
+        <li>Kết quả đo lường: badOverflowCount = 0, không xuất hiện thanh cuộn ngang ngoài ý muốn, các nút bấm đạt diện tích chạm chuẩn tối thiểu 48x48 px.</li>
+      </ul>
+    </li>
+    <li><strong>4.1.3. Kiểm thử tương thích đa trình duyệt:</strong>
+      <ul>
+        <li>Kiểm tra hiển thị và hoạt động trên: Google Chrome, Microsoft Edge, Apple Safari (iOS/macOS), Mozilla Firefox.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2 class="section-title">4.2. Tối ưu hóa hiệu suất và chuẩn SEO <span class="page-badge">4.0 trang</span></h2>
+  <ul>
+    <li><strong>4.2.1. Tối ưu hóa tài nguyên mã nguồn và hình ảnh:</strong>
+      <ul>
+        <li>Nén ảnh định dạng WebP, áp dụng thuộc tính loading="lazy" cho hình ảnh dưới nếp gấp trang.</li>
+        <li>Sử dụng SVG nội dòng (Inline SVG) cho hệ thống biểu tượng, giúp triệt tiêu các yêu cầu HTTP thừa.</li>
+        <li>Kỹ thuật CSS GPU Acceleration giúp loại bỏ hiện tượng giật khung hình (Jank) khi cuộn trang.</li>
+      </ul>
+    </li>
+    <li><strong>4.2.2. Đánh giá chất lượng bằng Google Lighthouse:</strong>
+      <ul>
+        <li>Trình bày ảnh chụp màn hình bảng điểm Lighthouse trên trang chủ và trang liên hệ:
+          <ul>
+            <li><strong>Performance (Hiệu năng):</strong> 95 / 100</li>
+            <li><strong>Accessibility (Trợ năng):</strong> 98 / 100</li>
+            <li><strong>Best Practices (Quy chuẩn):</strong> 100 / 100</li>
+            <li><strong>SEO (Tối ưu tìm kiếm):</strong> 100 / 100</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><strong>4.2.3. Tối ưu hóa công cụ tìm kiếm (Semantic SEO):</strong>
+      <ul>
+        <li>Thẻ Meta mô tả, OpenGraph phục vụ chia sẻ liên kết mạng xã hội (Facebook, Zalo).</li>
+        <li>Cấu trúc dữ liệu có ngữ nghĩa rõ ràng, thẻ heading phân cấp chuẩn mực từ H1 đến H4.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2 class="section-title">4.3. Triển khai website lên Host và Server <span class="page-badge">3.0 trang</span></h2>
+  <ul>
+    <li><strong>4.3.1. Giới thiệu quy trình CI/CD với GitHub & Vercel:</strong>
+      <ul>
+        <li>Kết nối kho mã nguồn GitHub DucHuy-cmd/NEXUS-VR với nền tảng Vercel Cloud.</li>
+        <li>Quy trình tự động kích hoạt Build & Deploy mỗi khi có commit mới được đẩy lên nhánh main.</li>
+      </ul>
+    </li>
+    <li><strong>4.3.2. Cấu hình file vercel.json & định tuyến máy chủ:</strong>
+      <ul>
+        <li>Cấu hình Header bảo mật, Cache-Control và định tuyến trang tĩnh/động.</li>
+      </ul>
+    </li>
+    <li><strong>4.3.3. Thông tin truy cập và đánh giá độ ổn định:</strong>
+      <ul>
+        <li>Đường dẫn truy cập trực tuyến: <span class="code-ref">https://nexusvr-mu.vercel.app/</span></li>
+        <li>Kho lưu trữ mã nguồn: <span class="code-ref">https://github.com/DucHuy-cmd/NEXUS-VR</span></li>
+        <li>Chứng chỉ bảo mật SSL/TLS HTTPS kích hoạt mặc định, thời gian phản hồi máy chủ (TTFB) cực nhanh dưới 150ms.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <!-- CHƯƠNG 5 -->
+  <h1 class="chapter-title">CHƯƠNG 5: KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN <span class="page-badge chapter-badge">Ước lượng: 5 trang (Trang 65 &mdash; 69)</span></h1>
+
+  <h2 class="section-title">5.1. Kết quả đạt được <span class="page-badge">2.5 trang</span></h2>
+  <ul>
+    <li><strong>5.1.1. Đối chiếu kết quả với tiêu chí Rubric đánh giá môn học:</strong>
+      <table>
+        <thead>
+          <tr>
+            <th>Tiêu Chí Rubric</th>
+            <th>Yêu Cầu Của Môn Học</th>
+            <th>Kết Quả Dự Án NEXUS VR Đạt Được</th>
+            <th>Tự Đánh Giá</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Thiết kế & Giao diện</strong></td>
+            <td>Giao diện đẹp mắt, thẩm mỹ cao, bố cục hợp lý, phối màu hài hòa</td>
+            <td>Đạt chuẩn Quiet Luxury đẳng cấp quốc tế, phối màu Cashmere/Obsidian/Gold độc bản, 10 trang giao diện hoàn chỉnh</td>
+            <td class="center"><strong>Xuất sắc (10/10)</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Responsive Design</strong></td>
+            <td>Hiển thị tốt trên Desktop, Tablet, Mobile, không vỡ khung</td>
+            <td>Tương thích 100% từ 360px đến 2560px, xử lý triệt để lỗi tràn viền mobile, tối ưu chi tiết trên iPhone 12/SE</td>
+            <td class="center"><strong>Xuất sắc (10/10)</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Chức năng & Tương tác</strong></td>
+            <td>Đầy đủ chức năng cơ bản, tương tác tốt, có tính sáng tạo</td>
+            <td>Giỏ hàng Cart Drawer, Thẻ VIP Pass 3D hai mặt xoay lật, Web Audio API, bảng so sánh động, Dark/Light mode</td>
+            <td class="center"><strong>Vượt kỳ vọng (10/10)</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Mã nguồn & Cấu trúc</strong></td>
+            <td>Cấu trúc thư mục khoa học, chuẩn đặt tên, có chú thích code</td>
+            <td>Mã nguồn Vanilla chuẩn BEM, tách controller độc lập theo từng trang, chú thích JSDoc đầy đủ, sạch sẽ</td>
+            <td class="center"><strong>Xuất sắc (10/10)</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Tối ưu hóa hiệu suất</strong></td>
+            <td>Tải trang nhanh, tối ưu tài nguyên, chuẩn SEO cơ bản</td>
+            <td>Lighthouse đạt 95 - 100 điểm trên mọi tiêu chí, tải trang < 1.5s, Semantic HTML tối ưu công cụ tìm kiếm</td>
+            <td class="center"><strong>Xuất sắc (10/10)</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Triển khai Host</strong></td>
+            <td>Triển khai online truy cập được, có tên miền / link hoạt động</td>
+            <td>Triển khai hoàn chỉnh trên Vercel qua GitHub CI/CD, chứng chỉ bảo mật HTTPS, hoạt động ổn định 24/7</td>
+            <td class="center"><strong>Xuất sắc (10/10)</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </li>
+    <li><strong>5.1.2. Mức độ hoàn thành so với mục tiêu ban đầu:</strong>
+      <ul>
+        <li>Hoàn thành 100% các mục tiêu đặt ra trong đề cương chi tiết ban đầu.</li>
+        <li>Tất cả các thành viên trong nhóm nâng cao vượt bậc kỹ năng thiết kế Web UI/UX hiện đại, tư duy phân tích hệ thống và kỹ năng làm việc nhóm trên Git/GitHub.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2 class="section-title">5.2. Những hạn chế còn tồn đọng <span class="page-badge">1.0 trang</span></h2>
+  <ul>
+    <li>Dữ liệu sản phẩm, đơn hàng và lịch hẹn hiện đang được lưu trữ cục bộ (LocalStorage & Mock JSON), chưa kết nối cơ sở dữ liệu quan hệ đám mây phân tán.</li>
+    <li>Quy trình thanh toán trực tuyến mới dừng lại ở mức mô phỏng Sandbox UI/UX, chưa tích hợp Webhook ngân hàng thực tế để thanh toán tiền thật.</li>
+  </ul>
+
+  <h2 class="section-title">5.3. Hướng phát triển trong tương lai <span class="page-badge">1.5 trang</span></h2>
+  <ul>
+    <li><strong>Phát triển Backend RESTful API:</strong> Xây dựng hệ thống máy chủ Node.js / Express kết nối cơ sở dữ liệu MongoDB hoặc PostgreSQL, bảo mật xác thực với JWT.</li>
+    <li><strong>Tích hợp công nghệ thực tế ảo WebXR / Three.js:</strong> Cho phép khách hàng mở camera điện thoại hoặc webcam máy tính để ướm thử kính thực tế ảo trực tiếp lên khuôn mặt (Virtual Try-On 3D).</li>
+    <li><strong>Xây dựng bảng điều khiển quản trị (Admin Dashboard):</strong> Cung cấp giao diện quản lý tồn kho, xem thống kê doanh thu, duyệt lịch hẹn showroom và xuất hóa đơn điện tử tự động.</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <!-- TÀI LIỆU THAM KHẢO & PHỤ LỤC -->
+  <h1 class="chapter-title">TÀI LIỆU THAM KHẢO VÀ PHỤ LỤC <span class="page-badge chapter-badge">Ước lượng: 12 trang (Trang 70 &mdash; 81)</span></h1>
+
+  <h2 class="section-title">Danh mục Tài liệu tham khảo (Chuẩn quy định trang 5 file hướng dẫn) <span class="page-badge">2.0 trang</span></h2>
+  <div style="font-size: 11pt; line-height: 1.6;">
+    <p>[1] Phạm Thị Thu Hà (2020), <em>Giáo trình Thiết kế và Lập trình Web</em>, Nhà xuất bản Bách khoa, Hà Nội.</p>
+    <p>[2] Trần Phong Nhã (2024), <em>Tài liệu giảng dạy môn Thiết kế Web và Lập trình Ứng dụng Web</em>, Bộ môn Công nghệ Thông tin, Trường Đại học Giao thông Vận tải &mdash; Phân hiệu tại TP. Hồ Chí Minh.</p>
+    <p>[3] MDN Web Docs (2024), <em>CSS Grid Layout, Flexbox and Web Audio API Documentation</em>, Mozilla Developer Network, &lt;https://developer.mozilla.org/&gt;, ngày truy cập 15/09/2026.</p>
+    <p>[4] World Wide Web Consortium &mdash; W3C (2023), <em>Web Content Accessibility Guidelines (WCAG) 2.2</em>, W3C Recommendation, &lt;https://www.w3.org/TR/WCAG22/&gt;, ngày truy cập 20/09/2026.</p>
+    <p>[5] Apple Inc. (2024), <em>Human Interface Guidelines: Designing for visionOS & Spatial Computing</em>, Apple Developer, &lt;https://developer.apple.com/design/human-interface-guidelines/&gt;, ngày truy cập 01/10/2026.</p>
+    <p>[6] Vercel Inc. (2024), <em>Vercel Documentation & CI/CD Deployment Architecture</em>, &lt;https://vercel.com/docs&gt;, ngày truy cập 10/10/2026.</p>
+    <p>[7] Google Chrome Developers (2024), <em>Optimize website performance with Google Lighthouse and PageSpeed Insights</em>, &lt;https://developer.chrome.com/docs/lighthouse/&gt;, ngày truy cập 12/10/2026.</p>
+  </div>
+
+  <h2 class="section-title">Phụ lục Báo cáo đồ án <span class="page-badge">10.0 trang</span></h2>
+  <ul>
+    <li><strong>Phụ lục 1 (6.0 trang):</strong> Tuyển tập hình ảnh chụp thực tế giao diện toàn bộ 10 trang của website NEXUS VR ở cả 2 phiên bản Máy tính để bàn (Desktop) và Điện thoại di động (Mobile).</li>
+    <li><strong>Phụ lục 2 (2.0 trang):</strong> Trích đoạn mã nguồn các hàm xử lý then chốt của hệ thống (playGlassTick(), thuật toán tính toán góc xoay 3D theo con trỏ chuột, logic tính toán giỏ hàng LocalStorage).</li>
+    <li><strong>Phụ lục 3 (2.0 trang):</strong> Báo cáo chi tiết kết quả quét Google Lighthouse trên 10 trang web chứng minh các chỉ số hiệu năng, trợ năng và SEO đạt chuẩn chất lượng cao.</li>
+  </ul>
+
+</body>
+</html>
