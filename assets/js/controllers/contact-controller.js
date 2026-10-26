@@ -17,11 +17,14 @@
     initHauteSpatialExperience();
   }
 
+  var isSoundEnabled = localStorage.getItem("nexus_sound_enabled") !== "false";
+
   function initHauteSpatialExperience() {
     if (window.__hauteExperienceInitialized) return;
     window.__hauteExperienceInitialized = true;
 
     initAudioSynthesisEngine();
+    initSoundToggle();
     initTimeSlotCapsules();
     initCustomServiceSelect();
     initCharacterCounter();
@@ -61,6 +64,7 @@
 
     // Tiếng chạm thủy tinh cường lực siêu nhẹ (Subtle Glass Tick)
     window.playGlassTick = function() {
+      if (!isSoundEnabled) return;
       try {
         var ctx = getCtx();
         if (!ctx) return;
@@ -82,6 +86,7 @@
 
     // Âm thanh lật báo chân thực (Newspaper Page Turn / Paper Rustle)
     window.playCardFlipSound = function () {
+      if (!isSoundEnabled) return;
       try {
         var ctx = getCtx();
         if (!ctx) return;
@@ -156,6 +161,7 @@
 
     // Âm khắc laser siêu thanh
     window.playLaserTickSound = function () {
+      if (!isSoundEnabled) return;
       try {
         var ctx = getCtx();
         if (!ctx) return;
@@ -178,6 +184,7 @@
 
     // Âm màn trập cơ học quang học khi chụp ảnh xuất vé VIP
     window.playShutterAcoustics = function () {
+      if (!isSoundEnabled) return;
       try {
         var ctx = getCtx();
         if (!ctx) return;
@@ -210,6 +217,51 @@
         osc2.stop(now + 0.14);
       } catch (e) {}
     };
+  }
+
+  /* --------------------------------------------------------------------------
+     1.1 SOUND TOGGLE CONTROLLER (ICON-ONLY LUXURY COMPACT)
+     -------------------------------------------------------------------------- */
+  function initSoundToggle() {
+    var btn = document.getElementById("soundToggleBtn");
+    var iconOn = btn ? btn.querySelector(".sound-icon-on") : null;
+    var iconOff = btn ? btn.querySelector(".sound-icon-off") : null;
+
+    if (!btn) return;
+
+    function updateSoundUI() {
+      if (isSoundEnabled) {
+        btn.classList.remove("is-muted");
+        btn.setAttribute("title", "Âm thanh: Bật (Click để tắt)");
+        btn.setAttribute("aria-label", "Âm thanh: Bật (Click để tắt)");
+        if (iconOn) iconOn.style.display = "inline-block";
+        if (iconOff) iconOff.style.display = "none";
+      } else {
+        btn.classList.add("is-muted");
+        btn.setAttribute("title", "Âm thanh: Tắt (Click để bật)");
+        btn.setAttribute("aria-label", "Âm thanh: Tắt (Click để bật)");
+        if (iconOn) iconOn.style.display = "none";
+        if (iconOff) iconOff.style.display = "inline-block";
+      }
+    }
+
+    updateSoundUI();
+
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      isSoundEnabled = !isSoundEnabled;
+      localStorage.setItem("nexus_sound_enabled", String(isSoundEnabled));
+      updateSoundUI();
+
+      if (isSoundEnabled && typeof window.playGlassTick === "function") {
+        window.playGlassTick();
+      }
+
+      if (typeof showToast === "function") {
+        showToast(isSoundEnabled ? "Đã bật hiệu ứng âm thanh xúc giác" : "Đã tắt âm thanh hiệu ứng", "info");
+      }
+    });
   }
 
   /* --------------------------------------------------------------------------

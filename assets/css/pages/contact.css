@@ -1538,6 +1538,8 @@ textarea:-webkit-autofill {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .stage-tag {
@@ -1578,6 +1580,21 @@ textarea:-webkit-autofill {
   color: #100E0D;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(200, 169, 130, 0.25);
+}
+
+.btn-pass-action--icon-only {
+  width: 27px;
+  height: 27px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.btn-pass-action--icon-only.is-muted {
+  opacity: 0.6;
+  border-style: dashed;
+  background: rgba(200, 169, 130, 0.04);
 }
 
 .btn-pass-action svg {
