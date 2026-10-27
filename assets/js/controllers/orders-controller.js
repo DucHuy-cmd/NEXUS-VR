@@ -12,6 +12,16 @@ XÁC NHẬN "ĐÃ NHẬN" VÀ "HỦY ĐƠN" QUA BẢNG MODAL APPLE GLASSMORPHISM
 
   const formatVND = (num) => (num || 0).toLocaleString("vi-VN") + " ₫";
 
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
   document.addEventListener("DOMContentLoaded", initOrdersController);
 
   function initOrdersController() {
@@ -100,14 +110,49 @@ XÁC NHẬN "ĐÃ NHẬN" VÀ "HỦY ĐƠN" QUA BẢNG MODAL APPLE GLASSMORPHISM
       if (order.status === "completed") badgeClass = "completed";
       if (order.status === "cancelled") badgeClass = "cancelled";
 
+      // THANH TIẾN ĐỘ VẬN CHUYỂN 3 CHẶNG CHO ĐƠN ĐANG XỬ LÝ
+      let stepperHTML = "";
+      if (order.status === "active") {
+        stepperHTML = `
+          <div class="order-stepper-bar">
+            <div class="order-stepper-node is-done">
+              <span>✓</span>
+              <span>Đã xác nhận</span>
+            </div>
+            <div class="order-stepper-divider is-done"></div>
+            <div class="order-stepper-node is-active">
+              <span>🚚</span>
+              <span>Đang vận chuyển</span>
+            </div>
+            <div class="order-stepper-divider"></div>
+            <div class="order-stepper-node">
+              <span>📦</span>
+              <span>Dự kiến giao 1-3 ngày</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // HỘP THÔNG TIN LÝ DO HỦY ĐƠN (CHUẨN SHOPEE)
+      let cancelReasonHTML = "";
+      if (order.status === "cancelled") {
+        cancelReasonHTML = `
+          <div class="order-cancel-reason-box">
+            <div><strong>Lý do hủy:</strong> ${escapeHtml(order.cancelReason || 'Đổi ý, tạm thời chưa có nhu cầu mua thiết bị này')}</div>
+            ${order.cancelNote ? `<div style="font-size: 0.8rem; margin-top: 3px; color: #7f1d1d;">Chi tiết: ${escapeHtml(order.cancelNote)}</div>` : ''}
+            <div style="font-size: 0.75rem; color: #b91c1c; margin-top: 3px;">Thời gian hủy: ${escapeHtml(order.cancelledAt || order.createdAt || '')}</div>
+          </div>
+        `;
+      }
+
       let productsHTML = "";
       (order.items || []).forEach((item) => {
         productsHTML += `
           <div class="order-product-item" style="display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border, #E5DECE); align-items: center;">
             <img src="${item.image || 'assets/images/placeholder.svg'}" class="order-product-img" alt="${item.name || 'Sản phẩm'}" style="width: 56px; height: 56px; object-fit: cover; border-radius: 8px;">
             <div style="flex: 1;">
-              <strong style="display: block; font-size: 0.95rem; color: var(--text-primary, #231F1C);">${item.name || 'Sản phẩm NEXUS VR'}</strong>
-              <span style="font-size: 0.8rem; color: var(--text-secondary, #726657);">${item.selectedColor ? 'Màu: ' + item.selectedColor + ' • ' : ''}Số lượng: ${item.qty || 1}</span>
+              <strong style="display: block; font-size: 0.95rem; color: var(--text-primary, #231F1C);">${escapeHtml(item.name || 'Sản phẩm NEXUS VR')}</strong>
+              <span style="font-size: 0.8rem; color: var(--text-secondary, #726657);">${item.selectedColor ? 'Màu: ' + escapeHtml(item.selectedColor) + ' • ' : ''}Số lượng: ${item.qty || 1}</span>
             </div>
             <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary, #231F1C);">${formatVND((item.price || 0) * (item.qty || 1))}</div>
           </div>
@@ -123,25 +168,45 @@ XÁC NHẬN "ĐÃ NHẬN" VÀ "HỦY ĐƠN" QUA BẢNG MODAL APPLE GLASSMORPHISM
           </div>
         `;
       } else if (order.status === "completed") {
-        actionsHTML = `<div style="font-size: 0.85rem; color: #2e7d32; font-weight: 600;">✓ Giao hàng thành công</div>`;
+        actionsHTML = `
+          <div class="btn-action-group" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 0.85rem; color: #2e7d32; font-weight: 600;">✓ Giao hàng thành công</span>
+            <button type="button" class="btn-reorder" data-id="${order.id}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+              Mua lại
+            </button>
+          </div>
+        `;
       } else if (order.status === "cancelled") {
-        actionsHTML = `<div style="font-size: 0.85rem; color: #d32f2f; font-weight: 600;">✕ Đã hủy đơn hàng</div>`;
+        actionsHTML = `
+          <div class="btn-action-group" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <span style="font-size: 0.85rem; color: #d32f2f; font-weight: 600;">✕ Đã hủy đơn</span>
+            <button type="button" class="btn-reorder" data-id="${order.id}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+              Mua lại
+            </button>
+          </div>
+        `;
       }
 
       card.innerHTML = `
         <div class="order-card-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border, #E5DECE); margin-bottom: 12px;">
           <div>
-            <span class="order-code" style="font-weight: 700; color: var(--accent, #A67C52); font-size: 1.05rem;">${order.code || '#NX-000000'}</span>
-            <span style="font-size: 0.8rem; color: var(--text-secondary, #726657); margin-left: 8px;">(${order.createdAt || ''})</span>
+            <span class="order-code" style="font-weight: 700; color: var(--accent, #A67C52); font-size: 1.05rem;">${escapeHtml(order.code || '#NX-000000')}</span>
+            <span style="font-size: 0.8rem; color: var(--text-secondary, #726657); margin-left: 8px;">(${escapeHtml(order.createdAt || '')})</span>
           </div>
-          <span class="order-status-badge ${badgeClass}" style="padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;">${order.statusText || 'Đơn hàng'}</span>
+          <span class="order-status-badge ${badgeClass}" style="padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;">${escapeHtml(order.statusText || 'Đơn hàng')}</span>
         </div>
+
+        ${stepperHTML}
 
         <div class="order-products-list">${productsHTML}</div>
 
-        <div class="order-card-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; margin-top: 8px;">
+        ${cancelReasonHTML}
+
+        <div class="order-card-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; margin-top: 8px; flex-wrap: wrap; gap: 10px;">
           <div>
-            <div style="font-size: 0.825rem; color: var(--text-secondary, #726657); margin-bottom: 2px;">Phương thức: ${order.paymentMethod || 'COD'}</div>
+            <div style="font-size: 0.825rem; color: var(--text-secondary, #726657); margin-bottom: 2px;">Phương thức: ${escapeHtml(order.paymentMethod || 'COD')}</div>
             <div class="order-total-price" style="font-size: 1.1rem; font-weight: 700; color: var(--accent, #A67C52);">Tổng cộng: ${formatVND(order.totalAmount)}</div>
           </div>
           ${actionsHTML}
@@ -168,6 +233,47 @@ XÁC NHẬN "ĐÃ NHẬN" VÀ "HỦY ĐƠN" QUA BẢNG MODAL APPLE GLASSMORPHISM
       btn.addEventListener("click", function () {
         pendingOrderIdToConfirm = this.getAttribute("data-id");
         openConfirmReceivedModal();
+      });
+    });
+
+    // 3. BẤM "MUA LẠI" -> NẠP LẠI SẢN PHẨM VÀO GIỎ & CHUYỂN SANG CART.HTML
+    bindReorderEvents();
+  }
+
+  function bindReorderEvents() {
+    document.querySelectorAll(".btn-reorder").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const orderId = this.getAttribute("data-id");
+        const orders = getOrders();
+        const order = orders.find((o) => o.id === orderId);
+        if (!order || !order.items || order.items.length === 0) return;
+
+        let addedCount = 0;
+        order.items.forEach((item) => {
+          if (window.cartManager && typeof window.cartManager.add === "function") {
+            window.cartManager.add(item.id, Number(item.qty) || 1, item.selectedColor || null);
+            addedCount++;
+          } else {
+            const userKey = getUserKeySuffix();
+            const cartKey = "nexus_cart" + userKey;
+            let cart = [];
+            try {
+              cart = JSON.parse(localStorage.getItem(cartKey) || "[]");
+            } catch (e) { cart = []; }
+            cart.push(item);
+            localStorage.setItem(cartKey, JSON.stringify(cart));
+            localStorage.setItem("nexus_cart", JSON.stringify(cart));
+            addedCount++;
+          }
+        });
+
+        if (typeof window.showToast === "function") {
+          window.showToast(`Đã thêm lại các sản phẩm từ đơn ${order.code} vào giỏ hàng!`, "success");
+        }
+
+        setTimeout(() => {
+          window.location.href = "cart.html";
+        }, 700);
       });
     });
   }
@@ -228,7 +334,7 @@ XÁC NHẬN "ĐÃ NHẬN" VÀ "HỦY ĐƠN" QUA BẢNG MODAL APPLE GLASSMORPHISM
   }
 
   /* --------------------------------------------------------------------------
-  4. BỘ ĐIỀU KHIỂN MODAL XÁC NHẬN "HỦY ĐƠN HÀNG" (APPLE STYLE)
+  4. BỘ ĐIỀU KHIỂN MODAL XÁC NHẬN "HỦY ĐƠN HÀNG" CÓ LÝ DO (CHUẨN SHOPEE)
   -------------------------------------------------------------------------- */
   function openConfirmCancelModal() {
     const modal = document.getElementById("confirmCancelModal");
@@ -245,11 +351,29 @@ XÁC NHẬN "ĐÃ NHẬN" VÀ "HỦY ĐƠN" QUA BẢNG MODAL APPLE GLASSMORPHISM
     const modal = document.getElementById("confirmCancelModal");
     const closeBtn = document.getElementById("btnCloseCancelModal");
     const confirmBtn = document.getElementById("btnConfirmCancelModal");
+    const radioInputs = document.querySelectorAll('input[name="cancelReasonRadio"]');
+    const otherWrap = document.getElementById("cancelOtherInputWrap");
+    const otherText = document.getElementById("cancelOtherText");
+
+    // Lắng nghe thay đổi chọn lý do hủy
+    radioInputs.forEach((radio) => {
+      radio.addEventListener("change", function () {
+        document.querySelectorAll(".cancel-reason-label").forEach((lbl) => lbl.classList.remove("is-selected"));
+        this.closest(".cancel-reason-label")?.classList.add("is-selected");
+
+        if (otherWrap) {
+          otherWrap.style.display = this.value === "other" ? "block" : "none";
+          if (this.value === "other" && otherText) {
+            otherText.focus();
+          }
+        }
+      });
+    });
 
     // Bấm "Hủy" -> Đóng modal, giữ nguyên đơn hàng, KHÔNG thông báo
     closeBtn?.addEventListener("click", closeConfirmCancelModal);
 
-    // Bấm "Xác nhận" -> Đổi trạng thái đơn sang "cancelled" + Hiện Toast báo đã hủy
+    // Bấm "Xác nhận hủy" -> Ghi nhận lý do + Đổi trạng thái đơn sang "cancelled" + Hiện Toast
     confirmBtn?.addEventListener("click", () => {
       if (!pendingOrderIdToCancel) return;
 
@@ -257,14 +381,45 @@ XÁC NHẬN "ĐÃ NHẬN" VÀ "HỦY ĐƠN" QUA BẢNG MODAL APPLE GLASSMORPHISM
       const target = orders.find((o) => o.id === pendingOrderIdToCancel);
 
       if (target) {
+        const selectedRadio = document.querySelector('input[name="cancelReasonRadio"]:checked');
+        let chosenReason = selectedRadio ? selectedRadio.value : "Đổi ý, tạm thời chưa có nhu cầu mua thiết bị này";
+        let customNote = "";
+
+        if (chosenReason === "other") {
+          const detail = otherText ? otherText.value.trim() : "";
+          chosenReason = detail ? `Khác: ${detail}` : "Lý do cá nhân khác";
+          customNote = detail;
+        }
+
         target.status = "cancelled";
         target.statusText = "Đã hủy đơn hàng";
+        target.cancelReason = chosenReason;
+        target.cancelNote = customNote;
+        target.cancelledAt = new Date().toLocaleString("vi-VN");
+
         saveOrders(orders);
         closeConfirmCancelModal();
+
+        // Reset form
+        if (otherText) otherText.value = "";
+        const firstRadio = document.querySelector('input[name="cancelReasonRadio"][value="Muốn thay đổi địa chỉ nhận hàng hoặc số điện thoại"]');
+        if (firstRadio) {
+          firstRadio.checked = true;
+          document.querySelectorAll(".cancel-reason-label").forEach((lbl) => lbl.classList.remove("is-selected"));
+          firstRadio.closest(".cancel-reason-label")?.classList.add("is-selected");
+        }
+        if (otherWrap) otherWrap.style.display = "none";
+
+        // Tự động chuyển mượt mà sang tab "cancelled" để người dùng xem kết quả ngay
+        currentTab = "cancelled";
+        document.querySelectorAll(".orders-tab-btn").forEach((btn) => {
+          btn.classList.toggle("is-active", btn.getAttribute("data-tab") === "cancelled");
+        });
+
         renderOrders();
 
         if (typeof window.showToast === "function") {
-          window.showToast("Đã hủy đơn hàng thành công.", "info");
+          window.showToast(`Đã hủy đơn ${target.code} thành công.`, "info");
         }
       }
     });

@@ -307,6 +307,151 @@
       background: #b71c1c;
       box-shadow: 0 6px 16px rgba(211, 47, 47, 0.35);
     }
+
+    /* NÂNG CẤP MODAL LÝ DO HỦY ĐƠN CHUẨN SHOPEE */
+    #confirmCancelModal .apple-modal-card {
+      max-width: 500px;
+      text-align: left;
+      padding: 24px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .cancel-reason-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .cancel-reason-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border, #E5DECE);
+      border-radius: 12px;
+      background: #FFFFFF;
+      cursor: pointer;
+      font-size: 0.88rem;
+      color: var(--text-primary, #231F1C);
+      transition: all 0.2s ease;
+    }
+
+    .cancel-reason-label:hover {
+      border-color: var(--accent, #A67C52);
+      background: rgba(166, 124, 82, 0.04);
+    }
+
+    .cancel-reason-label.is-selected {
+      border-color: var(--accent, #A67C52);
+      background: rgba(166, 124, 82, 0.08);
+      font-weight: 600;
+    }
+
+    .cancel-reason-label input[type="radio"] {
+      accent-color: var(--accent, #A67C52);
+      width: 17px;
+      height: 17px;
+      margin: 0;
+    }
+
+    .cancel-other-textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1.5px solid var(--border, #E5DECE);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      color: var(--text-primary, #231F1C);
+      background: #FFFFFF;
+      resize: vertical;
+      min-height: 64px;
+      margin-top: 6px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .cancel-other-textarea:focus {
+      border-color: var(--accent, #A67C52);
+    }
+
+    /* THANH TIẾN ĐỘ ĐƠN HÀNG TRỰC QUAN (ORDER TRACKING STEPPER) */
+    .order-stepper-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-secondary, #F2ECE4);
+      padding: 10px 16px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-size: 0.78rem;
+    }
+
+    .order-stepper-node {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-secondary, #726657);
+    }
+
+    .order-stepper-node.is-active {
+      color: var(--accent, #A67C52);
+      font-weight: 700;
+    }
+
+    .order-stepper-node.is-done {
+      color: #2e7d32;
+      font-weight: 600;
+    }
+
+    .order-stepper-divider {
+      flex: 1;
+      height: 2px;
+      background: var(--border, #E5DECE);
+      margin: 0 10px;
+    }
+
+    /* NHÃN LÝ DO HỦY ĐƠN TRÊN THẺ ĐƠN HÀNG */
+    .order-cancel-reason-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin: 12px 0 6px;
+      font-size: 0.825rem;
+      color: #991b1b;
+      line-height: 1.5;
+    }
+
+    .order-cancel-reason-box strong {
+      color: #dc2626;
+      font-weight: 700;
+    }
+
+    /* NÚT MUA LẠI 1-CHẠM (RE-ORDER BUTTON) */
+    .btn-reorder {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--accent, #A67C52);
+      background: var(--accent, #A67C52);
+      color: #FFFFFF;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(166, 124, 82, 0.2);
+    }
+
+    .btn-reorder:hover {
+      background: #8e6843;
+      border-color: #8e6843;
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body data-page="orders">
@@ -365,23 +510,62 @@
     </div>
   </div>
 
-  <!-- MODAL 2: XÁC NHẬN HỦY ĐƠN HÀNG (APPLE GLASSMORPHISM) -->
+  <!-- MODAL 2: XÁC NHẬN HỦY ĐƠN HÀNG CÓ LÝ DO (CHUẨN SHOPEE GLASSMORPHISM) -->
   <div id="confirmCancelModal" class="apple-modal-overlay" hidden>
     <div class="apple-modal-card">
-      <div class="apple-modal-icon red-icon">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="15" y1="9" x2="9" y2="15"></line>
-          <line x1="9" y1="9" x2="15" y2="15"></line>
-        </svg>
+      <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px;">
+        <div class="apple-modal-icon red-icon" style="margin: 0; flex-shrink: 0;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+        </div>
+        <div>
+          <h3 class="apple-modal-title" style="margin-bottom: 2px;">Lý do hủy đơn hàng</h3>
+          <span style="font-size: 0.8rem; color: var(--text-secondary, #726657);">Vui lòng chọn lý do để NEXUS phục vụ tốt hơn</span>
+        </div>
       </div>
-      <h3 class="apple-modal-title">Xác nhận hủy đơn hàng?</h3>
-      <p class="apple-modal-desc">
-        Bạn có chắc chắn muốn hủy đơn hàng này không? Đơn hàng sẽ được chuyển sang mục <strong>"Đơn hàng đã hủy"</strong>.
+
+      <div class="cancel-reason-options" id="cancelReasonOptionsList">
+        <label class="cancel-reason-label is-selected">
+          <input type="radio" name="cancelReasonRadio" value="Muốn thay đổi địa chỉ nhận hàng hoặc số điện thoại" checked>
+          <span>Muốn thay đổi địa chỉ nhận hàng hoặc số điện thoại</span>
+        </label>
+        <label class="cancel-reason-label">
+          <input type="radio" name="cancelReasonRadio" value="Muốn đổi phiên bản màu sắc hoặc cấu hình thiết bị">
+          <span>Muốn đổi phiên bản màu sắc hoặc cấu hình thiết bị</span>
+        </label>
+        <label class="cancel-reason-label">
+          <input type="radio" name="cancelReasonRadio" value="Quên áp dụng mã giảm giá (Voucher) hoặc muốn đổi hình thức thanh toán">
+          <span>Quên áp dụng Voucher hoặc muốn đổi phương thức thanh toán</span>
+        </label>
+        <label class="cancel-reason-label">
+          <input type="radio" name="cancelReasonRadio" value="Thời gian giao hàng dự kiến chưa đáp ứng mong muốn">
+          <span>Thời gian giao hàng dự kiến chưa đáp ứng mong muốn</span>
+        </label>
+        <label class="cancel-reason-label">
+          <input type="radio" name="cancelReasonRadio" value="Đổi ý, tạm thời chưa có nhu cầu mua thiết bị này">
+          <span>Đổi ý, tạm thời chưa có nhu cầu mua thiết bị này</span>
+        </label>
+        <label class="cancel-reason-label" id="cancelReasonOtherLabel">
+          <input type="radio" name="cancelReasonRadio" value="other" id="radioCancelOther">
+          <span>Lý do khác...</span>
+        </label>
+      </div>
+
+      <div id="cancelOtherInputWrap" style="display: none; margin-bottom: 16px;">
+        <label for="cancelOtherText" style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary, #726657); display: block; margin-bottom: 4px;">Nhập chi tiết lý do của bạn:</label>
+        <textarea id="cancelOtherText" class="cancel-other-textarea" placeholder="Nhập lý do hủy đơn cụ thể tại đây..." maxlength="200"></textarea>
+      </div>
+
+      <p style="font-size: 0.78rem; color: var(--text-secondary, #726657); margin-bottom: 18px; line-height: 1.4;">
+        💡 <em>Mẹo: Sau khi hủy đơn hàng, bạn vẫn có thể bấm nút <strong>"Mua lại"</strong> bất kỳ lúc nào để nạp lại sản phẩm vào giỏ.</em>
       </p>
+
       <div class="apple-modal-actions">
-        <button type="button" id="btnCloseCancelModal" class="btn-apple-secondary">Hủy</button>
-        <button type="button" id="btnConfirmCancelModal" class="btn-apple-primary btn-apple-danger">Xác nhận</button>
+        <button type="button" id="btnCloseCancelModal" class="btn-apple-secondary">Giữ lại đơn hàng</button>
+        <button type="button" id="btnConfirmCancelModal" class="btn-apple-primary btn-apple-danger">Xác nhận hủy đơn</button>
       </div>
     </div>
   </div>
@@ -395,6 +579,7 @@
 
   <!-- TẦNG 2: MODULES -->
   <script src="assets/js/modules/toast.js"></script>
+  <script src="assets/js/modules/cart-manager.js"></script>
   <script src="assets/js/modules/layout-loader.js"></script>
 
   <!-- TẦNG 3: CONTROLLER -->
