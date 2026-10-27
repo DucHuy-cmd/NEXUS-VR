@@ -510,7 +510,7 @@ def create_full_chapter3_word_doc():
         ("Hệ thống vi xử lý", "Kép R1 Quang Học + M2 Không Gian", "R1 Quang Học Độc Lập", "Vi xử lý di động tối ưu"),
         ("Trọng lượng khung đeo", "465 gram (Hợp kim ma-giê)", "490 gram (Khung nhôm)", "380 gram (Vỏ carbon)"),
         ("Thời lượng pin liên tục", "3.5 giờ (Pin mở rộng 6 giờ)", "3.0 giờ", "2.5 giờ"),
-        ("Giá niêm yết chính hãng", "89.990.000 VNĐ", "64.990.000 VNĐ", "39.990.000 VNĐ")
+        ("Giá niêm yết chính hãng", "79.990.000 VNĐ", "49.990.000 VNĐ", "12.490.000 VNĐ")
     ]
     for row_vals in compare_data:
         row_cells = table_compare.add_row().cells
