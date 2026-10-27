@@ -2,15 +2,7 @@
    TẦNG 3 - CONTROLLERS: PRODUCT DETAIL PAGE CONTROLLER
    ========================================================= */
 
-const PLACEHOLDER_IMG = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">' +
-  '<rect width="600" height="600" fill="#EDE4D8"/>' +
-  '<g fill="none" stroke="#A67C52" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">' +
-  '<rect x="150" y="220" width="300" height="200" rx="16"/>' +
-  '<circle cx="300" cy="320" r="55"/>' +
-  '<path d="M230 220 L260 180 L340 180 L370 220"/>' +
-  '</g></svg>'
-);
+const PLACEHOLDER_IMG = "assets/images/placeholder.svg";
 
 let selectedColorIndex = 0;
 
