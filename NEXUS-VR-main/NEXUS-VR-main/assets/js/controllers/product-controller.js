@@ -352,6 +352,7 @@ function addProductToCart(productId, qty, colorIndex) {
 function initWishlistButton(product) {
   const btn = document.getElementById("pd-wishlist-btn");
   if (!btn) return;
+  btn.dataset.id = String(product.id);
 
   const getWishlist = window.storageService && typeof window.storageService.getWishlist === "function"
     ? () => window.storageService.getWishlist()
@@ -359,20 +360,27 @@ function initWishlistButton(product) {
 
   const saveWishlist = window.storageService && typeof window.storageService.saveWishlist === "function"
     ? (list) => window.storageService.saveWishlist(list)
-    : (typeof window.saveWishlist === "function" ? window.saveWishlist : () => {});
+    : (typeof window.saveWishlist === "function" ? window.saveWishlist : (list) => {
+        localStorage.setItem("nexus_wishlist", JSON.stringify(list));
+      });
 
   function syncState() {
-    const isSaved = getWishlist().includes(product.id);
+    const list = (getWishlist() || []).map(String);
+    const isSaved = list.includes(String(product.id));
     btn.classList.toggle("is-active", isSaved);
     btn.setAttribute("aria-pressed", String(isSaved));
     btn.textContent = isSaved ? "♥ Đã yêu thích" : "♡ Yêu thích";
+    btn.title = isSaved ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích";
   }
 
   btn.addEventListener("click", () => {
-    const list = getWishlist();
-    const index = list.indexOf(product.id);
+    const list = (getWishlist() || []).map(String);
+    const productIdStr = String(product.id);
+    const index = list.indexOf(productIdStr);
+    let isAdded = false;
     if (index === -1) {
-      list.push(product.id);
+      list.push(productIdStr);
+      isAdded = true;
       if (typeof window.showToast === "function") window.showToast("Đã thêm vào yêu thích", "success");
     } else {
       list.splice(index, 1);
@@ -380,10 +388,20 @@ function initWishlistButton(product) {
     }
     saveWishlist(list);
     syncState();
+    window.dispatchEvent(new CustomEvent("nexus:wishlist-updated", {
+      detail: { wishlist: list, id: productIdStr, action: isAdded ? "add" : "remove" }
+    }));
   });
 
   window.addEventListener("nexus:wishlist-updated", () => {
     syncState();
+    const list = (getWishlist() || []).map(String);
+    document.querySelectorAll(".product-card__wishlist-btn").forEach((cardBtn) => {
+      const active = list.includes(String(cardBtn.dataset.id));
+      cardBtn.classList.toggle("is-active", active);
+      cardBtn.setAttribute("aria-pressed", String(active));
+      cardBtn.title = active ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích";
+    });
   });
 
   syncState();
@@ -422,7 +440,7 @@ function buildRelatedProductCard(product) {
   const getWishlist = window.storageService && typeof window.storageService.getWishlist === "function"
     ? () => window.storageService.getWishlist()
     : (typeof window.getWishlist === "function" ? window.getWishlist : () => []);
-  const isFav = getWishlist().includes(product.id);
+  const isFav = (getWishlist() || []).map(String).includes(String(product.id));
 
   const favBtn = document.createElement("button");
   favBtn.type = "button";

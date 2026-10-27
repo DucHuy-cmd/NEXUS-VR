@@ -343,8 +343,12 @@ function updateWishlistBadge() {
   const strCount = String(count);
 
   badges.forEach((badge) => {
-    if (badge.textContent !== strCount) {
+    const prevCount = badge.textContent.trim();
+    if (prevCount !== strCount) {
       badge.textContent = strCount;
+      badge.classList.remove("badge-bump");
+      void badge.offsetWidth;
+      badge.classList.add("badge-bump");
     }
     if (count > 0) {
       badge.hidden = false;
@@ -643,16 +647,37 @@ function syncPageWishlistState(id, isActive) {
   document.querySelectorAll(`.product-card__wishlist-btn[data-id="${id}"]`).forEach((btn) => {
     btn.classList.toggle("is-active", isActive);
     btn.setAttribute("aria-pressed", String(isActive));
+    btn.title = isActive ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích";
   });
 
   const pdBtn = document.getElementById("pd-wishlist-btn");
   if (pdBtn) {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("id") === String(id)) {
+    const currentId = pdBtn.dataset.id || (new URLSearchParams(window.location.search)).get("id");
+    if (String(currentId) === String(id)) {
       pdBtn.classList.toggle("is-active", isActive);
       pdBtn.setAttribute("aria-pressed", String(isActive));
       pdBtn.textContent = isActive ? "♥ Đã yêu thích" : "♡ Yêu thích";
     }
+  }
+}
+
+// Đồng bộ toàn bộ các nút yêu thích trên toàn trang với danh sách hiện tại
+function syncAllPageWishlistButtons() {
+  const list = getWishlistItems();
+  document.querySelectorAll(".product-card__wishlist-btn").forEach((btn) => {
+    const isFav = list.includes(String(btn.dataset.id));
+    btn.classList.toggle("is-active", isFav);
+    btn.setAttribute("aria-pressed", String(isFav));
+    btn.title = isFav ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích";
+  });
+
+  const pdBtn = document.getElementById("pd-wishlist-btn");
+  if (pdBtn) {
+    const currentId = pdBtn.dataset.id || (new URLSearchParams(window.location.search)).get("id");
+    const isFav = list.includes(String(currentId));
+    pdBtn.classList.toggle("is-active", isFav);
+    pdBtn.setAttribute("aria-pressed", String(isFav));
+    pdBtn.textContent = isFav ? "♥ Đã yêu thích" : "♡ Yêu thích";
   }
 }
 
@@ -820,35 +845,35 @@ window.updateWishlistBadge = updateWishlistBadge;
 window.openWishlistDrawer = openWishlistDrawer;
 window.closeWishlistDrawer = closeWishlistDrawer;
 window.updateUserState = updateUserState;
+window.syncAllPageWishlistButtons = syncAllPageWishlistButtons;
 
 window.addEventListener("storage", (e) => {
   if (e.key && (e.key.startsWith("nexus_cart") || e.key === "nexus_cart")) updateCartBadge();
   if (e.key === "nexus_user" || e.key === "currentUser") updateUserState();
   if (e.key === "nexus_wishlist") {
     updateWishlistBadge();
-    const drawer = document.getElementById("wishlist-drawer");
-    if (drawer && drawer.classList.contains("is-open")) {
-      renderWishlistDrawerContent();
-    }
+    renderWishlistDrawerContent();
+    syncAllPageWishlistButtons();
   }
 });
 
+// Bắt sự kiện cập nhật wishlist (reactive event): cập nhật ngay badge số lượng và drawer
 window.addEventListener("nexus:wishlist-updated", () => {
   updateWishlistBadge();
-  const drawer = document.getElementById("wishlist-drawer");
-  if (drawer && drawer.classList.contains("is-open")) {
-    renderWishlistDrawerContent();
-  }
+  renderWishlistDrawerContent();
+  syncAllPageWishlistButtons();
 });
 
 window.addEventListener("pageshow", () => {
   updateCartBadge();
   updateWishlistBadge();
+  syncAllPageWishlistButtons();
 });
 
 window.addEventListener("load", () => {
   updateCartBadge();
   updateWishlistBadge();
+  syncAllPageWishlistButtons();
 });
 
 function initAllLayout() {
@@ -860,6 +885,7 @@ function initAllLayout() {
   initWishlistDrawer();
   updateUserState();
   initLiveSearch();
+  syncAllPageWishlistButtons();
 }
 
 if (document.readyState === "loading") {

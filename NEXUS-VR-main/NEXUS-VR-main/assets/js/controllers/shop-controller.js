@@ -117,42 +117,56 @@
       return;
     }
     localStorage.setItem(WISHLIST_KEY, JSON.stringify(list));
+    window.dispatchEvent(new CustomEvent('nexus:wishlist-updated', { detail: { wishlist: list } }));
   }
 
   function isInWishlist(id) {
-    return getWishlist().includes(id);
+    return (getWishlist() || []).map(String).includes(String(id));
   }
 
   function toggleWishlist(id, btn) {
-    const list = getWishlist();
-    const idx = list.indexOf(id);
+    const list = (getWishlist() || []).map(String);
+    const strId = String(id);
+    const idx = list.indexOf(strId);
+    let isAdded = false;
     if (idx > -1) {
       list.splice(idx, 1);
-      btn.classList.remove('is-active');
-      btn.setAttribute('aria-pressed', 'false');
-      notify('Đã xóa khỏi danh sách yêu thích');
+      if (btn) {
+        btn.classList.remove('is-active');
+        btn.setAttribute('aria-pressed', 'false');
+        btn.title = 'Thêm vào yêu thích';
+      }
+      notify('Đã xóa khỏi danh sách yêu thích', 'info');
     } else {
-      list.push(id);
-      btn.classList.add('is-active');
-      btn.setAttribute('aria-pressed', 'true');
-      notify('Đã thêm vào danh sách yêu thích');
+      list.push(strId);
+      isAdded = true;
+      if (btn) {
+        btn.classList.add('is-active');
+        btn.setAttribute('aria-pressed', 'true');
+        btn.title = 'Bỏ khỏi yêu thích';
+      }
+      notify('Đã thêm vào danh sách yêu thích', 'success');
     }
     saveWishlist(list);
+    window.dispatchEvent(new CustomEvent('nexus:wishlist-updated', {
+      detail: { wishlist: list, id: strId, action: isAdded ? 'add' : 'remove' }
+    }));
   }
 
   // Đồng bộ trạng thái các thẻ sản phẩm khi wishlist được cập nhật từ drawer hoặc nơi khác
   window.addEventListener('nexus:wishlist-updated', () => {
-    const list = getWishlist();
+    const list = (getWishlist() || []).map(String);
     document.querySelectorAll('.product-card__wishlist-btn').forEach((btn) => {
-      const active = list.includes(btn.dataset.id);
+      const active = list.includes(String(btn.dataset.id));
       btn.classList.toggle('is-active', active);
       btn.setAttribute('aria-pressed', String(active));
+      btn.title = active ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích';
     });
   });
 
-  function notify(message) {
+  function notify(message, type = 'success') {
     if (typeof window.showToast === 'function') {
-      window.showToast(message, 'success');
+      window.showToast(message, type);
     }
   }
 
@@ -198,6 +212,8 @@
 
     const wishlistBtn = e.target.closest('.product-card__wishlist-btn');
     if (wishlistBtn) {
+      e.preventDefault();
+      e.stopPropagation();
       toggleWishlist(wishlistBtn.dataset.id, wishlistBtn);
       return;
     }
