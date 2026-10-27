@@ -265,7 +265,15 @@
       notifyCartChanged(cart);
       const colorLabel = newItem.selectedColor ? ` (${newItem.selectedColor})` : '';
       if (typeof window.showToast === 'function') {
-        window.showToast(`Đã thêm ${amount} ${newItem.name}${colorLabel} vào giỏ hàng`, 'success');
+        window.showToast(`Đã thêm ${amount} ${newItem.name}${colorLabel} vào giỏ hàng`, 'success', 3800, {
+          image: newItem.image,
+          title: newItem.name,
+          color: newItem.selectedColor,
+          actionText: 'Xem giỏ hàng',
+          onAction: () => {
+            window.location.href = 'cart.html';
+          }
+        });
       }
     }
 

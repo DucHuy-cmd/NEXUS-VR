@@ -31,8 +31,54 @@
   overflow: hidden;
   background: var(--bg-tertiary);
   aspect-ratio: 1 / 1;
+  cursor: crosshair;
 }
-.product-detail__main-image img { width: 100%; height: 100%; object-fit: cover; }
+.product-detail__main-image img { width: 100%; height: 100%; object-fit: cover; display: block; user-select: none; }
+
+/* KÍNH LÚP PHÓNG TO THẤU KÍNH (MAGNIFIER ZOOM LENS) */
+.product-detail__zoom-lens {
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-gold, #A67C52);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(166, 124, 82, 0.25);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+  background-repeat: no-repeat;
+  background-color: var(--surface-panel-card, #FFFFFF);
+}
+.product-detail__zoom-lens.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+.product-detail__zoom-hint {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(23, 20, 18, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #FAF7F2;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(200, 169, 130, 0.35);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.product-detail__main-image:hover .product-detail__zoom-hint {
+  opacity: 0;
+}
 
 .product-detail__badge {
   position: absolute; top: 16px; left: 16px;

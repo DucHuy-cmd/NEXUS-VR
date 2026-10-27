@@ -42,6 +42,7 @@ function initProductDetailPage() {
   initQtyControls(product);
   initWishlistButton(product);
   initAddToCart(product);
+  initMagnifierZoom();
 
   root.hidden = false;
 }
@@ -102,6 +103,66 @@ function setMainImage(src, productName) {
   mainImg.src = src || PLACEHOLDER_IMG;
   mainImg.alt = productName || "Ảnh sản phẩm";
   attachImgFallback(mainImg);
+
+  const lens = document.getElementById("pd-zoom-lens");
+  if (lens) {
+    lens.style.backgroundImage = `url("${src || PLACEHOLDER_IMG}")`;
+  }
+}
+
+function initMagnifierZoom() {
+  const container = document.getElementById("pd-main-image");
+  const mainImg = document.getElementById("pd-main-img");
+  const lens = document.getElementById("pd-zoom-lens");
+  if (!container || !mainImg || !lens) return;
+
+  const ZOOM_LEVEL = 2.5;
+  const LENS_RADIUS = 85;
+
+  function updateZoom(clientX, clientY) {
+    const rect = container.getBoundingClientRect();
+    let x = clientX - rect.left;
+    let y = clientY - rect.top;
+
+    x = Math.max(0, Math.min(x, rect.width));
+    y = Math.max(0, Math.min(y, rect.height));
+
+    lens.style.left = `${x - LENS_RADIUS}px`;
+    lens.style.top = `${y - LENS_RADIUS}px`;
+
+    const bgWidth = rect.width * ZOOM_LEVEL;
+    const bgHeight = rect.height * ZOOM_LEVEL;
+    const bgX = -(x * ZOOM_LEVEL - LENS_RADIUS);
+    const bgY = -(y * ZOOM_LEVEL - LENS_RADIUS);
+
+    lens.style.backgroundImage = `url("${mainImg.currentSrc || mainImg.src}")`;
+    lens.style.backgroundSize = `${bgWidth}px ${bgHeight}px`;
+    lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
+  }
+
+  container.addEventListener("mouseenter", (e) => {
+    lens.classList.add("is-active");
+    updateZoom(e.clientX, e.clientY);
+  });
+
+  container.addEventListener("mousemove", (e) => {
+    updateZoom(e.clientX, e.clientY);
+  });
+
+  container.addEventListener("mouseleave", () => {
+    lens.classList.remove("is-active");
+  });
+
+  container.addEventListener("touchmove", (e) => {
+    if (e.touches && e.touches[0]) {
+      lens.classList.add("is-active");
+      updateZoom(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, { passive: true });
+
+  container.addEventListener("touchend", () => {
+    lens.classList.remove("is-active");
+  });
 }
 
 function attachImgFallback(imgEl) {

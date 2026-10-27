@@ -286,13 +286,10 @@
               </div>
             </div>
 
-            <!-- BƯỚC 3: XÁC NHẬN HOÀN TẤT ĐƠN HÀNG -->
+            <!-- BƯỚC 3: XÁC NHẬN HOÀN TẤT ĐƠN HÀNG & HÓA ĐƠN TIẾP ĐÓN ĐIỆN TỬ -->
             <div class="checkout-step-content" id="checkoutStep3" hidden>
-              <div class="order-success-card" style="text-align: center; padding: 32px 16px;">
-                <div style="width: 64px; height: 64px; border-radius: 50%; background: #2e7d32; color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 2rem;">✓</div>
-                <h2 style="font-size: 1.8rem; margin-bottom: 8px;">Đặt hàng thành công!</h2>
-                <div id="confirmedOrderCode" style="font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 16px;">#NX-000000</div>
-                <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 24px;">Đang chuyển tới trang quản lý đơn hàng...</p>
+              <div class="order-receipt-card" id="orderReceiptCard">
+                <!-- Nội dung hóa đơn tiếp đón điện tử sẽ được render động bởi checkout-controller.js -->
               </div>
             </div>
           </div>

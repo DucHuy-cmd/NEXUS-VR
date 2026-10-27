@@ -666,6 +666,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
       step2Pill.classList.toggle("is-active", step === 2);
       step2Pill.classList.toggle("is-completed", step > 2);
       step3Pill.classList.toggle("is-active", step === 3);
+      step3Pill.classList.toggle("is-completed", step === 3);
       lineFill.style.width = step === 1 ? "0%" : step === 2 ? "50%" : "100%";
     }
 
@@ -673,11 +674,19 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     const step2Content = document.getElementById("checkoutStep2");
     const step3Content = document.getElementById("checkoutStep3");
     const sidebar = document.getElementById("checkoutSidebar");
+    const layout = document.querySelector(".checkout-layout");
 
     if (step1Content) step1Content.hidden = step !== 1;
     if (step2Content) step2Content.hidden = step !== 2;
     if (step3Content) step3Content.hidden = step !== 3;
     if (sidebar) sidebar.hidden = step === 3;
+    if (layout) {
+      if (step === 3) {
+        layout.classList.add("checkout-layout--receipt");
+      } else {
+        layout.classList.remove("checkout-layout--receipt");
+      }
+    }
 
     window.scrollTo({ top: 120, behavior: "smooth" });
   }
@@ -838,9 +847,265 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
   }
 
   /* --------------------------------------------------------------------------
-  9. LƯU ĐƠN HÀNG THÀNH CÔNG VÀ CHUYỂN SANG ORDERS.HTML
+  9. LƯU ĐƠN HÀNG THÀNH CÔNG, HIỂN THỊ HÓA ĐƠN TIẾP ĐÓN ĐIỆN TỬ & VIETQR
   -------------------------------------------------------------------------- */
+  let isOrderSubmitting = false;
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function playSuccessChime() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(523.25, now);
+      gain1.gain.setValueAtTime(0.08, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.25);
+
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = "sine";
+      osc2.frequency.setValueAtTime(659.25, now + 0.1);
+      gain2.gain.setValueAtTime(0.1, now + 0.1);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.1);
+      osc2.stop(now + 0.45);
+    } catch (e) {}
+  }
+
+  function renderOrderReceipt(order) {
+    const container = document.getElementById("orderReceiptCard");
+    if (!container) return;
+
+    const items = order.items || [];
+    const customer = order.customer || {};
+    const formatReceiptVND = (num) => (Number(num) || 0).toLocaleString("vi-VN") + " ₫";
+
+    let itemsHtml = "";
+    items.forEach((item) => {
+      const itemPrice = Number(item.price) || 0;
+      const itemQty = Number(item.qty) || 1;
+      const itemSubtotal = itemPrice * itemQty;
+      const imgSrc = item.image || "assets/images/products/vr-vision-pro.png";
+      const colorText = item.selectedColor
+        ? `<span class="receipt-item-color-pill">${escapeHtml(item.selectedColor)}</span>`
+        : "";
+
+      itemsHtml += `
+        <div class="receipt-item-row">
+          <img class="receipt-item-thumb" src="${escapeHtml(imgSrc)}" alt="${escapeHtml(item.name || 'Sản phẩm')}">
+          <div class="receipt-item-info">
+            <div class="receipt-item-name">${escapeHtml(item.name || 'Thiết bị NEXUS VR')}</div>
+            <div class="receipt-item-meta">
+              ${colorText}
+              <span>Số lượng: <strong>x${itemQty}</strong></span>
+            </div>
+          </div>
+          <div class="receipt-item-price-col">
+            <div class="receipt-item-subtotal">${formatReceiptVND(itemSubtotal)}</div>
+            <div class="receipt-item-unitprice">${formatReceiptVND(itemPrice)} / chiếc</div>
+          </div>
+        </div>
+      `;
+    });
+
+    let paymentBoxHtml = "";
+    if (order.paymentCode === "bank") {
+      const qrPhone = customer.phone || "0988123456";
+      const qrTotal = order.totalAmount || 0;
+      const qrUrl = `https://api.vietqr.io/image/970422-0399887766-compact2.png?amount=${qrTotal}&addInfo=NEXUS%20${qrPhone}`;
+
+      paymentBoxHtml = `
+        <div class="receipt-payment-box--bank">
+          <img class="receipt-payment-qr" src="${qrUrl}" alt="Mã VietQR thanh toán">
+          <div class="receipt-payment-bankinfo">
+            <div class="receipt-bank-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              XÁC NHẬN THANH TOÁN VIETQR
+            </div>
+            <div>Ngân hàng: <strong>MB BANK (Ngân hàng Quân Đội)</strong></div>
+            <div>Số tài khoản: <strong>0399887766</strong></div>
+            <div>Chủ tài khoản: <strong>CONG TY NEXUS VR VIET NAM</strong></div>
+            <div>Cú pháp chuyển khoản: <strong>NEXUS ${escapeHtml(qrPhone)}</strong></div>
+            <div style="font-size: 0.825rem; color: #2e7d32; margin-top: 4px; font-weight: 600;">✓ Giao dịch đã được ghi nhận trên cổng thanh toán thông minh</div>
+          </div>
+        </div>
+      `;
+    } else if (order.paymentCode === "card") {
+      paymentBoxHtml = `
+        <div class="receipt-payment-box--card">
+          <div class="receipt-shield-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <div>
+            <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">THANH TOÁN THẺ TÍN DỤNG ĐÃ ĐƯỢC BẢO MẬT</div>
+            <div style="font-size: 0.83rem; color: var(--text-secondary);">Giao dịch được mã hóa 256-bit SSL tiêu chuẩn quốc tế PCI DSS. Hóa đơn đã được gửi qua email.</div>
+          </div>
+        </div>
+      `;
+    } else {
+      paymentBoxHtml = `
+        <div class="receipt-payment-box--cod">
+          <div class="receipt-shield-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+          </div>
+          <div>
+            <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">THANH TOÁN TIỀN MẶT KHI NHẬN HÀNG (COD)</div>
+            <div style="font-size: 0.83rem; color: var(--text-secondary);">Quý khách có quyền mở bưu phẩm đồng kiểm tra đúng thiết bị và phụ kiện trước khi thanh toán cho nhân viên giao hàng.</div>
+          </div>
+        </div>
+      `;
+    }
+
+    const discountVal = Number(order.discountFee) || 0;
+    const shippingVal = Number(order.shippingFee) || 0;
+
+    container.innerHTML = `
+      <div class="receipt-header">
+        <div class="receipt-success-badge">
+          <div class="receipt-success-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div>
+            <span class="receipt-emblem-tag">NEXUS LUXURY ORDER CONFIRMATION</span>
+            <h2 class="receipt-title">Đặt hàng thành công!</h2>
+          </div>
+        </div>
+        <div class="receipt-code-box">
+          <span class="receipt-code-label">MÃ ĐƠN HÀNG</span>
+          <div class="receipt-code-val">
+            <span id="receiptOrderCodeVal">${escapeHtml(order.code)}</span>
+            <button type="button" class="receipt-copy-btn" id="receiptCopyCodeBtn" title="Sao chép mã đơn hàng">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+          </div>
+          <div class="receipt-timestamp">${escapeHtml(order.createdAt)}</div>
+        </div>
+      </div>
+
+      <div class="receipt-info-grid">
+        <div class="receipt-info-block">
+          <h4 class="receipt-block-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Thông tin người nhận
+          </h4>
+          <div class="receipt-info-row"><span>Họ và tên:</span> <strong>${escapeHtml(customer.name || 'Quý khách')}</strong></div>
+          <div class="receipt-info-row"><span>Số điện thoại:</span> <strong>${escapeHtml(customer.phone || '---')}</strong></div>
+          <div class="receipt-info-row"><span>Email nhận tin:</span> <strong>${escapeHtml(customer.email || '---')}</strong></div>
+          <div class="receipt-info-row"><span>Địa chỉ giao hàng:</span> <strong>${escapeHtml(customer.address || 'Chưa cung cấp')}</strong></div>
+        </div>
+
+        <div class="receipt-info-block">
+          <h4 class="receipt-block-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+            Phương thức & Vận chuyển
+          </h4>
+          <div class="receipt-info-row"><span>Vận chuyển:</span> <strong>${shippingVal === 150000 ? 'Hỏa tốc SafeExpress 24h' : 'Giao hàng tiêu chuẩn NEXUS SafeExpress'}</strong></div>
+          <div class="receipt-info-row"><span>Phương thức:</span> <strong>${escapeHtml(order.paymentMethod || 'COD')}</strong></div>
+          <div class="receipt-info-row"><span>Trạng thái:</span> <span class="receipt-status-pill">✓ Đã xác nhận & Đang chuẩn bị</span></div>
+        </div>
+      </div>
+
+      <div class="receipt-items-section">
+        <h4 class="receipt-block-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          Chi tiết danh mục thiết bị đã đặt
+        </h4>
+        <div class="receipt-items-table">
+          ${itemsHtml}
+        </div>
+      </div>
+
+      <div class="receipt-payment-status-box">
+        ${paymentBoxHtml}
+      </div>
+
+      <div class="receipt-summary-tally">
+        <div class="receipt-tally-line">
+          <span>Tạm tính hàng hóa:</span>
+          <span>${formatReceiptVND(order.subtotal)}</span>
+        </div>
+        ${discountVal > 0 ? `
+          <div class="receipt-tally-line">
+            <span>Khuyến mãi Voucher (${escapeHtml(order.couponCode || 'NEXUS')}):</span>
+            <span style="color: #2e7d32; font-weight: 700;">-${formatReceiptVND(discountVal)}</span>
+          </div>
+        ` : ''}
+        <div class="receipt-tally-line">
+          <span>Thuế GTGT (VAT 10%):</span>
+          <span>Đã bao gồm trong niêm yết</span>
+        </div>
+        <div class="receipt-tally-line">
+          <span>Phí bảo hiểm vận chuyển:</span>
+          <span>${shippingVal > 0 ? formatReceiptVND(shippingVal) : 'Miễn phí'}</span>
+        </div>
+        <div class="receipt-tally-total">
+          <span>TỔNG CỘNG THANH TOÁN:</span>
+          <span class="receipt-total-amount">${formatReceiptVND(order.totalAmount)}</span>
+        </div>
+      </div>
+
+      <div class="receipt-actions-bar">
+        <button type="button" class="btn-receipt-action btn-receipt-print" id="receiptPrintBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          In / Lưu Hóa Đơn (PDF)
+        </button>
+        <a href="orders.html" class="btn-receipt-action btn-receipt-orders">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+          Quản Lý Đơn Hàng
+        </a>
+        <a href="shop.html" class="btn-receipt-action btn-receipt-shop">
+          Tiếp Tục Mua Sắm →
+        </a>
+      </div>
+    `;
+
+    // Gắn sự kiện sao chép mã đơn hàng
+    const copyBtn = document.getElementById("receiptCopyCodeBtn");
+    if (copyBtn) {
+      copyBtn.addEventListener("click", () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(order.code).then(() => {
+            if (typeof window.showToast === "function") {
+              window.showToast(`Đã sao chép mã đơn hàng: ${order.code}`, "success");
+            }
+          });
+        }
+      });
+    }
+
+    // Gắn sự kiện in hóa đơn
+    const printBtn = document.getElementById("receiptPrintBtn");
+    if (printBtn) {
+      printBtn.addEventListener("click", () => {
+        window.print();
+      });
+    }
+  }
+
   function completeOrder(paymentType) {
+    if (isOrderSubmitting) return;
+
     const cart = getCartData();
 
     if (!cart || cart.length === 0) {
@@ -849,6 +1114,8 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
       }
       return;
     }
+
+    isOrderSubmitting = true;
 
     let subtotal = 0;
     cart.forEach((i) => (subtotal += (Number(i.price) || 0) * (Number(i.qty) || 1)));
@@ -876,18 +1143,22 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
       cleanPaymentLabel = "Thẻ tín dụng / Quốc tế";
     }
 
+    // Sao chép an toàn dữ liệu giỏ hàng để tránh mất mát khi xóa bộ nhớ
+    const savedItems = JSON.parse(JSON.stringify(cart));
+
     const newOrder = {
       id: "ORD_" + Date.now(),
       code: orderCode,
       createdAt: new Date().toLocaleString("vi-VN"),
-      customer: orderCustomerData,
-      items: cart,
+      customer: Object.assign({}, orderCustomerData),
+      items: savedItems,
       subtotal: subtotal,
       discountFee: discountFee,
       couponCode: coupon ? coupon.code : null,
       shippingFee: calcShipping,
       totalAmount: finalTotal,
       paymentMethod: cleanPaymentLabel,
+      paymentCode: paymentType,
       status: "active",
       statusText: "Đơn hàng đã được xác nhận và vận chuyển"
     };
@@ -916,7 +1187,10 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     existingOrders.unshift(newOrder);
     localStorage.setItem(orderKey, JSON.stringify(existingOrders));
 
-    // Xóa giỏ hàng và xóa voucher đã sử dụng
+    // Dừng bộ đếm thời gian QR
+    stopQrTimer();
+
+    // Xóa giỏ hàng và voucher đã sử dụng
     if (window.cartManager && typeof window.cartManager.clear === "function") {
       window.cartManager.clear();
     } else if (window.storageService && typeof window.storageService.clearCart === "function") {
@@ -928,12 +1202,17 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
 
     clearAppliedCoupon();
 
+    // Phát âm thanh xác nhận sang trọng
+    playSuccessChime();
+
+    // Hiển thị hóa đơn điện tử tại Bước 3
+    renderOrderReceipt(newOrder);
+    setStep(3);
+
     if (typeof window.showToast === "function") {
-      window.showToast(`Đặt hàng ${orderCode} thành công! Đang chuyển đến trang đơn hàng đã đặt...`, "success");
+      window.showToast(`Đơn hàng ${orderCode} đã được khởi tạo thành công!`, "success");
     }
 
-    setTimeout(() => {
-      window.location.href = "orders.html";
-    }, 1000);
+    isOrderSubmitting = false;
   }
 })();
