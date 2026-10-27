@@ -904,7 +904,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
       const itemPrice = Number(item.price) || 0;
       const itemQty = Number(item.qty) || 1;
       const itemSubtotal = itemPrice * itemQty;
-      const imgSrc = item.image || "assets/images/products/vr-vision-pro.png";
+      const imgSrc = item.image || "assets/images/placeholder.svg";
       const colorText = item.selectedColor
         ? `<span class="receipt-item-color-pill">${escapeHtml(item.selectedColor)}</span>`
         : "";

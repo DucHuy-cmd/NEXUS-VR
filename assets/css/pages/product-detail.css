@@ -176,3 +176,9 @@
   .product-detail { grid-template-columns: 1fr; gap: 32px; }
   .product-detail__gallery { position: static; }
 }
+
+@media (max-width: 768px), (hover: none) {
+  .product-detail__zoom-hint {
+    display: none;
+  }
+}
