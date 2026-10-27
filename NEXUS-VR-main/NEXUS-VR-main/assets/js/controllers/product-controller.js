@@ -97,6 +97,8 @@ function setMainImage(src, productName) {
 }
 
 function attachImgFallback(imgEl) {
+  if (!imgEl) return;
+  imgEl.setAttribute("onerror", "this.onerror=null; this.src='assets/images/placeholder.svg';");
   imgEl.onerror = function handleImgError() {
     imgEl.onerror = null;
     imgEl.src = PLACEHOLDER_IMG;

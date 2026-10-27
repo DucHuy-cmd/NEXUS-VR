@@ -230,6 +230,11 @@
       if (imgEl && imgPath) {
         imgEl.style.opacity = '0.5';
         setTimeout(() => {
+          imgEl.setAttribute("onerror", "this.onerror=null; this.src='assets/images/placeholder.svg';");
+          imgEl.onerror = function() {
+            this.onerror = null;
+            this.src = 'assets/images/placeholder.svg';
+          };
           imgEl.src = imgPath;
           imgEl.style.opacity = '1';
         }, 120);
