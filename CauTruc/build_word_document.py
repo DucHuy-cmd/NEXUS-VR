@@ -48,7 +48,7 @@ def format_table(table, col_widths_cm):
                 cell = row.cells[c_idx]
                 cell.width = Cm(width_cm)
                 cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-                set_cell_margins(cell, top=80, bottom=80, left=100, right=100)
+                set_cell_margins(cell, top=90, bottom=90, left=110, right=110)
     set_table_borders(table, color="000000", sz="4")
 
 def add_page_number_to_section(section):
@@ -89,7 +89,7 @@ def create_full_chapter3_word_doc():
     style_normal.paragraph_format.space_before = Pt(0)
     style_normal.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
-    # Đoạn văn bản chính chuẩn học thuật
+    # Đoạn văn bản chính chuẩn học thuật (không in đậm chữ nào trong nội dung)
     def add_para(text, indent=True):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
@@ -98,13 +98,14 @@ def create_full_chapter3_word_doc():
         if indent:
             p.paragraph_format.first_line_indent = Cm(1.0)
         run = p.add_run(text)
+        run.bold = False
         run.font.name = 'Times New Roman'
         run.font.size = Pt(13)
         run.font.color.rgb = RGBColor(0, 0, 0)
         return p
 
-    # Gạch đầu dòng (-) chia nhỏ nội dung chi tiết
-    def add_dash_item(bold_title, content_text):
+    # Gạch đầu dòng (-) chia nhỏ nội dung chi tiết (KHÔNG IN ĐẬM BẤT KỲ CHỮ NÀO)
+    def add_dash_item(title, content_text):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         p.paragraph_format.line_spacing = 1.5
@@ -114,24 +115,26 @@ def create_full_chapter3_word_doc():
         p.paragraph_format.first_line_indent = Cm(-0.5)
         
         run_dash = p.add_run("- ")
+        run_dash.bold = False
         run_dash.font.name = 'Times New Roman'
         run_dash.font.size = Pt(13)
         run_dash.font.color.rgb = RGBColor(0, 0, 0)
         
-        if bold_title:
-            run_title = p.add_run(bold_title + ": ")
-            run_title.bold = True
+        if title:
+            run_title = p.add_run(title + ": ")
+            run_title.bold = False  # KHÔNG IN ĐẬM THEO YÊU CẦU NGƯỜI DÙNG
             run_title.font.name = 'Times New Roman'
             run_title.font.size = Pt(13)
             run_title.font.color.rgb = RGBColor(0, 0, 0)
             
         run_text = p.add_run(content_text)
+        run_text.bold = False  # KHÔNG IN ĐẬM
         run_text.font.name = 'Times New Roman'
         run_text.font.size = Pt(13)
         run_text.font.color.rgb = RGBColor(0, 0, 0)
         return p
 
-    # Tiêu đề cấp 1: Tên chương (In hoa, in đậm, căn giữa)
+    # Tiêu đề cấp 1: Tên chương (In hoa, in đậm, căn giữa, cỡ chữ 16 theo chuẩn quy định của trường)
     def add_h1(text):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -141,11 +144,11 @@ def create_full_chapter3_word_doc():
         run = p.add_run(text)
         run.bold = True
         run.font.name = 'Times New Roman'
-        run.font.size = Pt(15)
+        run.font.size = Pt(16)
         run.font.color.rgb = RGBColor(0, 0, 0)
         return p
 
-    # Tiêu đề cấp 2 (Mục 3.1, 3.2, 3.3): IN HOA HẾT, in đậm, không in nghiêng
+    # Tiêu đề cấp 2 (Mục 3.1, 3.2, 3.3): IN HOA HẾT, in đậm, không in nghiêng, CỠ CHỮ 13
     def add_h2(text):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -156,11 +159,11 @@ def create_full_chapter3_word_doc():
         run.bold = True
         run.italic = False
         run.font.name = 'Times New Roman'
-        run.font.size = Pt(13.5)
+        run.font.size = Pt(13)  # CHÍNH XÁC CỠ CHỮ 13 THEO YÊU CẦU
         run.font.color.rgb = RGBColor(0, 0, 0)
         return p
 
-    # Tiêu đề cấp 3 (Mục 3.1.1, 3.1.2...): IN ĐẬM, KHÔNG IN NGHIÊNG, không cần in hoa hết
+    # Tiêu đề cấp 3 (Mục 3.1.1, 3.1.2...): IN ĐẬM, KHÔNG IN NGHIÊNG, không cần in hoa hết, CỠ CHỮ 13
     def add_h3(text):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -171,34 +174,34 @@ def create_full_chapter3_word_doc():
         run.bold = True
         run.italic = False
         run.font.name = 'Times New Roman'
-        run.font.size = Pt(13)
+        run.font.size = Pt(13)  # CỠ CHỮ 13
         run.font.color.rgb = RGBColor(0, 0, 0)
         return p
 
-    # Tên Bảng: Đặt PHÍA TRÊN bảng, IN NGHIÊNG, không tô màu
+    # Tên Bảng: Đặt PHÍA TRÊN bảng, CĂN GIỮA, IN NGHIÊNG, không tô màu
     def add_table_caption(text):
         p = doc.add_paragraph()
-        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER  # CĂN GIỮA THEO YÊU CẦU
         p.paragraph_format.space_before = Pt(10)
         p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.keep_with_next = True
         run = p.add_run(text)
         run.bold = False
-        run.italic = True
+        run.italic = True  # IN NGHIÊNG
         run.font.name = 'Times New Roman'
         run.font.size = Pt(12)
         run.font.color.rgb = RGBColor(0, 0, 0)
         return p
 
-    # Tên Hình: Đặt PHÍA DƯỚI hình, IN NGHIÊNG, không tô màu
+    # Tên Hình: Đặt PHÍA DƯỚI hình, CĂN GIỮA, IN NGHIÊNG, không tô màu
     def add_figure_caption(text):
         p = doc.add_paragraph()
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER  # CĂN GIỮA
         p.paragraph_format.space_before = Pt(4)
         p.paragraph_format.space_after = Pt(12)
         run = p.add_run(text)
         run.bold = False
-        run.italic = True
+        run.italic = True  # IN NGHIÊNG
         run.font.name = 'Times New Roman'
         run.font.size = Pt(12)
         run.font.color.rgb = RGBColor(0, 0, 0)
@@ -231,11 +234,11 @@ def create_full_chapter3_word_doc():
     add_h1("CHƯƠNG 3: THIẾT KẾ VÀ TRIỂN KHAI WEBSITE")
     
     # ----------------------------------------------------
-    # 3.1. THIẾT KẾ GIAO DIỆN (In hoa hết)
+    # 3.1. THIẾT KẾ GIAO DIỆN (In hoa hết, cỡ chữ 13, in đậm)
     # ----------------------------------------------------
     add_h2("3.1. Thiết kế giao diện")
     
-    # 3.1.1 (In đậm, không in nghiêng)
+    # 3.1.1 (In đậm, không in nghiêng, cỡ chữ 13)
     add_h3("3.1.1. Sơ đồ cây cấu trúc website và luồng điều hướng")
     add_para("Quá trình xây dựng hệ thống website được khởi đầu bằng việc hoạch định kiến trúc thông tin tổng thể nhằm định hình lộ trình di chuyển của người sử dụng qua từng phân hệ. Cấu trúc trang được tổ chức theo mô hình phân cấp dạng cây kết hợp mạng lưới liên kết ngang, lấy trang chủ làm nút gốc điều phối toàn bộ luồng truy cập của hệ sinh thái. Từ trang chủ, hệ thống phân nhánh thành chín lối đi chuyên biệt bao gồm danh mục sản phẩm, chi tiết cấu hình sản phẩm, bảng so sánh thông số kỹ thuật, khu vực phân tích công nghệ phần cứng, hệ sinh thái ứng dụng không gian số, không gian đặt lịch trải nghiệm thực tế ảo, tiến trình thanh toán đơn hàng, cổng xác thực tài khoản và trang giới thiệu thương hiệu.")
     
@@ -250,7 +253,7 @@ def create_full_chapter3_word_doc():
     add_dash_item("Thanh điều hướng cố định trên cùng", "Luôn xuất hiện thường trực tại mép trên màn hình khi cuộn trang, cho phép người dùng quay về trang chủ, truy cập giỏ hàng, mở thanh tìm kiếm hoặc thay đổi chế độ màu sắc hiển thị tại bất kỳ thời điểm nào.")
     add_dash_item("Chân trang chỉ mục toàn diện", "Đóng vai trò là bản đồ chỉ mục thứ cấp ở cuối mỗi trang, cung cấp liên kết truy cập các điều khoản sử dụng, chính sách bảo hành thấu kính, tọa độ địa lý phòng trưng bày và các kênh hỗ trợ khẩn cấp.")
 
-    # 3.1.2 (In đậm, không in nghiêng)
+    # 3.1.2 (In đậm, không in nghiêng, cỡ chữ 13)
     add_h3("3.1.2. Hệ thống quy chuẩn thiết kế giao diện")
     add_para("Hệ thống nhận diện thị giác của dự án được xây dựng dựa trên triết lý tối giản thượng hạng, chú trọng vào sự tương phản tinh tế giữa các gam màu tự nhiên và kim loại quý nhằm tôn vinh giá trị của dòng thiết bị điện toán không gian cao cấp. Toàn bộ các thông số về màu sắc, kiểu chữ và khoảng cách được quy chuẩn hóa dưới dạng các biến toàn cục tại tệp tin định dạng nền tảng, cho phép chuyển đổi trạng thái một cách đồng bộ trên toàn bộ mười trang giao diện.")
     
@@ -262,10 +265,13 @@ def create_full_chapter3_word_doc():
         hdr_cells[i].text = title
         p = hdr_cells[i].paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.line_spacing = 1.2
+        p.paragraph_format.space_after = Pt(2)
+        p.paragraph_format.space_before = Pt(2)
         run = p.runs[0]
         run.bold = True
         run.font.name = "Times New Roman"
-        run.font.size = Pt(10.5)
+        run.font.size = Pt(11.5)  # TĂNG LÊN 11.5pt CHO TIÊU ĐỀ BẢNG ĐỂ DỄ ĐỌC
         run.font.color.rgb = RGBColor(0, 0, 0)
 
     color_data = [
@@ -285,9 +291,13 @@ def create_full_chapter3_word_doc():
             row_cells[col_idx].text = val
             p = row_cells[col_idx].paragraphs[0]
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER if col_idx in [1, 2] else WD_ALIGN_PARAGRAPH.LEFT
+            p.paragraph_format.line_spacing = 1.2
+            p.paragraph_format.space_after = Pt(2)
+            p.paragraph_format.space_before = Pt(2)
             run = p.runs[0]
+            run.bold = False
             run.font.name = "Times New Roman"
-            run.font.size = Pt(10)
+            run.font.size = Pt(11)  # CỠ CHỮ 11pt ĐÁP ỨNG TỐT QUY ĐỊNH BẢNG BIỂU HỌC THUẬT
             run.font.color.rgb = RGBColor(0, 0, 0)
     # Khống chế độ rộng cột cố định: Tổng = 3.2 + 2.3 + 2.3 + 7.2 = 15.0 cm (không tràn)
     format_table(table_colors, [3.2, 2.3, 2.3, 7.2])
@@ -303,7 +313,7 @@ def create_full_chapter3_word_doc():
     add_dash_item("Quy chuẩn phông chữ nghệ thuật", "Ứng dụng phông chữ có chân Playfair Display tại các tiêu đề phụ và trích dẫn triết lý, tạo điểm nhấn giao thoa hài hòa giữa kỹ thuật công nghệ cao và di sản chế tác thủ công.")
     add_dash_item("Quy chuẩn hệ thống lưới và khoảng cách", "Tuân thủ chặt chẽ nguyên tắc toán học dựa trên bội số tám điểm ảnh, bán kính bo góc cố định ở mức mười sáu và hai mươi tư điểm ảnh, đi kèm bóng đổ khuếch tán đa tầng tạo chiều sâu không gian quang học.")
 
-    # 3.1.3 (In đậm, không in nghiêng)
+    # 3.1.3 (In đậm, không in nghiêng, cỡ chữ 13)
     add_h3("3.1.3. Cấu trúc và tổ chức bố cục các trang màn hình chính")
     add_para("Hệ thống website NEXUS VR bao gồm mười màn hình chức năng độc lập, mỗi màn hình đảm nhận một nhiệm vụ riêng biệt trong tiến trình tiếp cận, nghiên cứu và quyết định mua hàng của khách hàng.")
     
@@ -315,10 +325,13 @@ def create_full_chapter3_word_doc():
         hdr_p_cells[i].text = title
         p = hdr_p_cells[i].paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.line_spacing = 1.2
+        p.paragraph_format.space_after = Pt(2)
+        p.paragraph_format.space_before = Pt(2)
         run = p.runs[0]
         run.bold = True
         run.font.name = "Times New Roman"
-        run.font.size = Pt(10.5)
+        run.font.size = Pt(11.5)  # 11.5pt TIÊU ĐỀ
         run.font.color.rgb = RGBColor(0, 0, 0)
 
     pages_data = [
@@ -339,9 +352,13 @@ def create_full_chapter3_word_doc():
             row_cells[col_idx].text = val
             p = row_cells[col_idx].paragraphs[0]
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER if col_idx in [0, 1] else WD_ALIGN_PARAGRAPH.LEFT
+            p.paragraph_format.line_spacing = 1.2
+            p.paragraph_format.space_after = Pt(2)
+            p.paragraph_format.space_before = Pt(2)
             run = p.runs[0]
+            run.bold = False
             run.font.name = "Times New Roman"
-            run.font.size = Pt(10)
+            run.font.size = Pt(11)  # CỠ CHỮ 11pt RÕ RÀNG
             run.font.color.rgb = RGBColor(0, 0, 0)
     # Khống chế độ rộng cột cố định: Tổng = 1.2 + 2.8 + 3.5 + 7.5 = 15.0 cm (không tràn)
     format_table(table_pages, [1.2, 2.8, 3.5, 7.5])
@@ -373,7 +390,7 @@ def create_full_chapter3_word_doc():
 
     add_dash_item("Giao diện các phân hệ tài khoản và phụ trợ", "Bao gồm trang xác thực tài khoản (login.html) hỗ trợ đăng nhập và đăng ký hai chiều có thanh đo độ mạnh mật khẩu, trang theo dõi đơn hàng (orders.html) tra cứu trạng thái giao hàng, trang triết lý thương hiệu (about.html) và trang báo lỗi điều hướng (404.html).")
 
-    # 3.1.4 (In đậm, không in nghiêng)
+    # 3.1.4 (In đậm, không in nghiêng, cỡ chữ 13)
     add_h3("3.1.4. Thiết kế thích ứng đa thiết bị và xử lý điểm ngắt màn hình")
     add_para("Nhằm bảo đảm website hoạt động hoàn hảo trên mọi kích thước màn hình từ điện thoại di động cỡ nhỏ đến màn hình máy tính để bàn khổ lớn, hệ thống áp dụng chiến lược thiết kế thích ứng toàn diện dựa trên sáu điểm ngắt then chốt.")
     
@@ -385,10 +402,13 @@ def create_full_chapter3_word_doc():
         hdr_bp_cells[i].text = title
         p = hdr_bp_cells[i].paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.line_spacing = 1.2
+        p.paragraph_format.space_after = Pt(2)
+        p.paragraph_format.space_before = Pt(2)
         run = p.runs[0]
         run.bold = True
         run.font.name = "Times New Roman"
-        run.font.size = Pt(10.5)
+        run.font.size = Pt(11.5)  # 11.5pt TIÊU ĐỀ
         run.font.color.rgb = RGBColor(0, 0, 0)
 
     bp_data = [
@@ -405,9 +425,13 @@ def create_full_chapter3_word_doc():
             row_cells[col_idx].text = val
             p = row_cells[col_idx].paragraphs[0]
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER if col_idx in [0] else WD_ALIGN_PARAGRAPH.LEFT
+            p.paragraph_format.line_spacing = 1.2
+            p.paragraph_format.space_after = Pt(2)
+            p.paragraph_format.space_before = Pt(2)
             run = p.runs[0]
+            run.bold = False
             run.font.name = "Times New Roman"
-            run.font.size = Pt(10)
+            run.font.size = Pt(11)  # CỠ CHỮ 11pt
             run.font.color.rgb = RGBColor(0, 0, 0)
     # Khống chế độ rộng cột cố định: Tổng = 2.0 + 4.0 + 4.2 + 4.8 = 15.0 cm (không tràn)
     format_table(table_bp, [2.0, 4.0, 4.2, 4.8])
@@ -423,11 +447,11 @@ def create_full_chapter3_word_doc():
     add_dash_item("Tinh chỉnh khoảng đệm và khóa kích thước thẻ", "Giảm đệm lề hai bên khung biểu mẫu từ ba mươi hai điểm ảnh xuống hai mươi điểm ảnh, đồng thời ấn định chiều rộng tối đa của thẻ tiếp đón ở mức ba trăm bốn mươi hai điểm ảnh để vừa khít hoàn hảo trong khung nhìn.")
 
     # ----------------------------------------------------
-    # 3.2. CHỨC NĂNG VÀ TƯƠNG TÁC NGƯỜI DÙNG (In hoa hết)
+    # 3.2. CHỨC NĂNG VÀ TƯƠNG TÁC NGƯỜI DÙNG (In hoa hết, cỡ chữ 13, in đậm)
     # ----------------------------------------------------
     add_h2("3.2. Chức năng và tương tác người dùng")
     
-    # 3.2.1 (In đậm, không in nghiêng)
+    # 3.2.1 (In đậm, không in nghiêng, cỡ chữ 13)
     add_h3("3.2.1. Hệ thống thẻ tiếp đón kỹ thuật số ba chiều hai mặt")
     add_para("Thẻ tiếp đón kỹ thuật số là một thành phần giao diện mang tính đột phá của website, đóng vai trò là chiếc thẻ thành viên cao cấp chứng nhận quyền tham quan và trải nghiệm phòng trưng bày của khách hàng. Chiếc thẻ được lập trình hoạt động trong không gian phối cảnh ba chiều với góc nhìn sâu một nghìn hai trăm điểm ảnh, cho phép xoay lật hai mặt một trăm tám mươi độ quanh trục thẳng đứng.")
     
@@ -449,7 +473,7 @@ def create_full_chapter3_word_doc():
     add_dash_item("Hệ thống âm thanh phản hồi xúc giác", "Tích hợp công nghệ âm thanh web phát tiếng xoay ma sát tần số bốn trăm héc-zơ khi lật thẻ và tiếng gõ thủy tinh nhẹ khi chọn nút, hỗ trợ nút tắt âm thanh lưu vào bộ nhớ trình duyệt.")
     add_dash_item("Chức năng xuất vé thông hành số", "Cho phép đóng gói dữ liệu thành thẻ thông hành điện tử tải về máy tính để xuất trình khi tới tham quan phòng trưng bày thực tế.")
 
-    # 3.2.2 (In đậm, không in nghiêng)
+    # 3.2.2 (In đậm, không in nghiêng, cỡ chữ 13)
     add_h3("3.2.2. Cơ chế quản lý giỏ hàng thời gian thực")
     add_para("Chức năng giỏ hàng của dự án được triển khai theo mô hình ngăn kéo trượt thông minh, kết hợp giữa khả năng cập nhật trạng thái thời gian thực và độ bền vững dữ liệu trên trình duyệt người dùng.")
     add_dash_item("Cơ chế phát tín hiệu sự kiện toàn cục", "Khi khách hàng bấm nút đặt mua tại bất kỳ trang nào, sự kiện tùy chỉnh được phát ra trên cây tài liệu để bộ điều khiển trung tâm tiếp nhận thông tin sản phẩm và cấu hình đã chọn.")
@@ -458,7 +482,7 @@ def create_full_chapter3_word_doc():
     add_dash_item("Tính toán tài chính tự động thời gian thực", "Liên tục tính toán lại tổng tiền hàng, tiền thuế giá trị gia tăng mười phần trăm và áp dụng chiết khấu mã giảm giá với thời gian phản hồi tức thì.")
     add_dash_item("Lưu trữ dữ liệu bền vững qua bộ nhớ cục bộ", "Đồng bộ hóa liên tục vào bộ nhớ trình duyệt dưới định dạng chuỗi đối tượng mã hóa, bảo đảm giỏ hàng nguyên vẹn khi tải lại trang hoặc chuyển hướng qua mười trang khác nhau.")
 
-    # 3.2.3 (In đậm, không in nghiêng)
+    # 3.2.3 (In đậm, không in nghiêng, cỡ chữ 13)
     add_h3("3.2.3. Bảng đối chiếu và so sánh thông số kỹ thuật động")
     add_para("Nhằm giải quyết bài toán khó khăn của khách hàng khi phải lựa chọn giữa các dòng thiết bị thực tế ảo có cấu hình phần cứng tương đồng, hệ thống cung cấp một bảng so sánh kỹ thuật tương tác thông minh. Bảng đối chiếu này cho phép đặt cạnh nhau tối đa ba sản phẩm khác nhau trên cùng một khung nhìn để phân tích chi tiết từng khía cạnh kỹ thuật từ ống kính quang học, màn hình hiển thị, hệ thống xử lý trung tâm cho đến kết nối không dây và thời lượng pin.")
     
@@ -470,10 +494,13 @@ def create_full_chapter3_word_doc():
         hdr_c_cells[i].text = title
         p = hdr_c_cells[i].paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.line_spacing = 1.2
+        p.paragraph_format.space_after = Pt(2)
+        p.paragraph_format.space_before = Pt(2)
         run = p.runs[0]
         run.bold = True
         run.font.name = "Times New Roman"
-        run.font.size = Pt(10.5)
+        run.font.size = Pt(11.5)  # 11.5pt TIÊU ĐỀ BẢNG
         run.font.color.rgb = RGBColor(0, 0, 0)
 
     compare_data = [
@@ -491,9 +518,13 @@ def create_full_chapter3_word_doc():
             row_cells[col_idx].text = val
             p = row_cells[col_idx].paragraphs[0]
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER if col_idx > 0 else WD_ALIGN_PARAGRAPH.LEFT
+            p.paragraph_format.line_spacing = 1.2
+            p.paragraph_format.space_after = Pt(2)
+            p.paragraph_format.space_before = Pt(2)
             run = p.runs[0]
+            run.bold = False
             run.font.name = "Times New Roman"
-            run.font.size = Pt(10)
+            run.font.size = Pt(11)  # CỠ CHỮ 11pt RÕ RÀNG
             run.font.color.rgb = RGBColor(0, 0, 0)
     # Khống chế độ rộng cột cố định: Tổng = 3.6 + 3.8 + 3.8 + 3.8 = 15.0 cm (không tràn)
     format_table(table_compare, [3.6, 3.8, 3.8, 3.8])
@@ -503,7 +534,7 @@ def create_full_chapter3_word_doc():
     add_dash_item("Cố định hàng tiêu đề khi cuộn trang", "Duy trì ảnh và tên sản phẩm luôn ghim dính tại mép trên màn hình máy tính khi người dùng cuộn xem các thông số kỹ thuật bên dưới.")
     add_dash_item("Hỗ trợ cuộn ngang mượt mà trên di động", "Thiết lập thanh chỉ báo vị trí trực quan và hỗ trợ thao tác vuốt chạm hai chiều trên điện thoại, ngăn ngừa hiện tượng vỡ khung ngang toàn trang.")
 
-    # 3.2.4 (In đậm, không in nghiêng)
+    # 3.2.4 (In đậm, không in nghiêng, cỡ chữ 13)
     add_h3("3.2.4. Cơ chế chuyển đổi và đồng bộ giao diện sáng tối")
     add_para("Hệ thống chuyển đổi chế độ hiển thị giữa sáng và tối được thiết kế nhằm thích ứng linh hoạt với môi trường ánh sáng xung quanh và thói quen thị giác của từng khách hàng. Trình điều khiển giao diện sử dụng nút bấm chuyển đổi biểu tượng mặt trời và mặt trăng đặt tại vị trí trung tâm của thanh điều hướng chính.")
     
@@ -517,11 +548,11 @@ def create_full_chapter3_word_doc():
     add_dash_item("Tập lệnh ưu tiên chống chớp nháy màu", "Thực thi đoạn mã nhẹ ngay tại phần đầu tài liệu trước khi trình duyệt dựng khung giao diện, đọc trạng thái đã lưu để gán trước lớp định danh, loại bỏ triệt để hiện tượng chớp sáng trước khi chuyển tối.")
 
     # ----------------------------------------------------
-    # 3.3. MÃ NGUỒN VÀ CẤU TRÚC DỰ ÁN (In hoa hết)
+    # 3.3. MÃ NGUỒN VÀ CẤU TRÚC DỰ ÁN (In hoa hết, cỡ chữ 13, in đậm)
     # ----------------------------------------------------
     add_h2("3.3. Mã nguồn và cấu trúc dự án")
     
-    # 3.3.1 (In đậm, không in nghiêng)
+    # 3.3.1 (In đậm, không in nghiêng, cỡ chữ 13)
     add_h3("3.3.1. Cấu trúc thư mục mã nguồn và phân tầng chức năng")
     add_para("Mã nguồn của dự án được tổ chức khoa học theo nguyên tắc tách biệt mối quan tâm và cấu trúc hóa theo từng phân tầng chức năng rõ rệt. Cây thư mục gốc của dự án được phân chia thành ba khối chính bao gồm khối tệp tin tài liệu gốc, khối tài nguyên tĩnh và khối phục vụ máy chủ.")
     
@@ -533,10 +564,13 @@ def create_full_chapter3_word_doc():
         hdr_s_cells[i].text = title
         p = hdr_s_cells[i].paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.line_spacing = 1.2
+        p.paragraph_format.space_after = Pt(2)
+        p.paragraph_format.space_before = Pt(2)
         run = p.runs[0]
         run.bold = True
         run.font.name = "Times New Roman"
-        run.font.size = Pt(10.5)
+        run.font.size = Pt(11.5)  # 11.5pt TIÊU ĐỀ BẢNG
         run.font.color.rgb = RGBColor(0, 0, 0)
 
     struct_data = [
@@ -557,9 +591,13 @@ def create_full_chapter3_word_doc():
             row_cells[col_idx].text = val
             p = row_cells[col_idx].paragraphs[0]
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER if col_idx == 1 else WD_ALIGN_PARAGRAPH.LEFT
+            p.paragraph_format.line_spacing = 1.2
+            p.paragraph_format.space_after = Pt(2)
+            p.paragraph_format.space_before = Pt(2)
             run = p.runs[0]
+            run.bold = False
             run.font.name = "Times New Roman"
-            run.font.size = Pt(10)
+            run.font.size = Pt(11)  # CỠ CHỮ 11pt RÕ RÀNG
             run.font.color.rgb = RGBColor(0, 0, 0)
     # Khống chế độ rộng cột cố định: Tổng = 4.0 + 3.5 + 7.5 = 15.0 cm (không tràn)
     format_table(table_struct, [4.0, 3.5, 7.5])
@@ -571,7 +609,7 @@ def create_full_chapter3_word_doc():
     add_dash_item("Khối tài nguyên hình ảnh đồ họa", "Phân loại ngăn nắp theo ảnh biểu ngữ, ảnh chân dung sản phẩm độ phân giải cao và biểu tượng đồ họa vector SVG tối ưu tốc độ tải trang.")
     add_dash_item("Khối máy chủ dịch vụ phụ trợ", "Chạy trên môi trường Node.js cung cấp giao diện lập trình giả lập, điều phối tiếp nhận thông tin từ biểu mẫu liên hệ và thiết lập tiêu đề mạng an toàn.")
 
-    # 3.3.2 (In đậm, không in nghiêng)
+    # 3.3.2 (In đậm, không in nghiêng, cỡ chữ 13)
     add_h3("3.3.2. Quy chuẩn xây dựng mã nguồn và quy tắc định danh")
     add_para("Nhằm bảo đảm tính đồng bộ và thuận tiện trong quá trình phát triển nhóm, dự án thiết lập hệ thống quy chuẩn kỹ thuật khắt khe xuyên suốt mã nguồn.")
     add_dash_item("Quy tắc định danh kiểu dáng ba thành phần", "Áp dụng phương pháp BEM với tên khối làm tiền tố, nối với phần tử qua hai dấu gạch dưới và nối với biến thể trạng thái qua hai dấu gạch ngang, triệt tiêu hoàn toàn nguy cơ xung đột thuộc tính giữa các trang.")
@@ -579,7 +617,7 @@ def create_full_chapter3_word_doc():
     add_dash_item("Chế độ kiểm soát chặt chẽ trong kịch bản", "Kích hoạt chế độ kiểm soát nghiêm ngặt trong JavaScript, bắt buộc khai báo biến minh bạch và cấm tuyệt đối việc sử dụng biến toàn cục tự do gây ô nhiễm bộ nhớ.")
     add_dash_item("Kiểm tra tính hợp lệ biểu mẫu hai lớp", "Kết hợp ràng buộc kiểu dữ liệu của HTML5 với các biểu thức chính quy trong tập lệnh, mang lại phản hồi lỗi tức thì và ngăn chặn việc gửi dữ liệu rỗng.")
 
-    # 3.3.3 (In đậm, không in nghiêng)
+    # 3.3.3 (In đậm, không in nghiêng, cỡ chữ 13)
     add_h3("3.3.3. Phân tích các mô đun xử lý logic cốt lõi")
     add_para("Sơ đồ kiến trúc luồng dữ liệu và điều phối sự kiện phía trình duyệt thể hiện mối quan hệ cộng tác nhịp nhàng giữa các tầng giao diện người dùng, tầng bộ điều khiển nghiệp vụ và tầng lưu trữ bộ nhớ cục bộ.")
     
