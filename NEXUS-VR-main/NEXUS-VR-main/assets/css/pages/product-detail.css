@@ -1,0 +1,132 @@
+/* NEXUS VR — pages/product-detail.css   [PHỤ TRÁCH: Nhất Vũ]
+   TẦNG 3 - PAGES
+   Gallery ảnh + thumbnail, color swatches, tabs Mô tả/Thông số/
+   Đánh giá, khối "Sản phẩm tương tự" (dùng components/product-card.css).
+   Toàn bộ màu sắc lấy từ biến trong variables.css — không hardcode. */
+
+.product-detail-page { padding-top: 110px; padding-bottom: 40px; min-height: 60vh; }
+
+/* Breadcrumb */
+.breadcrumb { font-size: 13.5px; color: var(--text-muted); display: flex; gap: 8px; align-items: center; margin-bottom: 28px; flex-wrap: wrap; }
+.breadcrumb a { color: var(--text-secondary); }
+.breadcrumb a:hover { color: var(--accent-cyan); }
+
+/* Ẩn hoàn toàn khối chi tiết cho tới khi product-controller.js render xong,
+   tránh nháy giao diện rỗng / bị redirect 404 sau khi đã kịp hiện ra. */
+#product-detail-root[hidden] { display: none; }
+
+.product-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: start;
+}
+
+/* ---------- GALLERY ---------- */
+.product-detail__gallery { position: sticky; top: 110px; }
+
+.product-detail__main-image {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-tertiary);
+  aspect-ratio: 1 / 1;
+}
+.product-detail__main-image img { width: 100%; height: 100%; object-fit: cover; }
+
+.product-detail__badge {
+  position: absolute; top: 16px; left: 16px;
+  background: var(--accent-gradient-solid); color: #fff;
+  font-family: var(--font-head); font-weight: 700; font-size: 13px;
+  padding: 6px 14px; border-radius: 999px;
+}
+
+.product-detail__thumbs { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+.product-detail__thumb {
+  width: 76px; height: 76px; flex-shrink: 0; border-radius: var(--radius-sm); overflow: hidden;
+  border: 2px solid transparent; background: var(--bg-tertiary); cursor: pointer; padding: 0;
+  transition: border-color .2s;
+}
+.product-detail__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.product-detail__thumb.is-active,
+.product-detail__thumb:hover { border-color: var(--accent-cyan); }
+
+/* ---------- INFO ---------- */
+.product-detail__category { font-size: 12.5px; font-weight: 600; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: .04em; }
+.product-detail__title { margin: 10px 0 14px; }
+
+.product-detail__rating { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; }
+.product-detail__stars { color: var(--accent-bronze); letter-spacing: 2px; }
+
+.product-detail__price-row { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+.product-detail__price-now { font-family: var(--font-head); font-size: 30px; font-weight: 700; color: var(--accent-cyan); }
+.product-detail__price-old { font-size: 16px; color: var(--text-muted); text-decoration: line-through; }
+.product-detail__discount-pct { font-size: 12.5px; font-weight: 700; color: #fff; background: var(--error); padding: 3px 10px; border-radius: 999px; }
+
+.product-detail__short-desc { margin-bottom: 24px; }
+
+.product-detail__colors { margin-bottom: 22px; }
+.product-detail__colors-label { font-size: 14px; color: var(--text-secondary); display: block; margin-bottom: 10px; }
+.product-detail__color-swatches { display: flex; gap: 10px; }
+.product-detail__swatch {
+  width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent;
+  cursor: pointer; box-shadow: inset 0 0 0 1px var(--glass-border); padding: 0;
+  transition: transform .2s, border-color .2s;
+}
+.product-detail__swatch.is-active,
+.product-detail__swatch:hover { border-color: var(--accent-cyan); transform: scale(1.12); }
+
+.product-detail__stock { font-size: 13.5px; font-weight: 600; margin-bottom: 26px; }
+.product-detail__stock.is-in { color: var(--success); }
+.product-detail__stock.is-low { color: var(--warning); }
+.product-detail__stock.is-out { color: var(--error); }
+
+.product-detail__actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.product-detail__qty { display: flex; align-items: center; border: 1px solid var(--glass-border); border-radius: var(--radius-sm); overflow: hidden; }
+.product-detail__qty-btn { width: 40px; height: 44px; background: var(--glass-bg); border: none; font-size: 18px; cursor: pointer; color: var(--text-primary); }
+.product-detail__qty input {
+  width: 50px; height: 44px; border: none; text-align: center; background: transparent; font-size: 15px;
+  -moz-appearance: textfield;
+}
+.product-detail__qty input::-webkit-outer-spin-button,
+.product-detail__qty input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+#pd-add-to-cart:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.product-detail__wishlist-btn.is-active { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+/* ---------- TABS ---------- */
+.product-detail__tabs { margin-top: 70px; }
+.product-detail__tabs-nav { display: flex; gap: 8px; border-bottom: 1px solid var(--glass-border); margin-bottom: 30px; flex-wrap: wrap; }
+.product-detail__tab-btn {
+  padding: 14px 22px; background: none; border: none; border-bottom: 2px solid transparent;
+  font-family: var(--font-head); font-weight: 600; font-size: 14.5px; color: var(--text-muted); cursor: pointer;
+  transition: color .2s, border-color .2s;
+}
+.product-detail__tab-btn:hover { color: var(--text-primary); }
+.product-detail__tab-btn.is-active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); }
+
+.product-detail__tab-panel { max-width: 760px; }
+
+.product-detail__specs-table { width: 100%; border-collapse: collapse; }
+.product-detail__specs-table tr { border-bottom: 1px solid var(--glass-border); }
+.product-detail__specs-table th, .product-detail__specs-table td { text-align: left; padding: 14px 10px; font-size: 14.5px; }
+.product-detail__specs-table th { color: var(--text-secondary); font-weight: 600; width: 40%; }
+
+.product-detail__review { padding: 20px 0; border-bottom: 1px solid var(--glass-border); }
+.product-detail__review-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+.product-detail__review-stars { color: var(--accent-bronze); font-size: 13px; }
+.product-detail__review-date { font-size: 12.5px; color: var(--text-muted); }
+.product-detail__no-review { color: var(--text-muted); }
+
+/* ---------- SẢN PHẨM TƯƠNG TỰ ---------- */
+/* Dùng div thường (không phải <section>) vì global.css đã đặt
+   `section { padding: 90px 0; }` dùng cho section full-width toàn trang —
+   ở đây chỉ cần margin-top gọn bên trong .wrap của trang product. */
+.product-detail__related { margin-top: 40px; }
+.product-detail__related h2 { margin-bottom: 4px; }
+
+@media (max-width: 900px) {
+  .product-detail { grid-template-columns: 1fr; gap: 32px; }
+  .product-detail__gallery { position: static; }
+}

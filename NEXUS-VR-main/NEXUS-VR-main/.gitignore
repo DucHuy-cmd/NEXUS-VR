@@ -1,0 +1,16 @@
+# Nhật ký cá nhân & hồ sơ nội bộ của thành viên
+NHAT_KY_TIEN_DO_TRUONG_VU.doc
+*.doc
+
+# Tệp môi trường & bảo mật
+.env
+.env.local
+
+# Node modules & OS junk
+node_modules/
+.DS_Store
+Thumbs.db
+
+# IDE & AI Assistant rules
+.agent/
+.cursorrules

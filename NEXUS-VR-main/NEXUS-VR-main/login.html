@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tài Khoản | NEXUS VR — Quiet Luxury Spatial Computing</title>
+  <meta name="description" content="Đăng nhập hoặc đăng ký tài khoản thành viên NEXUS VR để quản lý đơn hàng và nhận đặc quyền công nghệ không gian.">
+  <meta name="theme-color" content="#F9F6F0">
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+  
+  <!-- FONTS: Space Grotesk & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- TẦNG 1: FOUNDATION -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  
+  <!-- TẦNG 2: COMPONENTS -->
+  <link rel="stylesheet" href="assets/css/components/navbar.css">
+  <link rel="stylesheet" href="assets/css/components/footer.css">
+  <link rel="stylesheet" href="assets/css/components/toast.css">
+  <link rel="stylesheet" href="assets/css/components/cart-drawer.css">
+  
+  <!-- TẦNG 3: PAGE CSS RIÊNG -->
+  <link rel="stylesheet" href="assets/css/pages/login.css">
+</head>
+<body data-page="login">
+  <!-- SKIP TO CONTENT -->
+  <a href="#main-content" class="skip-link">Bỏ qua tới nội dung chính</a>
+
+  <!-- NAVBAR -->
+  <div id="navbar-root"></div>
+
+  <main class="auth-page" id="main-content">
+    <div class="auth-container">
+      <div class="auth-card">
+        <!-- HEADER -->
+        <header class="auth-header">
+          <span class="auth-eyebrow">TÀI KHOẢN NEXUS</span>
+          <h1 class="auth-title" id="authTitle">Đăng Nhập</h1>
+          <p class="auth-subtitle" id="authSubtitle">Chào mừng bạn quay lại với không gian điện toán NEXUS.</p>
+        </header>
+
+        <!-- CỤM FORM & TABS (ẨN TOÀN BỘ KHI ĐÃ ĐĂNG NHẬP) -->
+        <div id="authFormsCluster">
+          <!-- TABS SWITCHER -->
+          <div class="auth-tabs" id="authTabsCluster" role="tablist" aria-label="Lựa chọn phương thức xác thực">
+            <button type="button" class="auth-tab-btn is-active" id="tabLoginBtn" role="tab" aria-selected="true" aria-controls="loginForm">
+              Đăng nhập
+            </button>
+            <button type="button" class="auth-tab-btn" id="tabRegisterBtn" role="tab" aria-selected="false" aria-controls="registerForm">
+              Đăng ký
+            </button>
+          </div>
+
+          <!-- FORM 1: ĐĂNG NHẬP -->
+          <form class="auth-form" id="loginForm" novalidate>
+            <div class="auth-field">
+              <label for="loginAccount" class="auth-label">Tài khoản (Email / Số điện thoại / Username)</label>
+              <div class="auth-input-wrap">
+                <input type="text" id="loginAccount" class="auth-input" placeholder="tuong@nexus.com hoặc 0988123456" autocomplete="username" required>
+              </div>
+              <span class="auth-field-error" id="loginAccountError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="loginPassword" class="auth-label">Mật khẩu</label>
+              <div class="auth-input-wrap">
+                <input type="password" id="loginPassword" class="auth-input" placeholder="••••••••" autocomplete="current-password" required>
+                <button type="button" class="auth-toggle-pwd" data-target="loginPassword" aria-label="Hiện mật khẩu">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <span class="auth-field-error" id="loginPasswordError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-row-between">
+              <label class="auth-checkbox-label">
+                <input type="checkbox" id="loginRemember" checked>
+                <span>Ghi nhớ phiên</span>
+              </label>
+              <a href="#" class="auth-forgot-link" onclick="if(typeof window.showToast==='function')window.showToast('Chức năng cấp lại mật khẩu đang gửi mã OTP qua email.','info'); return false;">Quên mật khẩu?</a>
+            </div>
+
+            <button type="submit" class="auth-submit-btn" id="loginSubmitBtn">
+              ĐĂNG NHẬP VÀO NEXUS
+            </button>
+          </form>
+
+          <!-- FORM 2: ĐĂNG KÝ -->
+          <form class="auth-form" id="registerForm" novalidate hidden>
+            <div class="auth-field">
+              <label for="registerAccount" class="auth-label">Tài khoản (Email / Số điện thoại / Username)</label>
+              <div class="auth-input-wrap">
+                <input type="text" id="registerAccount" class="auth-input" placeholder="tuong@nexus.com hoặc 0988123456" autocomplete="username" required>
+              </div>
+              <span class="auth-field-error" id="registerAccountError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="registerPassword" class="auth-label">Mật khẩu (tối thiểu 6 ký tự)</label>
+              <div class="auth-input-wrap">
+                <input type="password" id="registerPassword" class="auth-input" placeholder="••••••••" autocomplete="new-password" required>
+                <button type="button" class="auth-toggle-pwd" data-target="registerPassword" aria-label="Hiện mật khẩu">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <span class="auth-field-error" id="registerPasswordError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="registerConfirmPassword" class="auth-label">Nhập lại mật khẩu</label>
+              <div class="auth-input-wrap">
+                <input type="password" id="registerConfirmPassword" class="auth-input" placeholder="••••••••" autocomplete="new-password" required>
+                <button type="button" class="auth-toggle-pwd" data-target="registerConfirmPassword" aria-label="Hiện mật khẩu">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <span class="auth-field-error" id="registerConfirmError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label class="auth-checkbox-label">
+                <input type="checkbox" id="registerTerms" checked>
+                <span>Tôi đồng ý với Điều khoản dịch vụ &amp; Chính sách bảo mật</span>
+              </label>
+            </div>
+
+            <button type="submit" class="auth-submit-btn" id="registerSubmitBtn">
+              TẠO TÀI KHOẢN MỚI
+            </button>
+          </form>
+
+          <!-- FORM 3: HOÀN TẤT HỒ SƠ -->
+          <form class="auth-form" id="profileDetailsForm" novalidate hidden>
+            <div class="auth-field" style="text-align: center; margin-bottom: 24px;">
+              <label class="auth-label" style="margin-bottom: 10px; display: block; font-weight: 600;">Ảnh đại diện cá nhân</label>
+              <div style="position: relative; display: inline-block; width: 96px; height: 96px; border-radius: 50%; overflow: hidden; border: 2px solid var(--accent); background: var(--bg-secondary); box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
+                <img id="avatarPreviewImg" src="assets/images/placeholder.svg" alt="Preview Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div style="margin-top: 10px;">
+                <label for="avatarFileInput" style="padding: 8px 18px; font-size: 0.85rem; font-weight: 600; border-radius: 999px; background: var(--bg-secondary); border: 1px solid var(--border); cursor: pointer; display: inline-block;">
+                  📷 Chọn ảnh từ thiết bị
+                </label>
+                <input type="file" id="avatarFileInput" accept="image/*" hidden>
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label for="detailName" class="auth-label">Họ và tên *</label>
+              <div class="auth-input-wrap">
+                <input type="text" id="detailName" class="auth-input" placeholder="Trần Tưởng" required>
+              </div>
+              <span class="auth-field-error" id="detailNameError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="detailPhone" class="auth-label">Số điện thoại giao hàng *</label>
+              <div class="auth-input-wrap">
+                <input type="tel" id="detailPhone" class="auth-input" placeholder="0988123456" required>
+              </div>
+              <span class="auth-field-error" id="detailPhoneError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="detailEmail" class="auth-label">Địa chỉ Email *</label>
+              <div class="auth-input-wrap">
+                <input type="email" id="detailEmail" class="auth-input" placeholder="tuong@nexus.com" required>
+              </div>
+              <span class="auth-field-error" id="detailEmailError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="detailGender" class="auth-label">Giới tính</label>
+              <div class="auth-input-wrap">
+                <select id="detailGender" class="auth-input">
+                  <option value="Nam" selected>Nam</option>
+                  <option value="Nữ">Nữ</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label for="detailProvince" class="auth-label">Tỉnh / Thành phố *</label>
+              <div class="auth-input-wrap">
+                <select id="detailProvince" class="auth-input" required>
+                  <option value="">-- Chọn Tỉnh / Thành phố --</option>
+                </select>
+              </div>
+              <span class="auth-field-error" id="detailProvinceError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="detailWard" class="auth-label">Phường / Xã *</label>
+              <div class="auth-input-wrap">
+                <select id="detailWard" class="auth-input" disabled required>
+                  <option value="">-- Vui lòng chọn Tỉnh/Thành trước --</option>
+                </select>
+              </div>
+              <span class="auth-field-error" id="detailWardError" aria-live="polite"></span>
+            </div>
+
+            <div class="auth-field">
+              <label for="detailAddress" class="auth-label">Địa chỉ chi tiết (Số nhà, tên đường) *</label>
+              <div class="auth-input-wrap">
+                <input type="text" id="detailAddress" class="auth-input" placeholder="Số 123 Nguyễn Huệ" required>
+              </div>
+              <span class="auth-field-error" id="detailAddressError" aria-live="polite"></span>
+            </div>
+
+            <button type="submit" class="auth-submit-btn" id="saveProfileBtn">
+              HOÀN TẤT LƯU HỒ SƠ
+            </button>
+          </form>
+
+          <!-- NÚT 1-CLICK DEMO -->
+          <div class="auth-demo-helper">
+            <button type="button" class="auth-demo-btn" id="fillDemoBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              Điền tài khoản Tưởng Demo chấm bài (1-Click)
+            </button>
+          </div>
+        </div>
+
+        <!-- =========================
+        TRẠNG THÁI PROFILE (KHI ĐÃ ĐĂNG NHẬP)
+        ========================= -->
+        <div class="auth-profile" id="authProfileCluster" hidden>
+          <div class="auth-avatar-circle" style="overflow: hidden; width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; background: var(--accent); color: #fff; font-weight: 700; font-size: 1.6rem; box-shadow: 0 4px 18px rgba(166, 124, 82, 0.3);">
+            <img id="profileAvatarImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" hidden>
+            <span id="profileAvatarText">TT</span>
+          </div>
+
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h2 class="auth-profile-greeting" id="profileGreetingHeader" style="font-size: 1.4rem; color: var(--accent); margin-bottom: 4px; font-weight: 700;">Hi, Trần Tưởng</h2>
+            <p class="auth-profile-email" id="profileEmail" style="color: var(--text-secondary); font-size: 0.9rem;">tuong@nexus.com</p>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;" id="profilePhoneDisplay"></p>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);" id="profileAddressDisplay"></p>
+          </div>
+
+          <!-- ĐÃ XÓA HOÀN TOÀN KHUNG VIP TẠI ĐÂY -->
+
+          <div class="auth-profile-actions">
+            <button type="button" class="btn btn-secondary" id="profileEditBtn" style="width: 100%; text-align: center;">Chỉnh sửa thông tin &amp; Ảnh đại diện</button>
+            <a href="cart.html" class="btn btn-primary" style="width: 100%; text-align: center; margin-top: 10px;">Xem giỏ hàng</a>
+            <button type="button" class="auth-logout-btn" id="profileLogoutBtn" style="margin-top: 12px;">
+              Đăng xuất tài khoản
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <div id="footer-root"></div>
+
+  <!-- TẦNG 1: DATA & SERVICES -->
+  <script src="assets/js/data/products-data.js"></script>
+  <script src="assets/js/services/storage-service.js"></script>
+
+  <!-- TẦNG 2: MODULES -->
+  <script src="assets/js/modules/toast.js"></script>
+  <script src="assets/js/modules/layout-loader.js"></script>
+  <script src="assets/js/modules/validator.js"></script>
+  <script src="assets/js/modules/address-manager.js"></script>
+
+  <!-- TẦNG 3: CONTROLLER -->
+  <script src="assets/js/controllers/login-controller.js"></script>
+</body>
+</html>

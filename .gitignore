@@ -1,16 +1,14 @@
-# Nhật ký cá nhân & hồ sơ nội bộ của thành viên
-NHAT_KY_TIEN_DO_TRUONG_VU.doc
-*.doc
+# File tài liệu / chỉ để đọc
+docs/
+*.pdf
+*.docx
+*.txt
 
-# Tệp môi trường & bảo mật
+# File tạm / môi trường / build
 .env
-.env.local
-
-# Node modules & OS junk
+*.log
 node_modules/
-.DS_Store
-Thumbs.db
-
-# IDE & AI Assistant rules
-.agent/
-.cursorrules
+dist/
+build/
+.vscode/
+.idea/
