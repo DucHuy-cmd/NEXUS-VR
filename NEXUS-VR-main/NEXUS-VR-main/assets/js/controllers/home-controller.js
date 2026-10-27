@@ -327,12 +327,29 @@
     // Lấy 4 phụ kiện đi kèm tiêu biểu
     const accessories = PRODUCTS.filter((p) => p.id !== "vr-001").slice(0, 4);
 
+    const wishlist = (typeof window.getWishlistItems === "function")
+      ? window.getWishlistItems()
+      : (JSON.parse(localStorage.getItem("nexus_wishlist") || "[]"));
+
     container.innerHTML = accessories
       .map((p) => {
         const imageSrc = p.images && p.images[0] ? p.images[0] : "assets/images/placeholder.svg";
+        const isFav = Array.isArray(wishlist) && wishlist.includes(String(p.id));
         return `
           <article class="product-card">
             <div class="product-card__media">
+              <button 
+                type="button" 
+                class="product-card__wishlist-btn${isFav ? ' is-active' : ''}" 
+                aria-label="Thêm vào yêu thích" 
+                aria-pressed="${isFav}" 
+                data-id="${p.id}"
+                title="${isFav ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích'}"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </button>
               <a href="product.html?id=${encodeURIComponent(p.id)}">
                 <img 
                   class="product-card__image" 
@@ -367,6 +384,19 @@
       })
       .join("");
   }
+
+  // Đồng bộ trạng thái nút yêu thích trên trang chủ khi wishlist thay đổi
+  window.addEventListener("nexus:wishlist-updated", () => {
+    const wishlist = (typeof window.getWishlistItems === "function")
+      ? window.getWishlistItems()
+      : (JSON.parse(localStorage.getItem("nexus_wishlist") || "[]"));
+    document.querySelectorAll(".product-card__wishlist-btn").forEach((btn) => {
+      const isFav = Array.isArray(wishlist) && wishlist.includes(String(btn.dataset.id));
+      btn.classList.toggle("is-active", isFav);
+      btn.setAttribute("aria-pressed", String(isFav));
+      btn.title = isFav ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích";
+    });
+  });
 
   // Toàn cục helper cho Add To Cart
   window.addToCart = function (productId) {

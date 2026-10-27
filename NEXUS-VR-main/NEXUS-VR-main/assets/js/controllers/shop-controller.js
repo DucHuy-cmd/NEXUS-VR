@@ -140,6 +140,16 @@
     saveWishlist(list);
   }
 
+  // Đồng bộ trạng thái các thẻ sản phẩm khi wishlist được cập nhật từ drawer hoặc nơi khác
+  window.addEventListener('nexus:wishlist-updated', () => {
+    const list = getWishlist();
+    document.querySelectorAll('.product-card__wishlist-btn').forEach((btn) => {
+      const active = list.includes(btn.dataset.id);
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+  });
+
   function notify(message) {
     if (typeof window.showToast === 'function') {
       window.showToast(message, 'success');

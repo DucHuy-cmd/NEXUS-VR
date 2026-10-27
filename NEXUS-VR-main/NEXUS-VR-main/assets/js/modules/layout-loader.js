@@ -44,7 +44,7 @@ const NAVBAR_HTML = `
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
-        <span class="navbar__wishlist-badge" id="wishlist-badge">0</span>
+        <span class="navbar__wishlist-badge" id="wishlist-badge" hidden style="display: none;">0</span>
       </button>
 
       <!-- CART BUTTON -->
@@ -54,7 +54,7 @@ const NAVBAR_HTML = `
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <path d="M16 10a4 4 0 0 1-8 0"></path>
         </svg>
-        <span class="navbar__cart-badge" id="cart-badge">0</span>
+        <span class="navbar__cart-badge" id="cart-badge" hidden style="display: none;">0</span>
       </a>
 
       <!-- USER PROFILE SLOT -->
@@ -294,17 +294,26 @@ function initLiveSearch() {
   });
 }
 
-// Wishlist Manager & Drawer
+// =========================================================
+// WISHLIST MANAGER & DRAWER (GIAO DIỆN DANH SÁCH YÊU THÍCH)
+// Concept: Quiet Luxury Slide-over Drawer
+// =========================================================
+
 function getWishlistItems() {
   try {
     let list = [];
     if (window.storageService && typeof window.storageService.getWishlist === "function") {
       list = window.storageService.getWishlist() || [];
     } else {
-      list = JSON.parse(localStorage.getItem("nexus_wishlist")) || [];
+      const raw = localStorage.getItem("nexus_wishlist");
+      list = raw ? JSON.parse(raw) : [];
     }
     if (!Array.isArray(list)) return [];
-    return [...new Set(list.filter((id) => id !== null && id !== undefined && String(id).trim() !== ""))];
+    // Hỗ trợ cả item dạng id string lẫn object có thuộc tính id
+    return [...new Set(list.map((item) => {
+      if (item && typeof item === "object" && item.id) return String(item.id).trim();
+      return item !== null && item !== undefined ? String(item).trim() : "";
+    }).filter((id) => id !== ""))];
   } catch (e) {
     return [];
   }
@@ -327,27 +336,31 @@ function saveWishlistItems(list) {
 }
 
 function updateWishlistBadge() {
-  const badge = document.getElementById("wishlist-badge");
-  if (!badge) return;
+  const badges = document.querySelectorAll("#wishlist-badge, .navbar__wishlist-badge, [data-wishlist-count]");
+  if (!badges.length) return;
   const items = getWishlistItems();
   const count = items.length;
   const strCount = String(count);
-  if (badge.textContent !== strCount) {
-    badge.textContent = strCount;
-  }
-  if (count > 0) {
-    badge.hidden = false;
-    badge.style.display = "inline-flex";
-    badge.classList.add("has-items");
-  } else {
-    badge.hidden = true;
-    badge.style.display = "none";
-    badge.classList.remove("has-items");
-  }
+
+  badges.forEach((badge) => {
+    if (badge.textContent !== strCount) {
+      badge.textContent = strCount;
+    }
+    if (count > 0) {
+      badge.hidden = false;
+      badge.style.display = "inline-flex";
+      badge.classList.add("has-items");
+    } else {
+      badge.hidden = true;
+      badge.style.display = "none";
+      badge.classList.remove("has-items");
+    }
+  });
 }
 
 function ensureWishlistDrawerElements() {
   if (document.getElementById("wishlist-drawer")) return;
+
   const overlay = document.createElement("div");
   overlay.className = "wishlist-drawer-overlay";
   overlay.id = "wishlist-drawer-overlay";
@@ -363,23 +376,21 @@ function ensureWishlistDrawerElements() {
   aside.innerHTML = `
     <div class="wishlist-drawer__header">
       <div class="wishlist-drawer__title-wrap">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--accent, #A67C52);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
         <h3 class="wishlist-drawer__title">Sản Phẩm Yêu Thích</h3>
         <span class="wishlist-drawer__count" id="wishlist-drawer-count">(0)</span>
       </div>
-      <button type="button" class="wishlist-drawer__close" id="wishlist-drawer-close" aria-label="Đóng danh sách yêu thích">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button type="button" class="wishlist-drawer__close" id="wishlist-drawer-close" aria-label="Đóng danh sách yêu thích" title="Đóng (Esc)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
     </div>
     <div class="wishlist-drawer__body" id="wishlist-drawer-body"></div>
-    <div class="wishlist-drawer__footer">
-      <a href="shop.html" class="btn btn-primary wishlist-drawer__shop-btn">Khám phá cửa hàng</a>
-    </div>
+    <div class="wishlist-drawer__footer" id="wishlist-drawer-footer"></div>
   `;
 
   document.body.appendChild(overlay);
@@ -389,6 +400,7 @@ function ensureWishlistDrawerElements() {
 function renderWishlistDrawerContent() {
   ensureWishlistDrawerElements();
   const body = document.getElementById("wishlist-drawer-body");
+  const footer = document.getElementById("wishlist-drawer-footer");
   const countEl = document.getElementById("wishlist-drawer-count");
   if (!body) return;
 
@@ -396,17 +408,35 @@ function renderWishlistDrawerContent() {
   const count = Array.isArray(list) ? list.length : 0;
   if (countEl) countEl.textContent = `(${count})`;
 
+  // TRƯỜNG HỢP DANH SÁCH TRỐNG: Hiển thị màn hình thân thiện
   if (count === 0) {
     body.innerHTML = `
       <div class="wishlist-drawer__empty">
-        <div class="wishlist-drawer__empty-icon">♡</div>
-        <p class="wishlist-drawer__empty-text">Chưa có sản phẩm yêu thích</p>
-        <p class="wishlist-drawer__empty-sub">Hãy lưu lại các thiết bị và phụ kiện công nghệ không gian bạn quan tâm.</p>
+        <div class="wishlist-drawer__empty-icon-wrap" aria-hidden="true">
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </div>
+        <h4 class="wishlist-drawer__empty-title">Chưa có sản phẩm yêu thích nào</h4>
+        <p class="wishlist-drawer__empty-sub">Hãy lưu lại các thiết bị không gian và phụ kiện công nghệ bạn quan tâm để dễ dàng theo dõi và mua sắm sau.</p>
+        <a href="shop.html" class="btn btn-primary wishlist-drawer__empty-cta" id="wishlist-drawer-empty-btn">
+          <span>Khám phá ngay</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
       </div>
     `;
+    if (footer) {
+      footer.hidden = true;
+      footer.style.display = "none";
+      footer.innerHTML = "";
+    }
     return;
   }
 
+  // TRƯỜNG HỢP CÓ SẢN PHẨM: Hiển thị danh sách sản phẩm
   const catalog = (typeof PRODUCTS !== "undefined" && Array.isArray(PRODUCTS))
     ? PRODUCTS
     : ((window.PRODUCTS && Array.isArray(window.PRODUCTS)) ? window.PRODUCTS : []);
@@ -417,45 +447,213 @@ function renderWishlistDrawerContent() {
       return `
         <div class="wishlist-drawer__item" data-id="${id}">
           <div class="wishlist-drawer__item-thumb">
-            <img src="assets/images/placeholder.svg" alt="Sản phẩm">
+            <img src="assets/images/placeholder.svg" alt="Sản phẩm" width="74" height="74" loading="lazy">
           </div>
           <div class="wishlist-drawer__item-info">
+            <span class="wishlist-drawer__item-category">Sản phẩm</span>
             <span class="wishlist-drawer__item-name">Sản phẩm #${id}</span>
-          </div>
-          <div class="wishlist-drawer__item-actions">
-            <button type="button" class="wishlist-drawer__item-remove" data-id="${id}" title="Xóa khỏi yêu thích" aria-label="Xóa">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
+            <div class="wishlist-drawer__item-actions">
+              <button type="button" class="wishlist-drawer__btn-remove wishlist-drawer__item-remove" data-id="${id}" title="Xóa khỏi yêu thích" aria-label="Bỏ thích sản phẩm">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <span>Bỏ thích</span>
+              </button>
+            </div>
           </div>
         </div>
       `;
     }
 
     const img = (p.images && p.images[0]) || p.image || "assets/images/placeholder.svg";
-    const priceFormatted = (p.price || 0).toLocaleString("vi-VN") + "₫";
+    const priceFormatted = (Number(p.price) || 0).toLocaleString("vi-VN") + "₫";
+    const oldPriceFormatted = p.oldPrice ? (Number(p.oldPrice) || 0).toLocaleString("vi-VN") + "₫" : null;
+    const categoryLabel = p.categoryLabel || "Phụ kiện";
 
     return `
-      <div class="wishlist-drawer__item" data-id="${p.id}">
-        <a href="product.html?id=${encodeURIComponent(p.id)}" class="wishlist-drawer__item-thumb">
-          <img src="${img}" alt="${p.name}" onerror="this.onerror=null; this.src='assets/images/placeholder.svg';">
+      <div class="wishlist-drawer__item" data-id="${p.id}" id="wishlist-item-${p.id}">
+        <a href="product.html?id=${encodeURIComponent(p.id)}" class="wishlist-drawer__item-thumb" title="${p.name}">
+          <img src="${img}" alt="${p.name}" width="74" height="74" loading="lazy" onerror="this.onerror=null; this.src='assets/images/placeholder.svg';">
         </a>
         <div class="wishlist-drawer__item-info">
-          <a href="product.html?id=${encodeURIComponent(p.id)}" class="wishlist-drawer__item-name">${p.name}</a>
-          <span class="wishlist-drawer__item-price">${priceFormatted}</span>
-        </div>
-        <div class="wishlist-drawer__item-actions">
-          <button type="button" class="wishlist-drawer__item-add" data-id="${p.id}" title="Thêm vào giỏ hàng" aria-label="Thêm vào giỏ hàng">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-          </button>
-          <button type="button" class="wishlist-drawer__item-remove" data-id="${p.id}" title="Xóa khỏi yêu thích" aria-label="Xóa">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
+          <span class="wishlist-drawer__item-category">${categoryLabel}</span>
+          <a href="product.html?id=${encodeURIComponent(p.id)}" class="wishlist-drawer__item-name" title="${p.name}">${p.name}</a>
+          <div class="wishlist-drawer__item-price-wrap">
+            <span class="wishlist-drawer__item-price">${priceFormatted}</span>
+            ${oldPriceFormatted ? `<span class="wishlist-drawer__item-old-price">${oldPriceFormatted}</span>` : ""}
+          </div>
+          <div class="wishlist-drawer__item-actions">
+            <button type="button" class="wishlist-drawer__btn-add wishlist-drawer__item-add" data-id="${p.id}" title="Thêm vào giỏ hàng" aria-label="Thêm ${p.name} vào giỏ">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+              <span>Thêm vào giỏ</span>
+            </button>
+            <button type="button" class="wishlist-drawer__btn-remove wishlist-drawer__item-remove" data-id="${p.id}" title="Bỏ thích sản phẩm này" aria-label="Bỏ thích ${p.name}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+              <span>Bỏ thích</span>
+            </button>
+          </div>
         </div>
       </div>
     `;
   }).join("");
 
   body.innerHTML = `<div class="wishlist-drawer__list">${itemsHtml}</div>`;
+
+  // Render Drawer Footer
+  if (footer) {
+    footer.hidden = false;
+    footer.style.display = "flex";
+    footer.innerHTML = `
+      <div class="wishlist-drawer__footer-info">
+        <span>Đang lưu: <strong>${count}</strong> sản phẩm</span>
+        <button type="button" class="wishlist-drawer__clear-btn" id="wishlist-drawer-clear-btn" title="Xóa toàn bộ sản phẩm khỏi danh sách yêu thích">Xóa tất cả</button>
+      </div>
+      <div class="wishlist-drawer__footer-actions">
+        <button type="button" class="btn btn-primary wishlist-drawer__add-all-btn" id="wishlist-add-all-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span>Thêm tất cả vào giỏ</span>
+        </button>
+        <a href="shop.html" class="btn btn-secondary wishlist-drawer__shop-btn" id="wishlist-footer-shop-btn">Xem cửa hàng</a>
+      </div>
+    `;
+  }
+}
+
+// Thêm sản phẩm từ wishlist vào giỏ hàng an toàn trên toàn bộ các trang
+function addProductToCartFromWishlist(id, btnElement, skipToast = false) {
+  const catalog = (typeof PRODUCTS !== "undefined" && Array.isArray(PRODUCTS))
+    ? PRODUCTS
+    : ((window.PRODUCTS && Array.isArray(window.PRODUCTS)) ? window.PRODUCTS : []);
+  const product = catalog.find((item) => String(item.id) === String(id));
+  const productName = product ? product.name : ("Sản phẩm #" + id);
+  const hasCartManager = Boolean(window.cartManager && typeof window.cartManager.add === "function");
+
+  if (hasCartManager) {
+    window.cartManager.add(id, 1);
+  } else {
+    try {
+      let cart = [];
+      if (window.storageService && typeof window.storageService.getCart === "function") {
+        cart = window.storageService.getCart() || [];
+      } else {
+        const suffix = (window.storageService && window.storageService.getUserKeySuffix)
+          ? window.storageService.getUserKeySuffix()
+          : "_guest";
+        const raw = localStorage.getItem("nexus_cart" + suffix) || localStorage.getItem("nexus_cart");
+        cart = raw ? JSON.parse(raw) : [];
+      }
+
+      const existing = cart.find((item) => String(item.id) === String(id));
+      if (existing) {
+        existing.qty = (existing.qty || existing.quantity || 1) + 1;
+      } else if (product) {
+        const img = (product.colors && product.colors[0] && product.colors[0].image)
+          || (product.images && product.images[0])
+          || product.image
+          || "assets/images/placeholder.svg";
+        cart.push({
+          id: String(product.id),
+          name: product.name,
+          price: Number(product.price) || 0,
+          image: img,
+          selectedColor: (product.colors && product.colors[0] && product.colors[0].name) || "",
+          selectedColorHex: (product.colors && product.colors[0] && product.colors[0].hex) || "",
+          colorIndex: 0,
+          qty: 1
+        });
+      }
+
+      if (window.storageService && typeof window.storageService.saveCart === "function") {
+        window.storageService.saveCart(cart);
+      } else {
+        const suffix = (window.storageService && window.storageService.getUserKeySuffix)
+          ? window.storageService.getUserKeySuffix()
+          : "_guest";
+        localStorage.setItem("nexus_cart" + suffix, JSON.stringify(cart));
+        localStorage.setItem("nexus_cart", JSON.stringify(cart));
+        window.dispatchEvent(new CustomEvent("nexus:cart-updated", { detail: { cart, totalQuantity: cart.reduce((t, i) => t + (i.qty || 1), 0) } }));
+      }
+
+      if (!skipToast && typeof window.showToast === "function") {
+        window.showToast(`Đã thêm ${productName} vào giỏ hàng`, "success");
+      }
+    } catch (err) {
+      console.error("Lỗi khi thêm sản phẩm vào giỏ hàng:", err);
+    }
+  }
+
+  updateCartBadge();
+
+  if (btnElement) {
+    btnElement.classList.add("is-added");
+    const span = btnElement.querySelector("span");
+    const origText = span ? span.textContent : "Thêm vào giỏ";
+    if (span) span.textContent = "Đã thêm ✓";
+    setTimeout(() => {
+      btnElement.classList.remove("is-added");
+      if (span) span.textContent = origText;
+    }, 1200);
+  }
+}
+
+// Bỏ sản phẩm khỏi danh sách yêu thích và kích hoạt hoạt ảnh mượt
+function removeProductFromWishlist(id) {
+  const catalog = (typeof PRODUCTS !== "undefined" && Array.isArray(PRODUCTS))
+    ? PRODUCTS
+    : ((window.PRODUCTS && Array.isArray(window.PRODUCTS)) ? window.PRODUCTS : []);
+  const product = catalog.find((item) => String(item.id) === String(id));
+  const productName = product ? product.name : ("Sản phẩm #" + id);
+
+  const itemEl = document.querySelector(`.wishlist-drawer__item[data-id="${id}"]`);
+  if (itemEl) {
+    itemEl.classList.add("is-removing");
+  }
+
+  setTimeout(() => {
+    const list = getWishlistItems().filter((item) => String(item) !== String(id));
+    saveWishlistItems(list);
+    updateWishlistBadge();
+    renderWishlistDrawerContent();
+
+    // Đồng bộ nút yêu thích trên trang hiện tại
+    syncPageWishlistState(id, false);
+
+    if (typeof window.showToast === "function") {
+      window.showToast(`Đã bỏ ${productName} khỏi danh sách yêu thích`, "info");
+    }
+  }, itemEl ? 220 : 0);
+}
+
+// Đồng bộ trạng thái nút tim trên trang
+function syncPageWishlistState(id, isActive) {
+  document.querySelectorAll(`.product-card__wishlist-btn[data-id="${id}"]`).forEach((btn) => {
+    btn.classList.toggle("is-active", isActive);
+    btn.setAttribute("aria-pressed", String(isActive));
+  });
+
+  const pdBtn = document.getElementById("pd-wishlist-btn");
+  if (pdBtn) {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("id") === String(id)) {
+      pdBtn.classList.toggle("is-active", isActive);
+      pdBtn.setAttribute("aria-pressed", String(isActive));
+      pdBtn.textContent = isActive ? "♥ Đã yêu thích" : "♡ Yêu thích";
+    }
+  }
 }
 
 function openWishlistDrawer() {
@@ -488,67 +686,124 @@ function initWishlistDrawer() {
   ensureWishlistDrawerElements();
 
   document.addEventListener("click", (e) => {
-    const btn = e.target.closest("#navbar-wishlist-btn");
-    if (btn) {
+    // 1. Mở drawer từ nút yêu thích trên Navbar hoặc các liên kết có data-open-wishlist
+    const openBtn = e.target.closest("#navbar-wishlist-btn, [data-open-wishlist], .js-open-wishlist");
+    if (openBtn) {
       e.preventDefault();
       openWishlistDrawer();
       return;
     }
 
+    // 2. Đóng drawer khi click nút Đóng (X) hoặc bấm ra overlay nền mờ
     if (e.target.closest("#wishlist-drawer-close") || e.target.id === "wishlist-drawer-overlay") {
       e.preventDefault();
       closeWishlistDrawer();
       return;
     }
 
-    const removeBtn = e.target.closest(".wishlist-drawer__item-remove");
+    // 3. Xử lý nút "Khám phá ngay" hoặc "Xem cửa hàng" khi chuyển sang shop.html
+    const exploreBtn = e.target.closest("#wishlist-drawer-empty-btn, .wishlist-drawer__empty-cta, #wishlist-footer-shop-btn, .wishlist-drawer__shop-btn");
+    if (exploreBtn) {
+      const isShopPage = window.location.pathname.endsWith("shop.html") || (document.body && document.body.dataset.page === "shop");
+      if (isShopPage) {
+        e.preventDefault();
+        closeWishlistDrawer();
+        const shopTarget = document.getElementById("shop-grid") || document.getElementById("main-content") || document.querySelector("main");
+        if (shopTarget) {
+          shopTarget.scrollIntoView({ behavior: "smooth" });
+        }
+        return;
+      }
+      // Nếu ở trang khác, để link tự chuyển hướng sang shop.html
+    }
+
+    // 4. Xử lý nút "Bỏ thích (Xóa)"
+    const removeBtn = e.target.closest(".wishlist-drawer__btn-remove, .wishlist-drawer__item-remove");
     if (removeBtn) {
       e.preventDefault();
       const id = removeBtn.dataset.id;
-      const list = getWishlistItems().filter((item) => String(item) !== String(id));
-      saveWishlistItems(list);
-      updateWishlistBadge();
-      renderWishlistDrawerContent();
-      const pageBtn = document.querySelector(`.product-card__wishlist-btn[data-id="${id}"], #pd-wishlist-btn`);
-      if (pageBtn) {
-        pageBtn.classList.remove("is-active");
-        pageBtn.setAttribute("aria-pressed", "false");
-        if (pageBtn.id === "pd-wishlist-btn") {
-          pageBtn.textContent = "♡ Yêu thích";
-        }
-      }
-      if (typeof window.showToast === "function") {
-        window.showToast("Đã xóa khỏi danh sách yêu thích", "info");
-      }
+      if (id) removeProductFromWishlist(id);
       return;
     }
 
-    const addBtn = e.target.closest(".wishlist-drawer__item-add");
+    // 5. Xử lý nút "Thêm vào giỏ"
+    const addBtn = e.target.closest(".wishlist-drawer__btn-add, .wishlist-drawer__item-add");
     if (addBtn) {
       e.preventDefault();
       const id = addBtn.dataset.id;
-      if (window.cartManager && typeof window.cartManager.add === "function") {
-        window.cartManager.add(id, 1);
-      } else {
-        if (typeof window.showToast === "function") {
-          window.showToast("Đã thêm sản phẩm vào giỏ hàng", "success");
-        }
-      }
-      updateCartBadge();
+      if (id) addProductToCartFromWishlist(id, addBtn);
       return;
     }
 
-    if (e.target.closest(".product-card__wishlist-btn, #pd-wishlist-btn, [data-wishlist-btn]")) {
-      setTimeout(() => {
-        updateWishlistBadge();
-        const drawer = document.getElementById("wishlist-drawer");
-        if (drawer && drawer.classList.contains("is-open")) {
-          renderWishlistDrawerContent();
+    // 6. Xử lý nút "Xóa tất cả" trong Footer
+    if (e.target.closest("#wishlist-drawer-clear-btn")) {
+      e.preventDefault();
+      const list = getWishlistItems();
+      if (!list.length) return;
+      saveWishlistItems([]);
+      updateWishlistBadge();
+      renderWishlistDrawerContent();
+      document.querySelectorAll(".product-card__wishlist-btn").forEach((btn) => {
+        btn.classList.remove("is-active");
+        btn.setAttribute("aria-pressed", "false");
+      });
+      const pdBtn = document.getElementById("pd-wishlist-btn");
+      if (pdBtn) {
+        pdBtn.classList.remove("is-active");
+        pdBtn.setAttribute("aria-pressed", "false");
+        pdBtn.textContent = "♡ Yêu thích";
+      }
+      if (typeof window.showToast === "function") {
+        window.showToast("Đã xóa toàn bộ sản phẩm yêu thích", "info");
+      }
+      return;
+    }
+
+    // 7. Xử lý nút "Thêm tất cả vào giỏ" trong Footer
+    if (e.target.closest("#wishlist-add-all-btn")) {
+      e.preventDefault();
+      const list = getWishlistItems();
+      if (!list.length) return;
+      list.forEach((id) => addProductToCartFromWishlist(id, null, true));
+      if (typeof window.showToast === "function") {
+        window.showToast(`Đã thêm toàn bộ ${list.length} sản phẩm yêu thích vào giỏ hàng!`, "success");
+      }
+      return;
+    }
+
+    // 8. Tương tác với nút tim trên các Product Card ngoài trang (ngoại trừ trang Shop nếu shop-controller đã quản lý)
+    const cardHeartBtn = e.target.closest(".product-card__wishlist-btn");
+    if (cardHeartBtn && document.body && document.body.dataset.page !== "shop") {
+      e.preventDefault();
+      const id = cardHeartBtn.dataset.id;
+      if (!id) return;
+      const list = getWishlistItems();
+      const isSaved = list.includes(String(id));
+      let nextList;
+      if (isSaved) {
+        nextList = list.filter((item) => String(item) !== String(id));
+        syncPageWishlistState(id, false);
+        if (typeof window.showToast === "function") {
+          window.showToast("Đã bỏ khỏi danh sách yêu thích", "info");
         }
-      }, 40);
+      } else {
+        nextList = [...list, String(id)];
+        syncPageWishlistState(id, true);
+        if (typeof window.showToast === "function") {
+          window.showToast("Đã thêm vào danh sách yêu thích", "success");
+        }
+      }
+      saveWishlistItems(nextList);
+      updateWishlistBadge();
+      const drawer = document.getElementById("wishlist-drawer");
+      if (drawer && drawer.classList.contains("is-open")) {
+        renderWishlistDrawerContent();
+      }
+      return;
     }
   });
 
+  // Hỗ trợ phím Escape để đóng Drawer
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       const drawer = document.getElementById("wishlist-drawer");
