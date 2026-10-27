@@ -43,6 +43,68 @@ const PRODUCTS = [
     stock: 24
   },
   {
+    id: "vr-003",
+    name: "NEXUS Vision Studio",
+    category: "kinh-vr",
+    categoryLabel: "Kính VR",
+    price: 64990000,
+    oldPrice: 69990000,
+    rating: 4.9,
+    reviewCount: 184,
+    colors: [
+      { name: "Xám Than", hex: "#1D1916", imageIndex: 0, image: "assets/images/products/vr-vision-studio.webp" },
+      { name: "Titanium", hex: "#4B4F56", imageIndex: 1, image: "assets/images/products/vr-vision-studio.webp" }
+    ],
+    images: [
+      "assets/images/products/vr-vision-studio.webp"
+    ],
+    shortDesc: "Điện toán không gian phòng thu chuyên nghiệp. Kép 6K Micro-OLED.",
+    description: "NEXUS Vision Studio được chế tác dành riêng cho các nhà thiết kế 3D, kiến trúc sư và nhà phát triển không gian số. Trang bị vi xử lý chuyên dụng NEXUS R1 cùng thấu kính 6K siêu nét không độ trễ.",
+    specs: [
+      { label: "Độ phân giải", value: "Kép 6K (3072 × 1920) mỗi mắt" },
+      { label: "Tần số quét", value: "90Hz - 120Hz thích ứng" },
+      { label: "Góc nhìn (FOV)", value: "115° trường nhìn rộng" },
+      { label: "Trọng lượng", value: "410 g (Hợp kim ma-giê nguyên khối)" },
+      { label: "Thời lượng pin", value: "3,0 giờ sử dụng liên tục" },
+      { label: "Kết nối", value: "Wi-Fi 7, Thunderbolt 4 không dây" }
+    ],
+    reviews: [
+      { author: "Tuấn Hùng", rating: 5, comment: "Công cụ thiết kế 3D tuyệt đỉnh. Màu đen Midnight Obsidian cực kỳ sang trọng.", date: "2026-09-14" }
+    ],
+    featured: true,
+    stock: 38
+  },
+  {
+    id: "vr-004",
+    name: "NEXUS Enterprise XR",
+    category: "kinh-vr",
+    categoryLabel: "Kính VR",
+    price: 119990000,
+    oldPrice: null,
+    rating: 5.0,
+    reviewCount: 52,
+    colors: [
+      { name: "Titanium", hex: "#4B4F56", imageIndex: 0, image: "assets/images/products/vr-enterprise-xr.webp" }
+    ],
+    images: [
+      "assets/images/products/vr-enterprise-xr.webp"
+    ],
+    shortDesc: "Thiết bị thực tế ảo hỗn hợp doanh nghiệp tích hợp LiDAR và Iris ID.",
+    description: "Giải pháp điện toán không gian cao cấp nhất phục vụ nghiên cứu hàng không vũ trụ, đào tạo phẫu thuật y khoa và mô phỏng công nghiệp nặng. Cảm biến LiDAR định vị không gian thời gian thực chuẩn milimet.",
+    specs: [
+      { label: "Cảm biến", value: "LiDAR quang học + 12 Camera không gian" },
+      { label: "Độ phân giải", value: "Kép 8K công nghiệp (Ultra-OLED)" },
+      { label: "Bảo mật", value: "Quét mống mắt Iris ID mã hóa phần cứng" },
+      { label: "Băng thông", value: "5G Private Network & Wi-Fi 7 Enterprise" },
+      { label: "Quai đeo", value: "Halo Strap công thái học có núm xoay kim loại" }
+    ],
+    reviews: [
+      { author: "GS. Hoàng Nam", rating: 5, comment: "Độ chính xác cảm biến tuyệt vời cho các mô phỏng giải phẫu phức tạp.", date: "2026-09-02" }
+    ],
+    featured: true,
+    stock: 15
+  },
+  {
     id: "vr-002",
     name: "NEXUS Air Lite",
     category: "kinh-vr",
@@ -104,6 +166,119 @@ const PRODUCTS = [
     stock: 89
   },
   {
+    id: "ctrl-002",
+    name: "NEXUS Precision Stylus XR",
+    category: "tay-cam",
+    categoryLabel: "Tay cầm",
+    price: 4490000,
+    oldPrice: 4990000,
+    rating: 4.9,
+    reviewCount: 76,
+    colors: [
+      { name: "Titanium", hex: "#4B4F56", imageIndex: 0, image: "assets/images/products/stylus-xr.webp" },
+      { name: "Champagne", hex: "#C8B29B", imageIndex: 1, image: "assets/images/products/stylus-xr.webp" }
+    ],
+    images: [
+      "assets/images/products/stylus-xr.webp"
+    ],
+    shortDesc: "Bút vẽ không gian 3D với 4096 mức cảm ứng lực và rung xúc giác.",
+    description: "Thiết bị vẽ và phác thảo mô hình 3D trong không gian thực với độ chính xác dưới milimet. Thân bút bằng titanium satin kết hợp gốm đen mờ và đầu rung xúc giác mạ vàng tinh xảo.",
+    specs: [
+      { label: "Độ nhạy áp lực", value: "4096 mức cảm ứng lực" },
+      { label: "Góc nghiêng", value: "Nhận diện độ nghiêng 60 độ" },
+      { label: "Thời lượng pin", value: "14 giờ sáng tạo liên tục" },
+      { label: "Đế sạc", value: "Đế sạc từ tính titanium nguyên khối đi kèm" }
+    ],
+    reviews: [
+      { author: "Hoàng Yến", rating: 5, comment: "Cảm giác vẽ trong không gian 3D mượt mà tự nhiên như cầm bút vẽ thật.", date: "2026-08-25" }
+    ],
+    featured: false,
+    stock: 64
+  },
+  {
+    id: "acc-004",
+    name: "NEXUS Spatial Audio Pro",
+    category: "phu-kien",
+    categoryLabel: "Phụ kiện",
+    price: 5490000,
+    oldPrice: null,
+    rating: 4.8,
+    reviewCount: 110,
+    colors: [
+      { name: "Caramel", hex: "#A67C52", imageIndex: 0, image: "assets/images/products/audio-headband.webp" },
+      { name: "Champagne", hex: "#C8B29B", imageIndex: 1, image: "assets/images/products/audio-headband.webp" }
+    ],
+    images: [
+      "assets/images/products/audio-headband.webp"
+    ],
+    shortDesc: "Dây đeo đệm da Ý tích hợp cụm loa vòm không gian Lossless.",
+    description: "Phụ kiện âm thanh cao cấp dành cho NEXUS Vision Pro. Đệm tai bằng da thuộc Ý dập lỗ thoáng khí bọc mút hoạt tính, màng loa mạ Beryllium 40mm tái tạo âm trường 360 độ sống động.",
+    specs: [
+      { label: "Màng loa", value: "40mm Beryllium High-Resolution Driver" },
+      { label: "Chất liệu", value: "Da thuộc Ý đục lỗ, hợp kim Champagne Gold" },
+      { label: "Khử tiếng ồn", value: "Chống ồn chủ động thích ứng môi trường" }
+    ],
+    reviews: [],
+    featured: true,
+    stock: 88
+  },
+  {
+    id: "acc-005",
+    name: "NEXUS Optical Inserts by ZEISS",
+    category: "phu-kien",
+    categoryLabel: "Phụ kiện",
+    price: 3290000,
+    oldPrice: null,
+    rating: 4.9,
+    reviewCount: 215,
+    colors: [
+      { name: "Titanium", hex: "#4B4F56", imageIndex: 0, image: "assets/images/products/lens-inserts.webp" }
+    ],
+    images: [
+      "assets/images/products/lens-inserts.webp"
+    ],
+    shortDesc: "Tròng kính thuốc quang học từ tính hiệu chuẩn theo toa cá nhân.",
+    description: "Hợp tác độc quyền cùng ZEISS để mang lại độ trong suốt quang học tuyệt hảo cho người cận, viễn hoặc loạn thị. Ngàm hít từ tính siêu nhạy, tự động kết nối và hiệu chuẩn với màn hình thấu kính trong 1 giây.",
+    specs: [
+      { label: "Công nghệ thấu kính", value: "ZEISS DuraVision Lenses chống lóa" },
+      { label: "Ngàm gắn", value: "Khung hợp kim titan hít từ tính tự động" },
+      { label: "Phụ kiện kèm theo", value: "Hộp nhung bảo vệ bọc kim loại sang trọng" }
+    ],
+    reviews: [
+      { author: "Đức Thành", rating: 5, comment: "Đeo kính cận vẫn dùng VR thoải mái, tháo lắp từ tính cực kỳ tiện dụng.", date: "2026-09-08" }
+    ],
+    featured: false,
+    stock: 140
+  },
+  {
+    id: "acc-006",
+    name: "NEXUS MagPower Spatial Battery Pack",
+    category: "phu-kien",
+    categoryLabel: "Phụ kiện",
+    price: 3890000,
+    oldPrice: 4290000,
+    rating: 4.7,
+    reviewCount: 98,
+    colors: [
+      { name: "Champagne", hex: "#C8B29B", imageIndex: 0, image: "assets/images/products/battery-pack.webp" },
+      { name: "Titanium", hex: "#4B4F56", imageIndex: 1, image: "assets/images/products/battery-pack.webp" }
+    ],
+    images: [
+      "assets/images/products/battery-pack.webp"
+    ],
+    shortDesc: "Pin dự phòng từ tính vỏ nhôm nguyên khối, nâng thời lượng thêm 6 giờ.",
+    description: "Bộ pin ngoài bằng nhôm champagne bo cong mềm mại với dây cáp dệt dù cao cấp chống đứt gãy. Cung cấp năng lượng ổn định giúp bạn thoải mái xem phim, hội họp hoặc du ngoạn metaverse suốt cả ngày dài.",
+    specs: [
+      { label: "Dung lượng", value: "20.000 mAh (Công suất đầu ra 65W PD)" },
+      { label: "Thời lượng bổ sung", value: "Thêm 5,5 đến 6 giờ sử dụng liên tục" },
+      { label: "Đèn báo", value: "Thanh LED vi mô hiển thị phần trăm pin" },
+      { label: "Chất liệu", value: "Nhôm Anodized xử lý phun cát mịn màng" }
+    ],
+    reviews: [],
+    featured: false,
+    stock: 75
+  },
+  {
     id: "acc-001",
     name: "NEXUS Magnetic Charging Dock",
     category: "phu-kien",
@@ -143,7 +318,7 @@ const PRODUCTS = [
     rating: 4.9,
     reviewCount: 134,
     colors: [
-      { name: "Cream", hex: "#EFEBE5", imageIndex: 0, image: "assets/images/products/strap-cream.webp" },
+      { name: "Trắng Nâu", hex: "#EFEBE5", imageIndex: 0, image: "assets/images/products/strap-cream.webp" },
       { name: "Titanium", hex: "#4B4F56", imageIndex: 1, image: "assets/images/products/strap-titanium.webp" },
       { name: "Sport Cam", hex: "#E65C00", imageIndex: 2, image: "assets/images/products/strap-sport.webp" }
     ],
@@ -173,15 +348,15 @@ const PRODUCTS = [
     reviewCount: 67,
     colors: [
       { name: "Caramel", hex: "#A67C52", imageIndex: 0, image: "assets/images/products/case-caramel.webp" },
-      { name: "Cream", hex: "#EFEBE5", imageIndex: 1, image: "assets/images/products/case-cream.webp" },
-      { name: "Espresso", hex: "#231F1C", imageIndex: 2, image: "assets/images/products/case-espresso.webp" }
+      { name: "Trắng Nâu", hex: "#EFEBE5", imageIndex: 1, image: "assets/images/products/case-cream.webp" },
+      { name: "Xám Than", hex: "#231F1C", imageIndex: 2, image: "assets/images/products/case-espresso.webp" }
     ],
     images: [
       "assets/images/products/case-caramel.webp",
       "assets/images/products/case-cream.webp",
       "assets/images/products/case-espresso.webp"
     ],
-    shortDesc: "Hộp bảo vệ cao cấp chống sốc.",
+    shortDesc: "Hộp bảo vệ cao cấp chống sốc bọc da sang trọng.",
     description: "Được thiết kế riêng cho NEXUS Vision Pro. Vỏ ngoài bằng vật liệu dệt cao cấp chống nước, lót trong bằng vải sợi siêu nhỏ bảo vệ thấu kính tuyệt đối.",
     specs: [
       { label: "Vỏ ngoài", value: "Polycarbonate định hình nhiệt bọc vải" },
