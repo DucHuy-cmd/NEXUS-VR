@@ -205,7 +205,7 @@ const POSTS = [
       "Kỹ thuật này gọi là Foveated Rendering — chỉ vùng trung tâm tầm nhìn được render ở độ phân giải tối đa, phần ngoại vi được giảm chi tiết mà mắt người gần như không nhận ra sự khác biệt.",
       "Kết quả là hiệu năng xử lý tăng đáng kể trong khi mức tiêu thụ pin giảm xuống, cho phép các phiên chơi kéo dài hơn mà không cần nâng cấp phần cứng đồ họa."
     ],
-    image: "assets/images/blog/post-001.webp",
+    image: "assets/images/placeholder.svg",
     author: "Đội ngũ NEXUS",
     date: "2026-08-01",
     readTime: 5,
@@ -222,7 +222,7 @@ const POSTS = [
       "Từ thể loại hành động nhịp độ nhanh đến giải đố trầm lắng, người chơi có vô số lựa chọn phù hợp với sở thích cá nhân.",
       "Bài viết tổng hợp 5 tựa game nổi bật nhất, kèm đánh giá chi tiết về thời lượng chơi và mức độ tương thích với các dòng kính NEXUS."
     ],
-    image: "assets/images/blog/post-002.webp",
+    image: "assets/images/placeholder.svg",
     author: "Trường Vũ",
     date: "2026-07-20",
     readTime: 7,
@@ -239,7 +239,7 @@ const POSTS = [
       "Kết nối kính với Wi-Fi, đăng nhập tài khoản, và làm theo hướng dẫn thiết lập không gian chơi (Play Area) trong ứng dụng.",
       "Sau bước hiệu chỉnh tay cầm, bạn đã sẵn sàng trải nghiệm toàn bộ thư viện nội dung NEXUS."
     ],
-    image: "assets/images/blog/post-003.webp",
+    image: "assets/images/placeholder.svg",
     author: "Đội ngũ NEXUS",
     date: "2026-06-15",
     readTime: 4,
