@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="assets/css/components/footer.css">
   <link rel="stylesheet" href="assets/css/components/toast.css">
   <link rel="stylesheet" href="assets/css/components/cart-drawer.css">
+  <link rel="stylesheet" href="assets/css/components/invoice-print.css">
   
   <!-- TẦNG 3: PAGE CSS -->
   <link rel="stylesheet" href="assets/css/pages/checkout.css">
@@ -290,13 +291,132 @@
               </div>
             </div>
 
-            <!-- BƯỚC 3: XÁC NHẬN HOÀN TẤT ĐƠN HÀNG -->
+            <!-- BƯỚC 3: XÁC NHẬN HOÀN TẤT ĐƠN HÀNG & IN HÓA ĐƠN ĐIỆN TỬ -->
             <div class="checkout-step-content" id="checkoutStep3" hidden>
-              <div class="order-success-card" style="text-align: center; padding: 32px 16px;">
-                <div style="width: 64px; height: 64px; border-radius: 50%; background: #2e7d32; color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 2rem;">✓</div>
-                <h2 style="font-size: 1.8rem; margin-bottom: 8px;">Đặt hàng thành công!</h2>
-                <div id="confirmedOrderCode" style="font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 16px;">#NX-000000</div>
-                <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 24px;">Đang chuyển tới trang quản lý đơn hàng...</p>
+              <!-- BANNER THÔNG BÁO THÀNH CÔNG -->
+              <div class="order-success-icon-banner" style="text-align: center; margin-bottom: 24px;">
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: #2e7d32; color: #fff; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 1.8rem; box-shadow: 0 4px 16px rgba(46, 125, 50, 0.25);">✓</div>
+                <h2 style="font-size: 1.6rem; margin-bottom: 6px; font-family: var(--font-head);">Đặt hàng thành công!</h2>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">Cảm ơn bạn đã lựa chọn NEXUS VR. Hóa đơn điện tử của bạn đã được khởi tạo bên dưới.</p>
+              </div>
+
+              <!-- HÓA ĐƠN ĐIỆN TỬ CHUẨN A4 -->
+              <div class="nexus-invoice" id="checkoutInvoice">
+                <!-- HEADER HÓA ĐƠN -->
+                <div class="nexus-invoice__header">
+                  <div>
+                    <div class="nexus-invoice__brand-logo">
+                      <span class="nexus-invoice__brand-dot"></span>
+                      <span>NEXUS</span>
+                      <span class="nexus-invoice__brand-sub">VR</span>
+                    </div>
+                    <div class="nexus-invoice__company-info">
+                      <strong>CÔNG TY TNHH NEXUS VR VIỆT NAM</strong><br>
+                      Thiết bị điện toán không gian & Kính thực tế ảo cao cấp<br>
+                      Hotline: 1900 8888 • Email: contact@nexusvr.vn<br>
+                      Website: www.nexusvr.vn
+                    </div>
+                  </div>
+                  <div class="nexus-invoice__title-box">
+                    <h3 class="nexus-invoice__title">HÓA ĐƠN BÁN HÀNG</h3>
+                    <div class="nexus-invoice__meta-row">Mã đơn hàng: <strong id="invOrderCode">#NEXUS-000000</strong></div>
+                    <div class="nexus-invoice__meta-row">Ngày đặt: <span id="invOrderDate">--/--/----</span></div>
+                    <div class="nexus-invoice__meta-row">Thanh toán: <span id="invPaymentMethod">COD</span></div>
+                    <div class="nexus-invoice__meta-row">Trạng thái: <strong id="invOrderStatus" style="color: #2e7d32;">Đang xử lý</strong></div>
+                  </div>
+                </div>
+
+                <!-- THÔNG TIN NGƯỜI NHẬN -->
+                <div class="nexus-invoice__customer-card">
+                  <h4 class="nexus-invoice__section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    Thông tin người nhận hàng
+                  </h4>
+                  <div class="nexus-invoice__customer-grid">
+                    <div class="nexus-invoice__customer-field">Họ và tên: <strong id="invCustomerName">---</strong></div>
+                    <div class="nexus-invoice__customer-field">Số điện thoại: <strong id="invCustomerPhone">---</strong></div>
+                    <div class="nexus-invoice__customer-field">Email: <span id="invCustomerEmail">---</span></div>
+                    <div class="nexus-invoice__customer-field full-span">Địa chỉ giao hàng: <strong id="invCustomerAddress">---</strong></div>
+                  </div>
+                </div>
+
+                <!-- BẢNG KÊ CHI TIẾT SẢN PHẨM -->
+                <div class="nexus-invoice__table-wrapper">
+                  <table class="nexus-invoice__table">
+                    <thead>
+                      <tr>
+                        <th class="nexus-invoice__col-idx">STT</th>
+                        <th>Tên sản phẩm / Kính VR</th>
+                        <th class="nexus-invoice__col-color">Màu sắc</th>
+                        <th class="nexus-invoice__col-qty">SL</th>
+                        <th class="nexus-invoice__col-price">Đơn giá</th>
+                        <th class="nexus-invoice__col-amount">Thành tiền</th>
+                      </tr>
+                    </thead>
+                    <tbody id="invTableBody">
+                      <!-- Render động qua JS -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- TỔNG KẾT TÀI CHÍNH -->
+                <div class="nexus-invoice__summary-layout">
+                  <div class="nexus-invoice__note-box">
+                    <strong>Chính sách & Bảo hành:</strong><br>
+                    • Sản phẩm chính hãng NEXUS VR được bảo hành 24 tháng toàn diện.<br>
+                    • Chính sách 1 đổi 1 trong vòng 30 ngày nếu có lỗi kỹ thuật.<br>
+                    • Hóa đơn điện tử này có giá trị xác nhận bảo hành tại mọi trung tâm ủy quyền.
+                  </div>
+                  <div class="nexus-invoice__calc-table">
+                    <div class="nexus-invoice__calc-row">
+                      <span>Tạm tính:</span>
+                      <strong id="invSubtotal">0 ₫</strong>
+                    </div>
+                    <div class="nexus-invoice__calc-row discount-row" id="invDiscountRow" style="display: none;">
+                      <span>Chiết khấu Voucher <b id="invCouponCode"></b>:</span>
+                      <span id="invDiscountFee">-0 ₫</span>
+                    </div>
+                    <div class="nexus-invoice__calc-row">
+                      <span>Phí vận chuyển:</span>
+                      <strong id="invShippingFee">0 ₫</strong>
+                    </div>
+                    <div class="nexus-invoice__calc-row grand-total">
+                      <span>TỔNG THANH TOÁN:</span>
+                      <span id="invTotalAmount">0 ₫</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CHỮ KÝ XÁC NHẬN CHÂN TRANG KHỔ A4 -->
+                <div class="nexus-invoice__footer-signatures">
+                  <div class="nexus-invoice__sign-box">
+                    <div class="nexus-invoice__sign-title">Khách hàng nhận hàng</div>
+                    <div class="nexus-invoice__sign-subtitle">(Ký và ghi rõ họ tên)</div>
+                  </div>
+                  <div class="nexus-invoice__sign-box">
+                    <div class="nexus-invoice__sign-title">Đại diện NEXUS VR</div>
+                    <div class="nexus-invoice__sign-subtitle">(Xác nhận & đóng dấu)</div>
+                    <div class="nexus-invoice__sign-stamp">✓ ĐÃ KÝ ĐIỆN TỬ</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- HÀNG NÚT THAO TÁC (ẨN HOÀN TOÀN KHI IN ẤN) -->
+              <div class="nexus-invoice-actions no-print">
+                <button type="button" class="btn-print-invoice" id="btnPrintStep3Invoice">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                  </svg>
+                  In Hóa Đơn / Xuất PDF
+                </button>
+                <a href="orders.html" class="btn" style="padding: 12px 24px; border-radius: 999px; border: 1.5px solid var(--accent); color: var(--accent); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                  Xem đơn hàng của tôi &rarr;
+                </a>
+                <a href="shop.html" class="btn" style="padding: 12px 24px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-secondary); background: #fff; font-weight: 600; text-decoration: none;">
+                  Tiếp tục mua hàng
+                </a>
               </div>
             </div>
           </div>

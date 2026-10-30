@@ -22,11 +22,12 @@
   <link rel="stylesheet" href="assets/css/components/navbar.css">
   <link rel="stylesheet" href="assets/css/components/footer.css">
   <link rel="stylesheet" href="assets/css/components/toast.css">
+  <link rel="stylesheet" href="assets/css/components/invoice-print.css">
 
   <!-- PAGE CSS -->
   <style>
     .orders-page {
-      padding: calc(var(--nav-height, 72px) + 32px) 0 80px;
+      padding: 16px 0 80px;
       min-height: 80vh;
       background-color: var(--bg-primary, #F9F6F0);
     }
@@ -35,20 +36,39 @@
       margin: 0 auto;
       padding: 0 20px;
     }
+
+    /* HIỆU ỨNG TRƯỢT VÀO MỀM MẠI CHO CÁC KHỐI */
+    @keyframes orderSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .orders-breadcrumb {
       display: flex;
       align-items: center;
       gap: 8px;
       font-size: 0.85rem;
       color: var(--text-muted, #726657);
-      margin-bottom: 24px;
+      margin-bottom: 16px;
+      animation: orderSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) backwards;
     }
     .orders-breadcrumb a {
       color: var(--text-secondary, #4A4036);
       text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .orders-breadcrumb a:hover {
+      color: var(--accent, #A67C52);
     }
     .orders-heading {
-      margin-bottom: 28px;
+      margin-bottom: 22px;
+      animation: orderSlideUp 0.4s 0.05s cubic-bezier(0.16, 1, 0.3, 1) backwards;
     }
     .orders-heading h1 {
       font-family: 'Space Grotesk', sans-serif;
@@ -60,7 +80,8 @@
       display: flex;
       gap: 12px;
       border-bottom: 2px solid var(--border, #E5DECE);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
+      animation: orderSlideUp 0.45s 0.1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
     }
     .orders-tab-btn {
       padding: 12px 20px;
@@ -71,20 +92,52 @@
       font-size: 0.95rem;
       color: var(--text-secondary, #726657);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       margin-bottom: -2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .orders-tab-btn:hover {
+      color: var(--accent, #A67C52);
+      transform: translateY(-1px);
+    }
+    .orders-tab-btn:active {
+      transform: scale(0.97);
     }
     .orders-tab-btn.is-active {
       color: var(--accent, #A67C52);
       border-bottom-color: var(--accent, #A67C52);
     }
+
+    /* HIỆU ỨNG THẺ ĐƠN HÀNG (CASCADE & HOVER ELEVATION) */
+    @keyframes cardFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
     .order-card {
       background: var(--bg-elevated, #FFFFFF);
       border: 1px solid var(--border, #E5DECE);
-      border-radius: 16px;
-      padding: 20px 24px;
+      border-radius: 18px;
+      padding: 22px 26px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+      box-shadow: 0 4px 16px rgba(35, 31, 28, 0.03);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.3s ease;
+      animation: cardFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    }
+    .order-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 36px rgba(35, 31, 28, 0.08), 0 2px 8px rgba(166, 124, 82, 0.08);
+      border-color: rgba(166, 124, 82, 0.35);
     }
     .order-card-header {
       display: flex;
@@ -99,13 +152,32 @@
       font-family: 'Space Grotesk', sans-serif;
       color: var(--text-primary, #231F1C);
     }
+
+    /* HUY HIỆU TRẠNG THÁI CÓ CHẤM ĐÈN THỞ (PULSE DOT) */
     .order-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
       font-size: 0.8rem;
       font-weight: 600;
-      padding: 4px 12px;
-      border-radius: 20px;
+      padding: 4px 14px;
+      border-radius: 999px;
       background: #e3f2fd;
       color: #1565c0;
+      transition: all 0.25s ease;
+    }
+    .order-status-badge::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      display: inline-block;
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(0.85); opacity: 0.6; }
+      50% { transform: scale(1.3); opacity: 1; }
     }
     .order-status-badge.completed {
       background: #e8f5e9;
@@ -119,7 +191,7 @@
       display: flex;
       align-items: center;
       gap: 16px;
-      padding: 10px 0;
+      padding: 12px 0;
       border-bottom: 1px dashed var(--border, #E5DECE);
     }
     .order-product-item:last-child {
@@ -129,8 +201,13 @@
       width: 60px;
       height: 60px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 10px;
       background: #f0f0f0;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+    }
+    .order-card:hover .order-product-img {
+      transform: scale(1.06);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
     .order-card-footer {
       display: flex;
@@ -148,34 +225,45 @@
     .btn-action-group {
       display: flex;
       gap: 10px;
+      align-items: center;
     }
     .btn-cancel {
       padding: 8px 16px;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid #d32f2f;
-      background: transparent;
+      background: #ffffff;
       color: #d32f2f;
       font-weight: 600;
       font-size: 0.85rem;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .btn-cancel:hover {
       background: #ffebee;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
+    }
+    .btn-cancel:active {
+      transform: scale(0.96);
     }
     .btn-received {
       padding: 8px 18px;
-      border-radius: 8px;
+      border-radius: 10px;
       border: none;
-      background: var(--accent, #A67C52);
+      background: #2e7d32;
       color: #fff;
       font-weight: 600;
       font-size: 0.85rem;
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .btn-received:hover {
-      opacity: 0.9;
+      background: #256629;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(46, 125, 50, 0.3);
+    }
+    .btn-received:active {
+      transform: scale(0.96);
     }
 
     /* ==========================================================================
@@ -336,11 +424,30 @@
         <p style="color: var(--text-secondary, #726657);">Theo dõi tiến độ vận chuyển và lịch sử mua sắm của bạn.</p>
       </div>
 
-      <!-- TABS -->
+      <!-- TABS VỚI HUY HIỆU SỐ LƯỢNG ĐƠN HÀNG -->
       <div class="orders-tabs">
-        <button type="button" class="orders-tab-btn is-active" data-tab="active">Đang xử lý / Vận chuyển</button>
-        <button type="button" class="orders-tab-btn" data-tab="completed">Lịch sử đã mua</button>
-        <button type="button" class="orders-tab-btn" data-tab="cancelled">Đơn hàng đã hủy</button>
+        <button type="button" class="orders-tab-btn is-active" data-tab="active">
+          Đang xử lý <span class="order-tab-badge" id="badgeActive">2</span>
+        </button>
+        <button type="button" class="orders-tab-btn" data-tab="completed">
+          Đã giao <span class="order-tab-badge" id="badgeCompleted">1</span>
+        </button>
+        <button type="button" class="orders-tab-btn" data-tab="cancelled">
+          Đã hủy <span class="order-tab-badge" id="badgeCancelled">0</span>
+        </button>
+      </div>
+
+      <!-- THANH TÌM KIẾM ĐƠN HÀNG THỜI GIAN THỰC -->
+      <div class="orders-search-wrapper">
+        <div class="orders-search-box">
+          <svg class="orders-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="orderSearchInput" class="orders-search-input" placeholder="Tìm kiếm theo mã đơn hàng (#NEXUS-...) hoặc tên người nhận..." autocomplete="off">
+          <button type="button" id="orderSearchClearBtn" class="orders-search-clear" title="Xóa tìm kiếm" hidden aria-label="Xóa tìm kiếm">&times;</button>
+        </div>
+        <div id="orderSearchFeedback" class="orders-search-feedback" style="display: none;"></div>
       </div>
 
       <!-- DANH SÁCH ĐƠN HÀNG -->
@@ -404,5 +511,7 @@
   <!-- TẦNG 3: CONTROLLER -->
   <script src="assets/js/controllers/orders-controller.js"></script>
   
+  <!-- VÙNG IN HÓA ĐƠN RIÊNG BIỆT KHỔ A4 (DÀNH CHO WINDOW.PRINT) -->
+  <div id="invoicePrintRoot" class="invoice-print-root" aria-hidden="true"></div>
 </body>
 </html>

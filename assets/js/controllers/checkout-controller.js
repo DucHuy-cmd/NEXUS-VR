@@ -867,7 +867,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     }
 
     const finalTotal = Math.max(0, subtotal - discountFee + calcShipping);
-    const orderCode = "#NX-" + Math.floor(100000 + Math.random() * 900000);
+    const orderCode = "#NEXUS-" + Math.floor(100000 + Math.random() * 900000);
 
     let cleanPaymentLabel = "Thanh toán khi nhận hàng (COD)";
     if (paymentType === "bank") {
@@ -880,8 +880,8 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
       id: "ORD_" + Date.now(),
       code: orderCode,
       createdAt: new Date().toLocaleString("vi-VN"),
-      customer: orderCustomerData,
-      items: cart,
+      customer: { ...orderCustomerData },
+      items: [...cart],
       subtotal: subtotal,
       discountFee: discountFee,
       couponCode: coupon ? coupon.code : null,
@@ -889,7 +889,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
       totalAmount: finalTotal,
       paymentMethod: cleanPaymentLabel,
       status: "active",
-      statusText: "Đơn hàng đã được xác nhận và vận chuyển"
+      statusText: "Đang xử lý / Vận chuyển"
     };
 
     let user = null;
@@ -928,12 +928,87 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
 
     clearAppliedCoupon();
 
+    // RENDER HÓA ĐƠN BƯỚC 3 & CHUYỂN BƯỚC HOÀN TẤT
+    renderCheckoutStep3Invoice(newOrder);
+    setStep(3);
+
     if (typeof window.showToast === "function") {
-      window.showToast(`Đặt hàng ${orderCode} thành công! Đang chuyển đến trang đơn hàng đã đặt...`, "success");
+      window.showToast(`Đặt hàng ${orderCode} thành công! Quý khách có thể xem và in hóa đơn tại đây.`, "success");
+    }
+  }
+
+  function renderCheckoutStep3Invoice(order) {
+    if (!order) return;
+
+    const codeEl = document.getElementById("invOrderCode");
+    const dateEl = document.getElementById("invOrderDate");
+    const payEl = document.getElementById("invPaymentMethod");
+    const statusEl = document.getElementById("invOrderStatus");
+    const nameEl = document.getElementById("invCustomerName");
+    const phoneEl = document.getElementById("invCustomerPhone");
+    const emailEl = document.getElementById("invCustomerEmail");
+    const addressEl = document.getElementById("invCustomerAddress");
+    const tbody = document.getElementById("invTableBody");
+    const subtotalEl = document.getElementById("invSubtotal");
+    const discountRow = document.getElementById("invDiscountRow");
+    const couponCodeEl = document.getElementById("invCouponCode");
+    const discountFeeEl = document.getElementById("invDiscountFee");
+    const shippingEl = document.getElementById("invShippingFee");
+    const totalEl = document.getElementById("invTotalAmount");
+
+    if (codeEl) codeEl.textContent = order.code || "#NEXUS-000000";
+    if (dateEl) dateEl.textContent = order.createdAt || new Date().toLocaleString("vi-VN");
+    if (payEl) payEl.textContent = order.paymentMethod || "COD";
+    if (statusEl) statusEl.textContent = order.statusText || "Đang xử lý";
+
+    const cust = order.customer || {};
+    if (nameEl) nameEl.textContent = cust.name || "Khách hàng NEXUS";
+    if (phoneEl) phoneEl.textContent = cust.phone || "---";
+    if (emailEl) emailEl.textContent = cust.email || "---";
+    if (addressEl) addressEl.textContent = cust.address || "---";
+
+    if (tbody) {
+      tbody.innerHTML = (order.items || []).map((item, idx) => `
+        <tr>
+          <td class="nexus-invoice__col-idx">${idx + 1}</td>
+          <td>
+            <div class="nexus-invoice__product-title">${item.name || "Kính thực tế ảo NEXUS VR"}</div>
+          </td>
+          <td class="nexus-invoice__col-color">
+            <span class="nexus-invoice__product-badge">${item.selectedColor || "Tiêu chuẩn"}</span>
+          </td>
+          <td class="nexus-invoice__col-qty">${item.qty || 1}</td>
+          <td class="nexus-invoice__col-price">${formatVND(item.price || 0)}</td>
+          <td class="nexus-invoice__col-amount">${formatVND((item.price || 0) * (item.qty || 1))}</td>
+        </tr>
+      `).join("");
     }
 
-    setTimeout(() => {
-      window.location.href = "orders.html";
-    }, 1000);
+    if (subtotalEl) subtotalEl.textContent = formatVND(order.subtotal || 0);
+
+    if (discountRow) {
+      if (order.discountFee > 0 || order.couponCode) {
+        discountRow.style.display = "flex";
+        if (couponCodeEl) couponCodeEl.textContent = order.couponCode ? `(${order.couponCode})` : "";
+        if (discountFeeEl) discountFeeEl.textContent = order.discountFee > 0 ? `- ${formatVND(order.discountFee)}` : "Miễn phí ship";
+      } else {
+        discountRow.style.display = "none";
+      }
+    }
+
+    if (shippingEl) {
+      shippingEl.textContent = (order.shippingFee === 0 || !order.shippingFee) ? "Miễn phí" : formatVND(order.shippingFee);
+    }
+
+    if (totalEl) totalEl.textContent = formatVND(order.totalAmount || 0);
+
+    // Gắn sự kiện in hóa đơn Bước 3
+    const printBtn = document.getElementById("btnPrintStep3Invoice");
+    if (printBtn && !printBtn.dataset.bound) {
+      printBtn.dataset.bound = "true";
+      printBtn.addEventListener("click", () => {
+        window.print();
+      });
+    }
   }
 })();

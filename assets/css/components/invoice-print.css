@@ -1,0 +1,675 @@
+/* ==========================================================================
+   NEXUS VR — components/invoice-print.css
+   ĐỊNH DẠNG HÓA ĐƠN ĐIỆN TỬ & QUY TẮC IN ẤN KHỔ A4 CHUYÊN BIỆT (@media print)
+   Áp dụng đồng bộ cho checkout.html (Bước 3) & orders.html (Từng đơn hàng)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. GIAO DIỆN HÓA ĐƠN TRÊN MÀN HÌNH (SCREEN VIEW)
+   -------------------------------------------------------------------------- */
+.nexus-invoice {
+  background: #ffffff;
+  border: 1px solid var(--border, #E5DECE);
+  border-radius: 16px;
+  padding: 32px 36px;
+  margin: 20px auto;
+  max-width: 820px;
+  box-shadow: 0 4px 24px rgba(35, 31, 28, 0.05);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  color: var(--text-primary, #231F1C);
+  text-align: left;
+}
+
+/* Header hóa đơn */
+.nexus-invoice__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--accent, #A67C52);
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.nexus-invoice__brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-head, 'Space Grotesk', sans-serif);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-primary, #231F1C);
+  letter-spacing: -0.02em;
+}
+
+.nexus-invoice__brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent, #A67C52);
+  display: inline-block;
+}
+
+.nexus-invoice__brand-sub {
+  color: var(--accent, #A67C52);
+  font-weight: 700;
+}
+
+.nexus-invoice__company-info {
+  font-size: 0.825rem;
+  color: var(--text-secondary, #726657);
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+.nexus-invoice__title-box {
+  text-align: right;
+}
+
+.nexus-invoice__title {
+  font-family: var(--font-head, 'Space Grotesk', sans-serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent, #A67C52);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 6px 0;
+}
+
+.nexus-invoice__meta-row {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #726657);
+  margin: 3px 0;
+}
+
+.nexus-invoice__meta-row strong {
+  color: var(--text-primary, #231F1C);
+  font-family: var(--font-head, 'Space Grotesk', sans-serif);
+}
+
+/* Khối thông tin khách hàng nhận hàng */
+.nexus-invoice__customer-card {
+  background: var(--bg-secondary, #F9F6F0);
+  border: 1px solid var(--border, #E5DECE);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.nexus-invoice__section-title {
+  font-family: var(--font-head, 'Space Grotesk', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary, #231F1C);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nexus-invoice__customer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 24px;
+  font-size: 0.875rem;
+}
+
+.nexus-invoice__customer-field {
+  color: var(--text-secondary, #726657);
+}
+
+.nexus-invoice__customer-field strong {
+  color: var(--text-primary, #231F1C);
+}
+
+.nexus-invoice__customer-field.full-span {
+  grid-column: span 2;
+}
+
+/* Bảng kê chi tiết sản phẩm */
+.nexus-invoice__table-wrapper {
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.nexus-invoice__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.nexus-invoice__table th {
+  background: var(--bg-secondary, #F2ECE4);
+  color: var(--text-primary, #231F1C);
+  font-family: var(--font-head, 'Space Grotesk', sans-serif);
+  font-weight: 700;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border, #E5DECE);
+  border-bottom: 1px solid var(--border, #E5DECE);
+  font-size: 0.85rem;
+}
+
+.nexus-invoice__table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border, #E5DECE);
+  vertical-align: middle;
+}
+
+.nexus-invoice__table tr:nth-child(even) {
+  background: rgba(249, 246, 240, 0.4);
+}
+
+.nexus-invoice__col-idx { width: 50px; text-align: center; }
+.nexus-invoice__col-color { width: 110px; text-align: center; }
+.nexus-invoice__col-qty { width: 70px; text-align: center; }
+.nexus-invoice__col-price { width: 130px; text-align: right; }
+.nexus-invoice__col-amount { width: 140px; text-align: right; font-weight: 600; }
+
+.nexus-invoice__product-title {
+  font-weight: 600;
+  color: var(--text-primary, #231F1C);
+}
+
+.nexus-invoice__product-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #fff;
+  border: 1px solid var(--border, #E5DECE);
+  border-radius: 999px;
+  font-size: 0.775rem;
+  color: var(--text-secondary, #726657);
+}
+
+/* Bảng tổng kết tài chính */
+.nexus-invoice__summary-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border, #E5DECE);
+}
+
+.nexus-invoice__note-box {
+  flex: 1;
+  font-size: 0.825rem;
+  color: var(--text-secondary, #726657);
+  line-height: 1.6;
+  background: rgba(249, 246, 240, 0.6);
+  padding: 14px 18px;
+  border-radius: 10px;
+  border-left: 3px solid var(--accent, #A67C52);
+}
+
+.nexus-invoice__calc-table {
+  width: 320px;
+  font-size: 0.875rem;
+}
+
+.nexus-invoice__calc-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  color: var(--text-secondary, #726657);
+}
+
+.nexus-invoice__calc-row.discount-row {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.nexus-invoice__calc-row.grand-total {
+  border-top: 2px solid var(--text-primary, #231F1C);
+  padding-top: 10px;
+  margin-top: 6px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--accent, #A67C52);
+  font-family: var(--font-head, 'Space Grotesk', sans-serif);
+}
+
+/* Chân trang chữ ký & Lời cảm ơn */
+.nexus-invoice__footer-signatures {
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+  margin-top: 36px;
+  padding-top: 24px;
+}
+
+.nexus-invoice__sign-box {
+  width: 200px;
+}
+
+.nexus-invoice__sign-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-primary, #231F1C);
+  margin-bottom: 4px;
+}
+
+.nexus-invoice__sign-subtitle {
+  font-size: 0.775rem;
+  color: var(--text-muted, #7E7368);
+  font-style: italic;
+  margin-bottom: 50px;
+}
+
+.nexus-invoice__sign-stamp {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent, #A67C52);
+}
+
+/* Thanh nút thao tác (Màn hình thường) */
+.nexus-invoice-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin: 24px 0 10px;
+  flex-wrap: wrap;
+}
+
+.btn-print-invoice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--accent, #A67C52);
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-family: var(--font-head, 'Space Grotesk', sans-serif);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(166, 124, 82, 0.25);
+}
+
+.btn-print-invoice:hover {
+  background: var(--accent-hover, #8B6239);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(166, 124, 82, 0.35);
+}
+
+/* Nút in hóa đơn trên thẻ đơn hàng ở orders.html */
+.btn-print-order {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  background: #ffffff;
+  border: 1px solid var(--accent, #A67C52);
+  color: var(--accent, #A67C52);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-print-order svg {
+  transition: transform 0.25s ease;
+}
+
+.btn-print-order:hover {
+  background: var(--accent, #A67C52);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(166, 124, 82, 0.25);
+}
+
+.btn-print-order:hover svg {
+  transform: translateY(-1px) scale(1.12);
+}
+
+.btn-print-order:active {
+  transform: scale(0.96);
+}
+
+/* --------------------------------------------------------------------------
+   2. THANH TÌM KIẾM ĐƠN HÀNG THỜI GIAN THỰC (ORDERS.HTML)
+   -------------------------------------------------------------------------- */
+.orders-search-wrapper {
+  margin-bottom: 20px;
+}
+
+.orders-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid var(--border, #E5DECE);
+  border-radius: 14px;
+  padding: 4px 18px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.orders-search-box:focus-within {
+  border-color: var(--accent, #A67C52);
+  box-shadow: 0 6px 20px rgba(166, 124, 82, 0.14), 0 0 0 3px rgba(166, 124, 82, 0.1);
+  transform: translateY(-1px);
+}
+
+.orders-search-icon {
+  color: var(--text-muted, #7E7368);
+  margin-right: 12px;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.orders-search-box:focus-within .orders-search-icon {
+  color: var(--accent, #A67C52);
+  transform: scale(1.12);
+}
+
+.orders-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 12px 0;
+  font-size: 0.95rem;
+  color: var(--text-primary, #231F1C);
+  outline: none;
+  font-family: inherit;
+}
+
+.orders-search-input::placeholder {
+  color: var(--text-muted, #7E7368);
+  font-size: 0.9rem;
+}
+
+.orders-search-clear {
+  background: #EDE4D8;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary, #726657);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: 0;
+  line-height: 1;
+}
+
+.orders-search-clear:hover {
+  background: #dcd0bf;
+  color: var(--text-primary, #231F1C);
+  transform: scale(1.15) rotate(90deg);
+}
+
+.orders-search-feedback {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #726657);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* --------------------------------------------------------------------------
+   3. HUY HIỆU SỐ LƯỢNG ĐƠN TRÊN TỪNG TAB (ORDERS.HTML)
+   -------------------------------------------------------------------------- */
+.order-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--bg-secondary, #F2ECE4);
+  color: var(--text-secondary, #726657);
+  font-size: 0.775rem;
+  font-weight: 700;
+  margin-left: 6px;
+  transition: all 0.2s ease;
+}
+
+.orders-tab-btn.is-active .order-tab-badge {
+  background: var(--accent, #A67C52);
+  color: #ffffff;
+}
+
+/* Khối in riêng biệt trên orders.html */
+.invoice-print-root {
+  display: none;
+}
+
+/* ==========================================================================
+   4. THIẾT KẾ CSS CHUYÊN BIỆT @media print CHO HÓA ĐƠN ĐIỆN TỬ KHỔ A4
+   Đáp ứng tuyệt đối các quy tắc in ấn:
+   - Ẩn hoàn toàn: Navbar, Footer, Breadcrumb, các nút bấm thao tác ("Quay lại", "In hóa đơn").
+   - Định dạng hóa đơn gọn gàng trong khổ A4: Logo NEXUS VR, Mã đơn hàng, Ngày đặt,
+     Thông tin người nhận, Bảng kê chi tiết, Chiết khấu Voucher, Phí vận chuyển, Tổng tiền.
+   ========================================================================== */
+@media print {
+  /* Thiết lập chuẩn trang in A4 dọc và căn lề hài hòa */
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm;
+  }
+
+  /* Reset body và nền trang thành màu trắng tinh khôi, chữ đen rõ nét */
+  html, body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #1a1715 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 10.5pt !important;
+    line-height: 1.4 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* ẨN HOÀN TOÀN CÁC THÀNH PHẦN KHÔNG THUỘC HÓA ĐƠN */
+  #navbar-root,
+  .navbar,
+  #footer-root,
+  .footer,
+  .skip-link,
+  .checkout-breadcrumb,
+  .orders-breadcrumb,
+  .checkout-stepper,
+  .orders-heading,
+  .orders-tabs,
+  .orders-search-wrapper,
+  .apple-modal-overlay,
+  .toast-container,
+  #toastContainer,
+  .toast,
+  .no-print,
+  .checkout-btn-row,
+  .nexus-invoice-actions,
+  .btn-action-group,
+  .btn-print-invoice,
+  .btn-print-order,
+  .btn-cancel,
+  .btn-received,
+  .btn-apple-secondary,
+  .btn-apple-primary,
+  .btn-checkout-prev,
+  .btn-checkout-next,
+  .order-success-icon-banner {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Nếu đang in một hóa đơn cụ thể từ orders.html (thông qua #invoicePrintRoot) */
+  body.printing-single-order #ordersListContainer,
+  body.printing-single-order .orders-container > *:not(#invoicePrintRoot) {
+    display: none !important;
+  }
+
+  body.printing-single-order .invoice-print-root {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Định dạng hóa đơn trong chế độ in ấn */
+  .nexus-invoice {
+    display: block !important;
+    visibility: visible !important;
+    box-shadow: none !important;
+    border: 1px solid #999999 !important;
+    border-radius: 8px !important;
+    padding: 16mm 18mm !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    page-break-inside: avoid;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+  }
+
+  .nexus-invoice__header {
+    border-bottom: 2px solid #231F1C !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .nexus-invoice__brand-logo {
+    color: #000000 !important;
+    font-size: 18pt !important;
+  }
+
+  .nexus-invoice__brand-dot {
+    background: #8B6239 !important;
+  }
+
+  .nexus-invoice__brand-sub {
+    color: #8B6239 !important;
+  }
+
+  .nexus-invoice__company-info {
+    color: #444444 !important;
+    font-size: 8.5pt !important;
+  }
+
+  .nexus-invoice__title {
+    color: #231F1C !important;
+    font-size: 14pt !important;
+  }
+
+  .nexus-invoice__meta-row {
+    color: #333333 !important;
+    font-size: 9pt !important;
+  }
+
+  .nexus-invoice__customer-card {
+    background: #fafafa !important;
+    border: 1px solid #cccccc !important;
+    padding: 10px 14px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .nexus-invoice__section-title {
+    color: #000000 !important;
+    font-size: 9.5pt !important;
+    margin-bottom: 6px !important;
+  }
+
+  .nexus-invoice__customer-grid {
+    font-size: 9pt !important;
+    gap: 4px 16px !important;
+  }
+
+  .nexus-invoice__customer-field {
+    color: #333333 !important;
+  }
+
+  .nexus-invoice__table th {
+    background: #f0f0f0 !important;
+    color: #000000 !important;
+    border-top: 1px solid #888888 !important;
+    border-bottom: 1.5px solid #444444 !important;
+    padding: 8px 10px !important;
+    font-size: 9pt !important;
+  }
+
+  .nexus-invoice__table td {
+    border-bottom: 1px solid #e0e0e0 !important;
+    padding: 8px 10px !important;
+    font-size: 9pt !important;
+    color: #111111 !important;
+  }
+
+  .nexus-invoice__table tr:nth-child(even) {
+    background: transparent !important;
+  }
+
+  .nexus-invoice__product-badge {
+    border: 1px solid #999999 !important;
+    color: #333333 !important;
+  }
+
+  .nexus-invoice__summary-layout {
+    border-top: 1px dashed #666666 !important;
+    padding-top: 12px !important;
+    margin-top: 12px !important;
+  }
+
+  .nexus-invoice__note-box {
+    background: #fcfcfc !important;
+    border: 1px solid #dddddd !important;
+    border-left: 3px solid #8B6239 !important;
+    color: #444444 !important;
+    font-size: 8.5pt !important;
+    padding: 10px 12px !important;
+  }
+
+  .nexus-invoice__calc-table {
+    width: 280px !important;
+    font-size: 9pt !important;
+  }
+
+  .nexus-invoice__calc-row {
+    color: #333333 !important;
+    padding: 4px 0 !important;
+  }
+
+  .nexus-invoice__calc-row.discount-row {
+    color: #1b5e20 !important;
+  }
+
+  .nexus-invoice__calc-row.grand-total {
+    border-top: 1.5px solid #000000 !important;
+    color: #000000 !important;
+    font-size: 11.5pt !important;
+    font-weight: 800 !important;
+  }
+
+  .nexus-invoice__footer-signatures {
+    margin-top: 24px !important;
+    padding-top: 16px !important;
+    page-break-inside: avoid;
+  }
+
+  .nexus-invoice__sign-title {
+    color: #000000 !important;
+    font-size: 9pt !important;
+  }
+
+  .nexus-invoice__sign-subtitle {
+    color: #666666 !important;
+    font-size: 8pt !important;
+    margin-bottom: 40px !important;
+  }
+
+  .nexus-invoice__sign-stamp {
+    color: #8B6239 !important;
+    font-size: 9pt !important;
+  }
+}
