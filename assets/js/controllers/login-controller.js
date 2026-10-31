@@ -426,9 +426,6 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
         return;
       }
 
-      const isEmail = accountVal.includes("@");
-      const isPhone = /^0\d{9}$/.test(accountVal);
-
       const newUser = {
         account: accountVal,
         password: passwordVal,

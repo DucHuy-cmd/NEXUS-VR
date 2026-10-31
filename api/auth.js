@@ -35,12 +35,16 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ success: false, message: "Vui lòng nhập tài khoản và mật khẩu." });
     }
 
-    // Tra cứu trong CSDL SQL nếu đã kết nối
+    // Tra cứu trong CSDL SQL nếu đã kết nối (Hỗ trợ cả email hoặc username hoặc sđt)
     if (hasDatabaseConfigured()) {
       try {
+        const altEmail = userAccount.includes("@") ? userAccount.split("@")[0] : userAccount + "@gmail.com";
         const result = await query(
-          "SELECT id, email, password_hash, full_name, phone, role FROM users WHERE LOWER(email) = $1 LIMIT 1",
-          [userAccount]
+          `SELECT id, email, password_hash, full_name, phone, role 
+           FROM users 
+           WHERE LOWER(email) = $1 OR LOWER(email) = $2 OR phone = $1 
+           LIMIT 1`,
+          [userAccount, altEmail]
         );
 
         if (result.rows.length > 0) {
@@ -72,7 +76,7 @@ module.exports = async function handler(req, res) {
     }
 
     // Fallback tài khoản mẫu nếu môi trường offline chưa kết nối DB
-    if (userAccount === "tuong@gmail.com" && password === "123456") {
+    if ((userAccount === "tuong@gmail.com" || userAccount === "tuong") && password === "123456") {
       return res.status(200).json({
         success: true,
         message: "Đăng nhập tài khoản khách hàng",
@@ -101,20 +105,24 @@ module.exports = async function handler(req, res) {
     }
 
     const newId = "usr_" + Date.now().toString(36);
+    const resolvedEmail = userAccount.includes("@") ? userAccount : userAccount + "@gmail.com";
     const resolvedName = fullName || name || userAccount.split("@")[0];
     const pwdHashed = hashPassword(password);
 
     if (hasDatabaseConfigured()) {
       try {
-        const checkExist = await query("SELECT id FROM users WHERE LOWER(email) = $1 LIMIT 1", [userAccount]);
+        const checkExist = await query(
+          "SELECT id FROM users WHERE LOWER(email) = $1 OR LOWER(email) = $2 LIMIT 1",
+          [userAccount, resolvedEmail]
+        );
         if (checkExist.rows.length > 0) {
-          return res.status(409).json({ success: false, message: "Email này đã được đăng ký tài khoản." });
+          return res.status(409).json({ success: false, message: "Tài khoản hoặc Email này đã được đăng ký." });
         }
 
         await query(
           `INSERT INTO users (id, email, password_hash, full_name, phone, role)
            VALUES ($1, $2, $3, $4, $5, 'customer')`,
-          [newId, userAccount, pwdHashed, resolvedName, phone || ""]
+          [newId, resolvedEmail, pwdHashed, resolvedName, phone || ""]
         );
 
         return res.status(201).json({
@@ -122,7 +130,7 @@ module.exports = async function handler(req, res) {
           message: "Đăng ký tài khoản thành công!",
           user: {
             id: newId,
-            email: userAccount,
+            email: resolvedEmail,
             fullName: resolvedName,
             name: resolvedName.split(" ").pop(),
             phone: phone || "",
@@ -141,7 +149,7 @@ module.exports = async function handler(req, res) {
       mode: "local_storage",
       user: {
         id: newId,
-        email: userAccount,
+        email: resolvedEmail,
         fullName: resolvedName,
         phone: phone || "",
         role: "customer"
