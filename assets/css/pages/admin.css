@@ -545,3 +545,14 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   margin-right: 10px;
 }
+
+.btn-table-outline {
+  background: rgba(166, 124, 82, 0.15) !important;
+  color: #EDE4D8 !important;
+  border: 1px solid rgba(166, 124, 82, 0.4) !important;
+}
+.btn-table-outline:hover {
+  background: #A67C52 !important;
+  color: #FFFFFF !important;
+  border-color: #A67C52 !important;
+}

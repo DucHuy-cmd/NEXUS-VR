@@ -29,7 +29,7 @@
   <header class="admin-topbar">
     <a href="index.html" class="admin-topbar__brand">
       <span class="admin-topbar__logo">NEXUS VR</span>
-      <span class="admin-badge">ADMIN CONSOLE</span>
+      
     </a>
 
     <div class="admin-topbar__right">
@@ -37,11 +37,11 @@
         <span class="admin-live-dot" id="adminLiveDot"></span>
         <span id="adminLiveText">Hệ thống: Sẵn sàng</span>
       </div>
-      <div style="font-size: 0.88rem; color: #EDE4D8; display: flex; align-items: center; gap: 8px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        <strong id="adminUserDisplay">Quản Trị Viên</strong>
-      </div>
       <a href="shop.html" class="btn-admin-action btn-admin-outline" target="_blank">Xem Cửa Hàng</a>
+      <div class="admin-account-tag" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #EDE4D8; background: rgba(255,255,255,0.06); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.12);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span id="adminUserDisplay">admin@nexusvr.vn</span>
+      </div>
       <button type="button" id="btnAdminLogout" class="btn-admin-action btn-admin-danger">Đăng Xuất</button>
     </div>
   </header>
@@ -74,6 +74,12 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
         <span>Kho &amp; Sản Phẩm</span>
         <span class="admin-nav-badge">18</span>
+      </button>
+
+      <button type="button" class="admin-nav-item" data-admin-tab="users">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>Khách Hàng</span>
+        <span class="admin-nav-badge" id="sidebarBadgeUsers" style="background: rgba(33,150,243,0.3); color:#90CAF9;">0</span>
       </button>
     </aside>
 
@@ -108,7 +114,7 @@
               </div>
             </div>
             <div class="admin-kpi-val" id="kpiOrders">0</div>
-            <div class="admin-kpi-trend" style="color:#64B5F6;">Cập nhật từ LocalStorage &amp; SQL</div>
+            
           </div>
 
           <div class="admin-kpi-card">
@@ -119,7 +125,7 @@
               </div>
             </div>
             <div class="admin-kpi-val" id="kpiBookings" style="color:#81C784;">0</div>
-            <div class="admin-kpi-trend" style="color:#81C784;">Khách VIP đăng ký tại Showroom</div>
+            
           </div>
 
           <div class="admin-kpi-card">
@@ -130,7 +136,7 @@
               </div>
             </div>
             <div class="admin-kpi-val" id="kpiProducts">18</div>
-            <div class="admin-kpi-trend">Hệ sinh thái kính VR &amp; phụ kiện</div>
+            
           </div>
 
           <div class="admin-kpi-card">
@@ -141,7 +147,7 @@
               </div>
             </div>
             <div class="admin-kpi-val" id="kpiUsers" style="color:#64B5F6;">0</div>
-            <div class="admin-kpi-trend" style="color:#64B5F6;">Cơ sở dữ liệu PostgreSQL</div>
+            
           </div>
         </div>
 

@@ -888,7 +888,8 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
       shippingFee: calcShipping,
       totalAmount: finalTotal,
       paymentMethod: cleanPaymentLabel,
-      status: "active",
+      status: "processing",
+      total: finalTotal,
       statusText: "Đang xử lý / Vận chuyển"
     };
 

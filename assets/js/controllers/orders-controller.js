@@ -59,7 +59,7 @@
     const userSuffix = getUserKeySuffix();
     const seedFlag = "nexus_orders_seeded" + userSuffix;
     const orders = getOrders();
-    if (orders.length > 0 || localStorage.getItem(seedFlag)) return;
+    return; // Disable dummy seeding
     localStorage.setItem(seedFlag, "true");
 
     // Lấy thông tin user hiện tại nếu có

@@ -83,10 +83,10 @@ module.exports = async function handler(req, res) {
             cust.name || "Khách Hàng",
             cust.phone || "",
             cust.address || "",
-            Number(data.total || 0),
+            Number(data.total || data.totalAmount || 0),
             Number(data.shippingFee || 0),
             data.paymentMethod || "VietQR Napas 247",
-            data.status || "processing",
+            (data.status === "active" || !data.status) ? "processing" : data.status,
             JSON.stringify(data.items || [])
           ]
         );
@@ -101,7 +101,7 @@ module.exports = async function handler(req, res) {
       order: {
         id: orderId,
         code: orderCode,
-        status: data.status || "processing",
+        status: (data.status === "active" || !data.status) ? "processing" : data.status,
         total: data.total
       }
     });
@@ -131,6 +131,19 @@ module.exports = async function handler(req, res) {
       success: true,
       message: `Đã cập nhật trạng thái đơn hàng sang ${newStatus}`
     });
+  }
+
+    // 4. DELETE: XÓA ĐƠN HÀNG HOẶC DỌN SẠCH ĐƠN RÁC
+  if (req.method === "DELETE") {
+    if (hasDatabaseConfigured()) {
+      try {
+        await query("DELETE FROM orders");
+        return res.status(200).json({ success: true, message: "Đã xóa toàn bộ đơn hàng trong Database." });
+      } catch (err) {
+        return res.status(500).json({ success: false, message: err.message });
+      }
+    }
+    return res.status(200).json({ success: true, mode: "local_storage" });
   }
 
   return res.status(405).json({ success: false, message: "Method Not Allowed" });

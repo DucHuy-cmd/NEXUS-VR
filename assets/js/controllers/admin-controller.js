@@ -107,7 +107,7 @@
       if (authOverlay) authOverlay.style.display = "none";
       const user = getCurrentUser();
       if (adminUserDisplay) {
-        adminUserDisplay.textContent = user.fullName || user.name || "Quản Trị Viên";
+        adminUserDisplay.textContent = user.email || user.account || "admin@nexusvr.vn";
       }
     } else {
       if (authOverlay) authOverlay.style.display = "flex";
@@ -200,85 +200,11 @@
   }
 
   function getSeedOrders() {
-    return [
-      {
-        id: "ord_sample_01",
-        code: "#NEXUS-892145",
-        createdAt: "31/10/2026, 14:30:00",
-        customer: {
-          name: "Trần Hoàng Nam",
-          phone: "0988123456",
-          email: "khachhang@nexusvr.vn",
-          address: "Tòa nhà Landmark 81, TP.HCM"
-        },
-        items: [
-          {
-            id: "vr-001",
-            name: "NEXUS Vision Pro",
-            price: 79990000,
-            qty: 1,
-            selectedColor: "Xám Than",
-            image: "assets/images/products/hero-vr-headset-xam.webp"
-          }
-        ],
-        total: 79990000,
-        paymentMethod: "VietQR Napas 247",
-        status: "processing"
-      },
-      {
-        id: "ord_sample_02",
-        code: "#NEXUS-671203",
-        createdAt: "30/10/2026, 09:15:00",
-        customer: {
-          name: "Lê Minh Anh",
-          phone: "0912345678",
-          email: "minhanh@gmail.com",
-          address: "Số 45 Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh"
-        },
-        items: [
-          {
-            id: "vr-007",
-            name: "NEXUS CyberPlay VR (Gaming Edition)",
-            price: 14490000,
-            qty: 1,
-            selectedColor: "Xám Than",
-            image: "assets/images/products/vr-cyberplay.webp"
-          }
-        ],
-        total: 14490000,
-        paymentMethod: "Thanh toán khi nhận hàng (COD)",
-        status: "completed"
-      }
-    ];
+    return [];
   }
 
   function getSeedBookings() {
-    return [
-      {
-        id: "bkg_001",
-        name: "Hoàng Minh Tuấn",
-        email: "tuan.hoang@fpt.com",
-        phone: "0903112233",
-        service: "Trải nghiệm cá nhân hóa 1:1 với NEXUS Vision Pro",
-        timeSlot: "09:00 - 10:30",
-        bookingDate: "01/11/2026",
-        message: "Muốn trải nghiệm ứng dụng phẫu thuật y khoa và mô phỏng 3D",
-        status: "confirmed",
-        createdAt: "31/10/2026 14:00"
-      },
-      {
-        id: "bkg_002",
-        name: "Nguyễn Phương Thảo",
-        email: "thao.nguyen@vng.com.vn",
-        phone: "0918776655",
-        service: "Trải nghiệm Phòng Thu Điện Toán Không Gian (Vision Studio)",
-        timeSlot: "14:00 - 15:30",
-        bookingDate: "02/11/2026",
-        message: "Quan tâm đến tính năng Render thời gian thực",
-        status: "pending",
-        createdAt: "30/10/2026 11:00"
-      }
-    ];
+    return [];
   }
 
   /* ---------------------------------------------------------

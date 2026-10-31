@@ -107,5 +107,18 @@ module.exports = async function handler(req, res) {
     });
   }
 
+    // 4. DELETE: XÓA LỊCH HẸN HOẶC DỌN SẠCH LỊCH RÁC
+  if (req.method === "DELETE") {
+    if (hasDatabaseConfigured()) {
+      try {
+        await query("DELETE FROM bookings");
+        return res.status(200).json({ success: true, message: "Đã xóa toàn bộ lịch hẹn trong Database." });
+      } catch (err) {
+        return res.status(500).json({ success: false, message: err.message });
+      }
+    }
+    return res.status(200).json({ success: true, mode: "local_storage" });
+  }
+
   return res.status(405).json({ success: false, message: "Method Not Allowed" });
 };

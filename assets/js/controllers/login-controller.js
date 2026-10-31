@@ -380,31 +380,42 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
 
       if (hasError) return;
 
-      // XÁC THỰC BẢO MẬT QUA SERVERLESS API & DATABASE (KHÔNG LỘ PASSWORD TRÊN CLIENT)
-      if (window.apiService && typeof window.apiService.login === "function") {
-        window.apiService.login({ email: accountVal, password: passwordVal }).then((res) => {
-          if (res && res.success && res.user) {
-            saveCurrentSession(res.user);
-            if (res.user.role === "admin") {
-              if (typeof window.showToast === "function") {
-                window.showToast("Đăng nhập Quản trị viên thành công! Đang chuyển hướng...", "success");
-              }
-              setTimeout(() => {
-                window.location.href = "admin.html";
-              }, 700);
-            } else {
-              if (typeof window.showToast === "function") {
-                window.showToast(`Đăng nhập thành công! Chào mừng ${res.user.fullName || res.user.name}.`, "success");
-              }
-              initProfileState();
+      // TẠO TÀI KHOẢN MỚI QUA SERVERLESS API & POSTGRESQL DATABASE
+      const isEmail = accountVal.includes("@");
+      const finalEmail = isEmail ? accountVal : accountVal + "@gmail.com";
+      const finalName = isEmail ? accountVal.split("@")[0] : accountVal;
+      const isPhone = /^0\d{9}$/.test(accountVal);
+
+      if (window.apiService && typeof window.apiService.register === "function") {
+        window.apiService.register({
+          email: finalEmail,
+          password: passwordVal,
+          name: finalName,
+          fullName: finalName,
+          phone: isPhone ? accountVal : ""
+        }).then((res) => {
+          if (res && res.success) {
+            const registeredUser = res.user || {
+              id: "usr_" + Date.now().toString(36),
+              email: finalEmail,
+              account: accountVal,
+              name: finalName,
+              fullName: finalName,
+              phone: isPhone ? accountVal : "",
+              role: "customer"
+            };
+            saveCurrentSession(registeredUser);
+            if (typeof window.showToast === "function") {
+              window.showToast(`Tạo tài khoản thành công! Chào mừng ${finalName}.`, "success");
             }
+            initProfileState();
           } else {
-            const msg = (res && res.message) || "Tài khoản hoặc mật khẩu không chính xác.";
+            const msg = (res && res.message) || "Không thể tạo tài khoản. Vui lòng thử lại.";
             if (accountError) accountError.textContent = msg;
             if (typeof window.showToast === "function") window.showToast(msg, "error");
           }
         }).catch(() => {
-          if (accountError) accountError.textContent = "Không thể kết nối đến máy chủ xác thực.";
+          if (accountError) accountError.textContent = "Lỗi kết nối máy chủ khi tạo tài khoản.";
         });
         return;
       }
