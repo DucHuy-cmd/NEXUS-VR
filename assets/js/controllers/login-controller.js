@@ -239,20 +239,7 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
       }
     });
 
-    const fillAdminBtn = document.getElementById("fillAdminDemoBtn");
-    if (fillAdminBtn) {
-      fillAdminBtn.addEventListener("click", () => {
-        const accountInput = document.getElementById("loginAccount");
-        const pwdInput = document.getElementById("loginPassword");
-        if (accountInput && pwdInput) {
-          accountInput.value = "admin@nexusvr.vn";
-          pwdInput.value = "admin123";
-        }
-        if (typeof window.showToast === "function") {
-          window.showToast("Đã nạp tài khoản Admin: admin@nexusvr.vn / admin123 (Nhấn Đăng nhập để vào Admin Console)", "info");
-        }
-      });
-    }
+
   }
 
   /* --------------------------------------------------------------------------
@@ -288,25 +275,32 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
 
       if (hasError) return;
 
-      // KIỂM TRA ĐĂNG NHẬP QUẢN TRỊ VIÊN (ADMIN ROOT)
-      if (accountVal === "admin@nexusvr.vn" && passwordVal === "admin123") {
-        const adminUser = {
-          account: "admin@nexusvr.vn",
-          email: "admin@nexusvr.vn",
-          password: "admin123",
-          name: "Quản Trị Viên",
-          fullName: "Quản Trị Viên NEXUS",
-          phone: "0901234567",
-          role: "admin",
-          joinedDate: "10/2026"
-        };
-        saveCurrentSession(adminUser);
-        if (typeof window.showToast === "function") {
-          window.showToast("Đăng nhập thành công với quyền Quản Trị Viên! Đang mở Admin Dashboard...", "success");
-        }
-        setTimeout(() => {
-          window.location.href = "admin.html";
-        }, 900);
+      // XÁC THỰC BẢO MẬT QUA SERVERLESS API & DATABASE (KHÔNG LỘ PASSWORD TRÊN CLIENT)
+      if (window.apiService && typeof window.apiService.login === "function") {
+        window.apiService.login({ email: accountVal, password: passwordVal }).then((res) => {
+          if (res && res.success && res.user) {
+            saveCurrentSession(res.user);
+            if (res.user.role === "admin") {
+              if (typeof window.showToast === "function") {
+                window.showToast("Đăng nhập Quản trị viên thành công! Đang chuyển hướng...", "success");
+              }
+              setTimeout(() => {
+                window.location.href = "admin.html";
+              }, 700);
+            } else {
+              if (typeof window.showToast === "function") {
+                window.showToast(`Đăng nhập thành công! Chào mừng ${res.user.fullName || res.user.name}.`, "success");
+              }
+              initProfileState();
+            }
+          } else {
+            const msg = (res && res.message) || "Tài khoản hoặc mật khẩu không chính xác.";
+            if (accountError) accountError.textContent = msg;
+            if (typeof window.showToast === "function") window.showToast(msg, "error");
+          }
+        }).catch(() => {
+          if (accountError) accountError.textContent = "Không thể kết nối đến máy chủ xác thực.";
+        });
         return;
       }
 
@@ -386,25 +380,32 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
 
       if (hasError) return;
 
-      // KIỂM TRA ĐĂNG NHẬP QUẢN TRỊ VIÊN (ADMIN ROOT)
-      if (accountVal === "admin@nexusvr.vn" && passwordVal === "admin123") {
-        const adminUser = {
-          account: "admin@nexusvr.vn",
-          email: "admin@nexusvr.vn",
-          password: "admin123",
-          name: "Quản Trị Viên",
-          fullName: "Quản Trị Viên NEXUS",
-          phone: "0901234567",
-          role: "admin",
-          joinedDate: "10/2026"
-        };
-        saveCurrentSession(adminUser);
-        if (typeof window.showToast === "function") {
-          window.showToast("Đăng nhập thành công với quyền Quản Trị Viên! Đang mở Admin Dashboard...", "success");
-        }
-        setTimeout(() => {
-          window.location.href = "admin.html";
-        }, 900);
+      // XÁC THỰC BẢO MẬT QUA SERVERLESS API & DATABASE (KHÔNG LỘ PASSWORD TRÊN CLIENT)
+      if (window.apiService && typeof window.apiService.login === "function") {
+        window.apiService.login({ email: accountVal, password: passwordVal }).then((res) => {
+          if (res && res.success && res.user) {
+            saveCurrentSession(res.user);
+            if (res.user.role === "admin") {
+              if (typeof window.showToast === "function") {
+                window.showToast("Đăng nhập Quản trị viên thành công! Đang chuyển hướng...", "success");
+              }
+              setTimeout(() => {
+                window.location.href = "admin.html";
+              }, 700);
+            } else {
+              if (typeof window.showToast === "function") {
+                window.showToast(`Đăng nhập thành công! Chào mừng ${res.user.fullName || res.user.name}.`, "success");
+              }
+              initProfileState();
+            }
+          } else {
+            const msg = (res && res.message) || "Tài khoản hoặc mật khẩu không chính xác.";
+            if (accountError) accountError.textContent = msg;
+            if (typeof window.showToast === "function") window.showToast(msg, "error");
+          }
+        }).catch(() => {
+          if (accountError) accountError.textContent = "Không thể kết nối đến máy chủ xác thực.";
+        });
         return;
       }
 

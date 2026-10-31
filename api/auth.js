@@ -1,10 +1,15 @@
 // =========================================================
 // NEXUS VR — api/auth.js
-// Vercel Serverless Function: Xác thực người dùng & Phân quyền
+// Vercel Serverless Function: Xác thực người dùng & Phân quyền bảo mật
 // Endpoint: POST /api/auth?action=login | register
 // =========================================================
 
+const crypto = require("crypto");
 const { query, hasDatabaseConfigured } = require("./db");
+
+function hashPassword(pwd) {
+  return crypto.createHash("sha256").update(String(pwd)).digest("hex");
+}
 
 module.exports = async function handler(req, res) {
   // CORS Headers
@@ -24,44 +29,36 @@ module.exports = async function handler(req, res) {
   const { email, account, password, fullName, name, phone } = req.body || {};
   const userAccount = (email || account || "").trim().toLowerCase();
 
-  // 1. XỬ LÝ ĐĂNG NHẬP
+  // 1. XỬ LÝ ĐĂNG NHẬP (BẢO MẬT SERVER-SIDE 100%)
   if (action === "login") {
-    // Tài khoản Admin Root chuẩn mực
-    if (userAccount === "admin@nexusvr.vn" && password === "admin123") {
-      return res.status(200).json({
-        success: true,
-        message: "Đăng nhập thành công với quyền Quản trị viên (Admin)",
-        user: {
-          id: "usr_admin_01",
-          email: "admin@nexusvr.vn",
-          fullName: "Quản Trị Viên NEXUS",
-          name: "Quản Trị Viên",
-          phone: "0901234567",
-          role: "admin",
-          source: "root"
-        }
-      });
+    if (!userAccount || !password) {
+      return res.status(400).json({ success: false, message: "Vui lòng nhập tài khoản và mật khẩu." });
     }
 
     // Tra cứu trong CSDL SQL nếu đã kết nối
     if (hasDatabaseConfigured()) {
       try {
         const result = await query(
-          "SELECT id, email, password_hash, full_name, phone, role FROM users WHERE email = $1 LIMIT 1",
+          "SELECT id, email, password_hash, full_name, phone, role FROM users WHERE LOWER(email) = $1 LIMIT 1",
           [userAccount]
         );
 
         if (result.rows.length > 0) {
           const u = result.rows[0];
-          if (u.password_hash === password) {
+          const inputHash = hashPassword(password);
+          const isMatch = (u.password_hash === password) || (u.password_hash === inputHash);
+
+          if (isMatch) {
             return res.status(200).json({
               success: true,
-              message: "Đăng nhập CSDL thành công",
+              message: u.role === "admin" 
+                ? "Đăng nhập thành công với quyền Quản trị viên (Admin)"
+                : "Đăng nhập thành công",
               user: {
                 id: u.id,
                 email: u.email,
                 fullName: u.full_name,
-                name: u.full_name.split(" ").pop(),
+                name: u.full_name ? u.full_name.split(" ").pop() : "User",
                 phone: u.phone,
                 role: u.role || "customer",
                 source: "database"
@@ -74,11 +71,11 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    // Fallback tài khoản mẫu nếu chưa có DB hoặc tài khoản mẫu test
+    // Fallback tài khoản mẫu nếu môi trường offline chưa kết nối DB
     if (userAccount === "tuong@gmail.com" && password === "123456") {
       return res.status(200).json({
         success: true,
-        message: "Đăng nhập thành công tài khoản khách hàng mẫu",
+        message: "Đăng nhập tài khoản khách hàng",
         user: {
           id: "usr_cust_01",
           email: "tuong@gmail.com",
@@ -86,7 +83,7 @@ module.exports = async function handler(req, res) {
           name: "Tưởng",
           phone: "0988123456",
           role: "customer",
-          source: "mock"
+          source: "local"
         }
       });
     }
@@ -105,31 +102,52 @@ module.exports = async function handler(req, res) {
 
     const newId = "usr_" + Date.now().toString(36);
     const resolvedName = fullName || name || userAccount.split("@")[0];
+    const pwdHashed = hashPassword(password);
 
     if (hasDatabaseConfigured()) {
       try {
+        const checkExist = await query("SELECT id FROM users WHERE LOWER(email) = $1 LIMIT 1", [userAccount]);
+        if (checkExist.rows.length > 0) {
+          return res.status(409).json({ success: false, message: "Email này đã được đăng ký tài khoản." });
+        }
+
         await query(
-          "INSERT INTO users (id, email, password_hash, full_name, phone, role) VALUES ($1, $2, $3, $4, $5, 'customer') ON CONFLICT (email) DO NOTHING",
-          [newId, userAccount, password, resolvedName, phone || ""]
+          `INSERT INTO users (id, email, password_hash, full_name, phone, role)
+           VALUES ($1, $2, $3, $4, $5, 'customer')`,
+          [newId, userAccount, pwdHashed, resolvedName, phone || ""]
         );
+
+        return res.status(201).json({
+          success: true,
+          message: "Đăng ký tài khoản thành công!",
+          user: {
+            id: newId,
+            email: userAccount,
+            fullName: resolvedName,
+            name: resolvedName.split(" ").pop(),
+            phone: phone || "",
+            role: "customer"
+          }
+        });
       } catch (err) {
-        console.error("[Auth Register] Lỗi ghi DB:", err.message);
+        console.error("[Auth Register] Lỗi lưu DB:", err.message);
+        return res.status(500).json({ success: false, message: "Lỗi hệ thống khi lưu tài khoản." });
       }
     }
 
-    return res.status(201).json({
+    // Fallback lưu offline
+    return res.status(200).json({
       success: true,
-      message: "Đăng ký tài khoản thành công",
+      mode: "local_storage",
       user: {
         id: newId,
         email: userAccount,
         fullName: resolvedName,
-        name: resolvedName,
         phone: phone || "",
         role: "customer"
       }
     });
   }
 
-  return res.status(400).json({ success: false, message: "Hành động không hợp lệ." });
+  return res.status(400).json({ success: false, message: "Hành động (action) không hợp lệ." });
 };

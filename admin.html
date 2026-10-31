@@ -132,6 +132,17 @@
             <div class="admin-kpi-val" id="kpiProducts">18</div>
             <div class="admin-kpi-trend">Hệ sinh thái kính VR &amp; phụ kiện</div>
           </div>
+
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-top">
+              <span class="admin-kpi-label">KHÁCH HÀNG ĐĂNG KÝ</span>
+              <div class="admin-kpi-icon" style="background: rgba(33,150,243,0.15); color:#64B5F6;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </div>
+            </div>
+            <div class="admin-kpi-val" id="kpiUsers" style="color:#64B5F6;">0</div>
+            <div class="admin-kpi-trend" style="color:#64B5F6;">Cơ sở dữ liệu PostgreSQL</div>
+          </div>
         </div>
 
         <!-- BẢNG ĐƠN HÀNG GẦN NHẤT -->
@@ -261,6 +272,43 @@
         </div>
       </section>
 
+      <!-- ==========================================
+           TAB 5: QUẢN LÝ TÀI KHOẢN KHÁCH HÀNG
+           ========================================== -->
+      <section class="admin-tab-pane" id="pane-users" style="display: none;">
+        <h1 class="admin-header-title">Quản Lý Khách Hàng &amp; Phân Quyền</h1>
+        <p class="admin-header-desc">Danh sách tài khoản khách hàng đăng ký trên hệ thống, phân quyền quản trị và quản lý quyền truy cập.</p>
+
+        <div class="admin-card-panel">
+          <div class="admin-panel-head">
+            <div class="admin-filter-bar">
+              <input type="text" id="userSearchInput" class="admin-input" placeholder="🔍 Tìm theo tên, email hoặc số điện thoại...">
+              <select id="userRoleFilter" class="admin-select">
+                <option value="all">Tất cả vai trò</option>
+                <option value="customer">Khách hàng (Customer)</option>
+                <option value="admin">Quản trị viên (Admin)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Khách Hàng</th>
+                  <th>Email</th>
+                  <th>Số Điện Thoại</th>
+                  <th>Vai Trò</th>
+                  <th>Ngày Đăng Ký</th>
+                  <th>Hành Động</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -272,20 +320,14 @@
       <div class="admin-auth-icon">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
       </div>
-      <h2 class="admin-auth-title">Yêu Cầu Quyền Quản Trị</h2>
-      <p class="admin-auth-desc">Khu vực này chỉ dành riêng cho Quản trị viên hệ thống (Admin). Vui lòng đăng nhập để tiếp tục.</p>
+      <h2 class="admin-auth-title">Khu Vực Quản Trị Được Bảo Vệ</h2>
+      <p class="admin-auth-desc">Khu vực này yêu cầu đặc quyền Quản trị viên (Admin). Vui lòng đăng nhập bằng tài khoản Quản trị để tiếp tục.</p>
 
-      <div class="admin-quick-login-box">
-        <strong>Tài khoản Demo dành cho Giảng viên:</strong><br>
-        • Email: <code style="color:#A67C52;">admin@nexusvr.vn</code><br>
-        • Mật khẩu: <code style="color:#A67C52;">admin123</code> (Quyền Admin tối cao)
-      </div>
-
-      <button type="button" class="btn-admin-primary" id="btnQuickAdminLogin">
-        Đăng Nhập Nhanh Quản Trị Viên (1-Click)
-      </button>
+      <a href="login.html?redirect=admin.html" class="btn-admin-primary" style="display: inline-block; text-align: center; text-decoration: none; padding: 12px 24px; border-radius: 8px;">
+        Đến Trang Đăng Nhập Quản Trị
+      </a>
       <div style="margin-top: 14px;">
-        <a href="login.html" style="color: #877D72; font-size: 0.85rem; text-decoration: none;">Hoặc đến trang Đăng nhập thông thường</a>
+        <a href="index.html" style="color: #877D72; font-size: 0.85rem; text-decoration: none;">← Trở về Trang Chủ</a>
       </div>
     </div>
   </div>

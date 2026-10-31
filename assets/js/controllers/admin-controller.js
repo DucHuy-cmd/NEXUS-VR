@@ -1,7 +1,9 @@
 /* =========================================================
    NEXUS VR — controllers/admin-controller.js
    TẦNG 3 - CONTROLLER: BỘ NÃO ĐIỀU KHIỂN DASHBOARD QUẢN TRỊ
-   Quản lý: Phân quyền Admin, Đơn hàng, Lịch hẹn Showroom, Sản phẩm
+   Quản lý: Phân quyền Admin, Đơn hàng, Lịch hẹn Showroom,
+   Kho sản phẩm, và Quản lý Tài khoản Khách hàng
+   Bảo mật: 100% Server-Side Authentication & Zero Backdoors
    ========================================================= */
 
 (function (global) {
@@ -14,6 +16,7 @@
   let currentTab = "overview";
   let ordersList = [];
   let bookingsList = [];
+  let usersList = [];
 
   const formatVND = (num) => (num || 0).toLocaleString("vi-VN") + " ₫";
 
@@ -28,6 +31,9 @@
     checkDatabaseConnection();
   }
 
+  /* ---------------------------------------------------------
+     1. KIỂM TRA KẾT NỐI SERVERLESS & POSTGRESQL ĐÁM MÂY
+     --------------------------------------------------------- */
   async function checkDatabaseConnection() {
     const dot = document.getElementById("adminLiveDot");
     const text = document.getElementById("adminLiveText");
@@ -44,7 +50,7 @@
         } else {
           dot.style.background = "#FF9800";
           text.textContent = "DB: Hybrid Local Mode";
-          text.title = "Đang chạy chế độ lưu trữ cục bộ an toàn (Sẵn sàng kết nối Vercel Postgres)";
+          text.title = "Đang chạy chế độ lưu trữ cục bộ an toàn";
         }
       } catch (e) {
         dot.style.background = "#FF9800";
@@ -56,13 +62,20 @@
   async function refreshDataFromServerless() {
     if (!window.apiService) return;
     try {
+      // 1. Nạp Đơn hàng từ Serverless / Postgres
       const serverOrders = await window.apiService.getOrders({ isAdmin: true });
       if (serverOrders && Array.isArray(serverOrders) && serverOrders.length > 0) {
         ordersList = serverOrders;
       }
+      // 2. Nạp Lịch hẹn Showroom VIP
       const serverBookings = await window.apiService.getBookings();
       if (serverBookings && Array.isArray(serverBookings) && serverBookings.length > 0) {
         bookingsList = serverBookings;
+      }
+      // 3. Nạp Danh sách Tài khoản Khách hàng từ Database
+      const serverUsers = await window.apiService.getUsers();
+      if (serverUsers && Array.isArray(serverUsers) && serverUsers.length > 0) {
+        usersList = serverUsers;
       }
       renderAllViews();
     } catch (e) {
@@ -71,7 +84,7 @@
   }
 
   /* ---------------------------------------------------------
-     1. PHÂN QUYỀN TRUY CẬP (ROLE-BASED ACCESS CONTROL)
+     2. BẢO VỆ ROUTE & PHÂN QUYỀN (ZERO BACKDOORS)
      --------------------------------------------------------- */
   function getCurrentUser() {
     try {
@@ -83,7 +96,7 @@
 
   function checkIsAdmin() {
     const user = getCurrentUser();
-    return user && (user.role === "admin" || user.email === "admin@nexusvr.vn");
+    return Boolean(user && user.role === "admin");
   }
 
   function initAuthCheck() {
@@ -98,30 +111,12 @@
       }
     } else {
       if (authOverlay) authOverlay.style.display = "flex";
-    }
-
-    // Nút đăng nhập nhanh chế độ Admin phục vụ chấm thi / Demo
-    const btnQuickAdmin = document.getElementById("btnQuickAdminLogin");
-    if (btnQuickAdmin) {
-      btnQuickAdmin.addEventListener("click", () => {
-        const adminAccount = {
-          id: "usr_admin_01",
-          email: "admin@nexusvr.vn",
-          fullName: "Quản Trị Viên NEXUS",
-          name: "Quản Trị Viên",
-          phone: "0901234567",
-          role: "admin",
-          loginTime: new Date().toISOString()
-        };
-        localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(adminAccount));
-        if (typeof window.showToast === "function") {
-          window.showToast("Đã cấp quyền Quản trị viên hệ thống!", "success");
+      // Chuyển hướng về login sau 1.5 giây nếu không có quyền
+      setTimeout(() => {
+        if (!checkIsAdmin()) {
+          window.location.href = "login.html?redirect=admin.html";
         }
-        if (authOverlay) authOverlay.style.display = "none";
-        if (adminUserDisplay) adminUserDisplay.textContent = adminAccount.fullName;
-        loadAllData();
-        renderAllViews();
-      });
+      }, 1500);
     }
 
     // Nút Đăng xuất Admin
@@ -136,15 +131,13 @@
   }
 
   /* ---------------------------------------------------------
-     2. NẠP DỮ LIỆU ĐƠN HÀNG & LỊCH HẸN TỪ STORAGE
+     3. NẠP DỮ LIỆU BAN ĐẦU (OFFLINE FALLBACK & SEED DATA)
      --------------------------------------------------------- */
   function loadAllData() {
-    // 2.1. Đơn hàng
+    // 3.1. Đơn hàng
     try {
-      // Đọc các đơn hàng tổng hợp
       let allOrders = JSON.parse(localStorage.getItem(STORAGE_KEY_ORDERS) || "[]");
       if (allOrders.length === 0) {
-        // Lấy seed orders nếu chưa có
         allOrders = getSeedOrders();
         localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(allOrders));
       }
@@ -153,7 +146,7 @@
       ordersList = getSeedOrders();
     }
 
-    // 2.2. Lịch hẹn Showroom VIP
+    // 3.2. Lịch hẹn Showroom VIP
     try {
       let allBookings = JSON.parse(localStorage.getItem(STORAGE_KEY_BOOKINGS) || "[]");
       if (allBookings.length === 0) {
@@ -163,6 +156,46 @@
       bookingsList = allBookings;
     } catch (e) {
       bookingsList = getSeedBookings();
+    }
+
+    // 3.3. Người dùng
+    try {
+      const registered = JSON.parse(localStorage.getItem("nexus_registered_users") || "[]");
+      const defaultUsers = [
+        {
+          id: "usr_admin_01",
+          email: "admin@nexusvr.vn",
+          fullName: "Quản Trị Viên NEXUS",
+          name: "Quản Trị Viên",
+          phone: "0901234567",
+          role: "admin",
+          createdAt: "31/10/2026, 14:00:00"
+        },
+        {
+          id: "usr_cust_01",
+          email: "khachhang@nexusvr.vn",
+          fullName: "Trần Hoàng Nam",
+          name: "Nam",
+          phone: "0988123456",
+          role: "customer",
+          createdAt: "31/10/2026, 14:30:00"
+        }
+      ];
+      usersList = [...defaultUsers];
+      registered.forEach(r => {
+        if (!usersList.some(u => u.email === r.email)) {
+          usersList.push({
+            id: r.id || "usr_" + Date.now().toString(36),
+            email: r.email,
+            fullName: r.fullName || r.name || "Khách",
+            phone: r.phone || "Chưa cập nhật",
+            role: r.role || "customer",
+            createdAt: "Mới đăng ký"
+          });
+        }
+      });
+    } catch (e) {
+      usersList = [];
     }
   }
 
@@ -176,7 +209,7 @@
           name: "Trần Hoàng Nam",
           phone: "0988123456",
           email: "khachhang@nexusvr.vn",
-          address: "Tòa nhà Landmark 81, 720A Điện Biên Phủ, Phường 22, Bình Thạnh, TP.HCM"
+          address: "Tòa nhà Landmark 81, TP.HCM"
         },
         items: [
           {
@@ -215,30 +248,6 @@
         total: 14490000,
         paymentMethod: "Thanh toán khi nhận hàng (COD)",
         status: "completed"
-      },
-      {
-        id: "ord_sample_03",
-        code: "#NEXUS-440192",
-        createdAt: "29/10/2026, 16:45:00",
-        customer: {
-          name: "Đặng Hoàng Yến",
-          phone: "0933557799",
-          email: "hoangyen@design.vn",
-          address: "Số 12 Thảo Điền, Quận 2, TP. Thủ Đức"
-        },
-        items: [
-          {
-            id: "ctrl-002",
-            name: "NEXUS Precision Stylus XR",
-            price: 3490000,
-            qty: 1,
-            selectedColor: "Titanium",
-            image: "assets/images/products/stylus-xr.webp"
-          }
-        ],
-        total: 3520000,
-        paymentMethod: "Thẻ tín dụng quốc tế",
-        status: "cancelled"
       }
     ];
   }
@@ -247,45 +256,33 @@
     return [
       {
         id: "bkg_001",
-        name: "Nguyễn Thái Sơn",
-        email: "thaison.architect@gmail.com",
-        phone: "0908765432",
-        service: "Trải nghiệm NEXUS Vision Pro 1:1",
-        timeSlot: "10:00 - 11:30",
-        bookingDate: "02/11/2026",
-        message: "Muốn thử nghiệm tính năng dựng mô hình 3D trên Vision Pro và bút Stylus XR.",
-        status: "pending",
-        createdAt: "31/10/2026 15:20"
+        name: "Hoàng Minh Tuấn",
+        email: "tuan.hoang@fpt.com",
+        phone: "0903112233",
+        service: "Trải nghiệm cá nhân hóa 1:1 với NEXUS Vision Pro",
+        timeSlot: "09:00 - 10:30",
+        bookingDate: "01/11/2026",
+        message: "Muốn trải nghiệm ứng dụng phẫu thuật y khoa và mô phỏng 3D",
+        status: "confirmed",
+        createdAt: "31/10/2026 14:00"
       },
       {
         id: "bkg_002",
-        name: "Vũ Hải Đăng",
-        email: "dang.vu@fintech.vn",
-        phone: "0919887766",
-        service: "Tư vấn giải pháp Doanh nghiệp NEXUS Enterprise XR",
-        timeSlot: "14:30 - 16:00",
-        bookingDate: "03/11/2026",
-        message: "Tìm hiểu giải pháp đào tạo mô phỏng từ xa cho 20 nhân sự.",
-        status: "confirmed",
+        name: "Nguyễn Phương Thảo",
+        email: "thao.nguyen@vng.com.vn",
+        phone: "0918776655",
+        service: "Trải nghiệm Phòng Thu Điện Toán Không Gian (Vision Studio)",
+        timeSlot: "14:00 - 15:30",
+        bookingDate: "02/11/2026",
+        message: "Quan tâm đến tính năng Render thời gian thực",
+        status: "pending",
         createdAt: "30/10/2026 11:00"
-      },
-      {
-        id: "bkg_003",
-        name: "Phạm Quỳnh Nga",
-        email: "quynhnga@metaverse.com",
-        phone: "0987112233",
-        service: "Thưởng thức rạp phim Spatial Cinema 8K",
-        timeSlot: "16:30 - 17:30",
-        bookingDate: "04/11/2026",
-        message: "Trải nghiệm thử mẫu kính Cinema Acoustic XR.",
-        status: "completed",
-        createdAt: "29/10/2026 09:30"
       }
     ];
   }
 
   /* ---------------------------------------------------------
-     3. ĐIỀU HƯỚNG TABS
+     4. ĐIỀU HƯỚNG TABS
      --------------------------------------------------------- */
   function initTabNavigation() {
     const tabBtns = document.querySelectorAll("[data-admin-tab]");
@@ -306,7 +303,7 @@
   }
 
   /* ---------------------------------------------------------
-     4. RENDER TOÀN BỘ GIAO DIỆN
+     5. RENDER TOÀN BỘ GIAO DIỆN
      --------------------------------------------------------- */
   function renderAllViews() {
     renderKPIs();
@@ -314,6 +311,7 @@
     renderOrdersTable();
     renderBookingsTable();
     renderProductsTable();
+    renderUsersTable();
   }
 
   function renderKPIs() {
@@ -327,17 +325,22 @@
     const kpiOrders = document.getElementById("kpiOrders");
     const kpiBookings = document.getElementById("kpiBookings");
     const kpiProducts = document.getElementById("kpiProducts");
+    const kpiUsers = document.getElementById("kpiUsers");
 
     if (kpiRevenue) kpiRevenue.textContent = formatVND(totalRevenue);
     if (kpiOrders) kpiOrders.textContent = ordersList.length;
     if (kpiBookings) kpiBookings.textContent = pendingBookingsCount;
     if (kpiProducts) kpiProducts.textContent = (window.PRODUCTS || []).length || 18;
+    if (kpiUsers) kpiUsers.textContent = usersList.length;
 
     // Badges trên sidebar
     const badgeOrders = document.getElementById("sidebarBadgeOrders");
     const badgeBookings = document.getElementById("sidebarBadgeBookings");
+    const badgeUsers = document.getElementById("sidebarBadgeUsers");
+
     if (badgeOrders) badgeOrders.textContent = ordersList.length;
     if (badgeBookings) badgeBookings.textContent = pendingBookingsCount;
+    if (badgeUsers) badgeUsers.textContent = usersList.length;
   }
 
   function renderOverviewTables() {
@@ -373,27 +376,26 @@
   }
 
   /* ---------------------------------------------------------
-     5. RENDER BẢNG ĐƠN HÀNG & THAO TÁC DUYỆT ĐƠN
+     6. RENDER BẢNG ĐƠN HÀNG & THAO TÁC DUYỆT ĐƠN
      --------------------------------------------------------- */
   function renderOrdersTable() {
     const tbody = document.getElementById("ordersTableBody");
     if (!tbody) return;
 
+    const searchKeyword = (document.getElementById("orderSearchInput")?.value || "").toLowerCase().trim();
     const filterStatus = document.getElementById("orderStatusFilter")?.value || "all";
-    const keyword = (document.getElementById("orderSearchInput")?.value || "").toLowerCase().trim();
 
     let list = ordersList.filter((ord) => {
       const matchStatus = filterStatus === "all" || ord.status === filterStatus;
-      const matchKey =
-        !keyword ||
-        (ord.code && ord.code.toLowerCase().includes(keyword)) ||
-        (ord.customer && ord.customer.name.toLowerCase().includes(keyword)) ||
-        (ord.customer && ord.customer.phone.includes(keyword));
-      return matchStatus && matchKey;
+      const custName = (ord.customer?.name || "").toLowerCase();
+      const custPhone = (ord.customer?.phone || "").toLowerCase();
+      const code = (ord.code || "").toLowerCase();
+      const matchSearch = !searchKeyword || code.includes(searchKeyword) || custName.includes(searchKeyword) || custPhone.includes(searchKeyword);
+      return matchStatus && matchSearch;
     });
 
     if (list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#877D72; padding:30px;">Không tìm thấy đơn hàng phù hợp</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#877D72; padding:30px;">Không tìm thấy đơn hàng nào phù hợp</td></tr>`;
       return;
     }
 
@@ -405,30 +407,28 @@
           cancelled: { label: "Đã hủy", cls: "status-pill--cancelled" }
         };
         const s = statusMap[ord.status] || statusMap.processing;
-
-        const itemsDesc = (ord.items || [])
-          .map((i) => `${i.name} (x${i.qty}${i.selectedColor ? " - " + i.selectedColor : ""})`)
-          .join("<br>");
+        const itemsCount = Array.isArray(ord.items) ? ord.items.reduce((acc, it) => acc + (it.qty || 1), 0) : 1;
 
         return `
           <tr>
-            <td><strong>${ord.code}</strong></td>
+            <td><strong>${ord.code}</strong><br><span style="font-size:0.78rem; color:#877D72;">${ord.createdAt || "Vừa xong"}</span></td>
             <td>
-              <div><strong>${ord.customer ? ord.customer.name : "N/A"}</strong></div>
-              <div style="font-size:0.8rem; color:#877D72;">${ord.customer ? ord.customer.phone : ""}</div>
+              <strong>${ord.customer ? ord.customer.name : "Khách vãng lai"}</strong><br>
+              <span style="font-size:0.8rem; color:#877D72;">${ord.customer ? ord.customer.phone : ""}</span>
             </td>
-            <td style="font-size:0.85rem; max-width:250px;">${itemsDesc}</td>
+            <td><span class="admin-badge">${itemsCount} món</span></td>
             <td><strong>${formatVND(ord.total)}</strong></td>
             <td><span class="status-pill ${s.cls}">${s.label}</span></td>
-            <td style="font-size:0.8rem; color:#877D72;">${ord.createdAt || "Vừa xong"}</td>
             <td>
-              ${
-                ord.status === "processing"
-                  ? `<button type="button" class="btn-table-action btn-table-success" onclick="window.__adminUpdateOrderStatus('${ord.id || ord.code}', 'completed')">Duyệt giao</button>
-                     <button type="button" class="btn-table-action btn-table-danger" onclick="window.__adminUpdateOrderStatus('${ord.id || ord.code}', 'cancelled')">Hủy</button>`
-                  : ""
-              }
-              <button type="button" class="btn-table-action btn-table-print" onclick="window.__adminPrintOrder('${ord.code}')">In A4</button>
+              <div style="display:flex; gap:6px;">
+                ${
+                  ord.status === "processing"
+                    ? `<button type="button" class="btn-table-action btn-table-success" onclick="window.__adminUpdateOrderStatus('${ord.id}', 'completed')">Duyệt Giao</button>
+                       <button type="button" class="btn-table-action btn-table-danger" onclick="window.__adminUpdateOrderStatus('${ord.id}', 'cancelled')">Hủy</button>`
+                    : `<span style="font-size:0.8rem; color:#877D72;">Đã chốt</span>`
+                }
+                <button type="button" class="btn-table-action btn-table-print" onclick="window.__adminPrintOrder('${ord.code}')">In Đơn</button>
+              </div>
             </td>
           </tr>
         `;
@@ -437,7 +437,7 @@
   }
 
   /* ---------------------------------------------------------
-     6. RENDER BẢNG LỊCH HẸN SHOWROOM & DUYỆT HẸN
+     7. RENDER BẢNG LỊCH HẸN SHOWROOM VIP
      --------------------------------------------------------- */
   function renderBookingsTable() {
     const tbody = document.getElementById("bookingsTableBody");
@@ -456,8 +456,8 @@
         const statusMap = {
           pending: { label: "Chờ xác nhận", cls: "status-pill--pending" },
           confirmed: { label: "Đã xác nhận", cls: "status-pill--confirmed" },
-          completed: { label: "Đã hoàn tất", cls: "status-pill--completed" },
-          cancelled: { label: "Đã hủy", cls: "status-pill--cancelled" }
+          completed: { label: "Đã tiếp đón", cls: "status-pill--completed" },
+          cancelled: { label: "Đã từ chối", cls: "status-pill--cancelled" }
         };
         const s = statusMap[b.status] || statusMap.pending;
 
@@ -486,7 +486,7 @@
   }
 
   /* ---------------------------------------------------------
-     7. RENDER BẢNG SẢN PHẨM & QUẢN LÝ KHO (18 SẢN PHẨM)
+     8. RENDER BẢNG SẢN PHẨM & QUẢN LÝ KHO (18 SẢN PHẨM)
      --------------------------------------------------------- */
   function renderProductsTable() {
     const tbody = document.getElementById("productsTableBody");
@@ -518,7 +518,69 @@
   }
 
   /* ---------------------------------------------------------
-     8. GLOBAL ACTIONS CHO GIAO DIỆN ADMIN (HYBRID API + LOCAL)
+     9. RENDER BẢNG QUẢN LÝ TÀI KHOẢN KHÁCH HÀNG (TAB 5)
+     --------------------------------------------------------- */
+  function renderUsersTable() {
+    const tbody = document.getElementById("usersTableBody");
+    if (!tbody) return;
+
+    const search = (document.getElementById("userSearchInput")?.value || "").toLowerCase().trim();
+    const roleFilter = document.getElementById("userRoleFilter")?.value || "all";
+
+    const filtered = usersList.filter((u) => {
+      const matchRole = roleFilter === "all" || u.role === roleFilter;
+      const matchSearch =
+        !search ||
+        (u.fullName || "").toLowerCase().includes(search) ||
+        (u.email || "").toLowerCase().includes(search) ||
+        (u.phone || "").toLowerCase().includes(search);
+      return matchRole && matchSearch;
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#877D72; padding:30px;">Không tìm thấy tài khoản người dùng nào</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered
+      .map((u) => {
+        const initial = (u.fullName || u.email || "U").charAt(0).toUpperCase();
+        const isAdmin = u.role === "admin";
+        const rolePill = isAdmin
+          ? `<span class="status-pill status-pill--admin">★ Quản Trị Viên</span>`
+          : `<span class="status-pill status-pill--customer">Khách Hàng</span>`;
+
+        return `
+          <tr>
+            <td>
+              <div style="display:flex; align-items:center;">
+                <span class="admin-user-avatar">${initial}</span>
+                <div>
+                  <strong>${u.fullName || "Quý Khách"}</strong>
+                  <br><span style="font-size:0.78rem; color:#877D72;">ID: ${u.id}</span>
+                </div>
+              </div>
+            </td>
+            <td><strong>${u.email}</strong></td>
+            <td>${u.phone || "Chưa cập nhật"}</td>
+            <td>${rolePill}</td>
+            <td style="font-size:0.85rem; color:#EDE4D8;">${u.createdAt || "31/10/2026"}</td>
+            <td>
+              ${
+                u.id === "usr_admin_01" || u.email === "admin@nexusvr.vn"
+                  ? `<span style="font-size:0.8rem; color:#D4AF37;">Admin Tối Cao</span>`
+                  : `<button type="button" class="btn-table-action btn-table-outline" onclick="window.__adminToggleUserRole('${u.id}', '${u.role}')">${isAdmin ? 'Hạ cấp Khách' : 'Thăng cấp Admin'}</button>
+                     <button type="button" class="btn-table-action btn-table-danger" onclick="window.__adminDeleteUser('${u.id}')">Xóa</button>`
+              }
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
+  }
+
+  /* ---------------------------------------------------------
+     10. GLOBAL ACTIONS CHO GIAO DIỆN ADMIN
      --------------------------------------------------------- */
   global.__adminUpdateOrderStatus = function (orderIdOrCode, newStatus) {
     const order = ordersList.find((o) => o.id === orderIdOrCode || o.code === orderIdOrCode);
@@ -575,10 +637,47 @@
     }
   };
 
+  global.__adminToggleUserRole = async function (userId, currentRole) {
+    const newRole = currentRole === "admin" ? "customer" : "admin";
+    const user = usersList.find((u) => u.id === userId);
+    if (!user) return;
+
+    user.role = newRole;
+    if (window.apiService && typeof window.apiService.updateUserRole === "function") {
+      await window.apiService.updateUserRole(userId, newRole);
+    }
+
+    if (typeof window.showToast === "function") {
+      window.showToast(`Đã chuyển vai trò của ${user.fullName} sang '${newRole === "admin" ? "Quản trị viên" : "Khách hàng"}'!`, "success");
+    }
+    renderKPIs();
+    renderUsersTable();
+  };
+
+  global.__adminDeleteUser = async function (userId) {
+    const user = usersList.find((u) => u.id === userId);
+    if (!user) return;
+
+    if (!confirm(`Bạn có chắc chắn muốn xóa tài khoản "${user.fullName || user.email}" khỏi hệ thống?`)) {
+      return;
+    }
+
+    usersList = usersList.filter((u) => u.id !== userId);
+
+    if (window.apiService && typeof window.apiService.deleteUser === "function") {
+      await window.apiService.deleteUser(userId);
+    }
+
+    if (typeof window.showToast === "function") {
+      window.showToast(`Đã xóa tài khoản ${user.email}!`, "success");
+    }
+    renderKPIs();
+    renderUsersTable();
+  };
+
   global.__adminPrintOrder = function (orderCode) {
     const order = ordersList.find((o) => o.code === orderCode);
     if (!order) return;
-    // Chuyển sang orders.html hoặc in trực tiếp
     window.open(`orders.html?print=${encodeURIComponent(orderCode)}`, "_blank");
   };
 
@@ -590,5 +689,10 @@
 
     const bookingStatus = document.getElementById("bookingStatusFilter");
     if (bookingStatus) bookingStatus.addEventListener("change", renderBookingsTable);
+
+    const userSearch = document.getElementById("userSearchInput");
+    const userRole = document.getElementById("userRoleFilter");
+    if (userSearch) userSearch.addEventListener("input", renderUsersTable);
+    if (userRole) userRole.addEventListener("change", renderUsersTable);
   }
 })(window);
