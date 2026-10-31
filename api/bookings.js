@@ -87,15 +87,23 @@ module.exports = async function handler(req, res) {
 
   // 3. PATCH: DUYỆT / XÁC NHẬN LỊCH HẸN (DÀNH CHO ADMIN)
   if (req.method === "PATCH") {
-    const { bookingId, status } = req.body || {};
+    const { bookingId, id, status, reason } = req.body || {};
+    const targetId = bookingId || id;
 
-    if (!bookingId || !status) {
+    if (!targetId || !status) {
       return res.status(400).json({ success: false, message: "Thiếu mã lịch hẹn hoặc trạng thái mới." });
     }
 
     if (hasDatabaseConfigured()) {
       try {
-        await query("UPDATE bookings SET status = $1 WHERE id = $2", [status, bookingId]);
+        if (reason) {
+          await query(
+            "UPDATE bookings SET status = $1, message = CASE WHEN message IS NULL OR message = '' THEN ('Lý do: ' || $3) ELSE (message || ' | Lý do: ' || $3) END WHERE id = $2",
+            [status, targetId, reason]
+          );
+        } else {
+          await query("UPDATE bookings SET status = $1 WHERE id = $2", [status, targetId]);
+        }
       } catch (err) {
         console.error("[Bookings PATCH] Lỗi cập nhật DB:", err.message);
       }

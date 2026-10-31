@@ -34,6 +34,7 @@
     initConfirmCancelModal();
     updateTabBadges();
     renderOrders();
+    syncOrdersFromServerless();
 
     // HỖ TRỢ IN HÓA ĐƠN TỰ ĐỘNG TỪ ADMIN CONSOLE (?print=#NEXUS-...)
     try {
@@ -49,6 +50,49 @@
         }
       }
     } catch (e) {}
+  }
+
+  /* --------------------------------------------------------------------------
+     0. ĐỒNG BỘ ĐƠN HÀNG TỪ SERVERLESS POSTGRESQL VỀ LOCAL
+     -------------------------------------------------------------------------- */
+  async function syncOrdersFromServerless() {
+    try {
+      let user = null;
+      try {
+        user = typeof window.getCurrentUser === "function"
+          ? window.getCurrentUser()
+          : JSON.parse(localStorage.getItem("nexus_user") || "null");
+      } catch (e) {}
+
+      if (!user || (!user.email && !user.account)) return;
+      if (!window.apiService || typeof window.apiService.getOrders !== "function") return;
+
+      const email = user.email || user.account;
+      const res = await window.apiService.getOrders({ email });
+      if (res && Array.isArray(res)) {
+        const userKey = getUserKeySuffix();
+        const key = "nexus_orders" + userKey;
+        let localOrders = [];
+        try {
+          localOrders = JSON.parse(localStorage.getItem(key) || "[]");
+        } catch (e) {
+          localOrders = [];
+        }
+
+        const merged = [...res];
+        localOrders.forEach(loc => {
+          if (!merged.some(m => (m.code && m.code === loc.code) || (m.id && m.id === loc.id))) {
+            merged.push(loc);
+          }
+        });
+
+        localStorage.setItem(key, JSON.stringify(merged));
+        updateTabBadges();
+        renderOrders();
+      }
+    } catch (err) {
+      console.warn("[Orders] Đồng bộ đơn hàng thất bại:", err);
+    }
   }
 
   /* --------------------------------------------------------------------------
@@ -218,7 +262,7 @@
      -------------------------------------------------------------------------- */
   function updateTabBadges() {
     const orders = getOrders();
-    const activeCount = orders.filter((o) => o.status === "active").length;
+    const activeCount = orders.filter((o) => o.status === "active" || o.status === "processing").length;
     const completedCount = orders.filter((o) => o.status === "completed").length;
     const cancelledCount = orders.filter((o) => o.status === "cancelled").length;
 
@@ -283,7 +327,12 @@
     updateTabBadges();
 
     // 1. Lọc theo Tab hiện tại (active, completed, cancelled)
-    let filteredOrders = orders.filter((o) => o.status === currentTab);
+    let filteredOrders = orders.filter((o) => {
+      if (currentTab === "active") {
+        return o.status === "active" || o.status === "processing";
+      }
+      return o.status === currentTab;
+    });
 
     // 2. Lọc thời gian thực theo từ khóa tìm kiếm (Mã đơn hàng, tên người nhận, SĐT)
     if (searchKeyword) {
@@ -394,7 +443,7 @@
 
       // Hàng nút thao tác theo trạng thái
       let actionsHTML = "";
-      if (order.status === "active") {
+      if (order.status === "active" || order.status === "processing") {
         actionsHTML = `
           <div class="btn-action-group" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             ${printBtnHTML}
@@ -418,6 +467,16 @@
         `;
       }
 
+      // Khung hiển thị lý do hủy đơn nếu bị hủy
+      let cancelReasonHTML = "";
+      if (order.status === "cancelled" && (order.notes || order.cancelReason)) {
+        cancelReasonHTML = `
+          <div style="margin-top: 10px; padding: 10px 14px; background: rgba(211, 47, 47, 0.08); border-left: 4px solid #d32f2f; border-radius: 6px; font-size: 0.85rem; color: #b71c1c; line-height: 1.5;">
+            <strong>⚠️ Lý do hủy đơn:</strong> ${escapeHtml(order.cancelReason || order.notes)}
+          </div>
+        `;
+      }
+
       // Thông tin tổng kết tài chính thẻ đơn
       let financialMeta = `Phương thức: ${order.paymentMethod || 'COD'}`;
       if (order.discountFee > 0) {
@@ -436,6 +495,8 @@
         ${customerInfoHTML}
 
         <div class="order-products-list">${productsHTML}</div>
+
+        ${cancelReasonHTML}
 
         <div class="order-card-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; margin-top: 8px; flex-wrap: wrap; gap: 12px;">
           <div>

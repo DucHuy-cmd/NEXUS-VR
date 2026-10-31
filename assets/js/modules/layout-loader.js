@@ -233,9 +233,10 @@ function updateUserState() {
           <span class="navbar__user-name">${isAdmin ? '[Admin] ' : ''}</span>
         </a>
         <div class="navbar__user-dropdown">
-          ${isAdmin ? '<a href="admin.html" style="color:#A67C52; font-weight:700;">✦ Bảng Quản Trị (Admin)</a>' : ''}
-          <a href="orders.html">Đơn hàng của tôi</a>
-          <a href="login.html">Hồ sơ cá nhân</a>
+          ${isAdmin ? '<a href="admin.html" style="color:#A67C52; font-weight:700;">✦ Bảng Quản Trị (Admin)</a>' : `
+            <a href="orders.html">Đơn hàng của tôi</a>
+            <a href="login.html">Hồ sơ cá nhân</a>
+          `}
           <a href="#" id="navbar-logout-btn">Đăng xuất</a>
         </div>
       </div>

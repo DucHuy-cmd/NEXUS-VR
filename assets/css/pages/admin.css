@@ -64,22 +64,33 @@
 .admin-live-status {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.8rem;
-  color: #81C784;
-  background: rgba(76, 175, 80, 0.1);
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(76, 175, 80, 0.25);
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(76, 175, 80, 0.12);
+  border: 1px solid rgba(76, 175, 80, 0.35);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.admin-live-status:hover {
+  transform: scale(1.15);
+  background: rgba(76, 175, 80, 0.2);
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
 }
 
 .admin-live-dot {
-  width: 7px;
-  height: 7px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #4CAF50;
-  box-shadow: 0 0 8px #4CAF50;
+  box-shadow: 0 0 10px #4CAF50;
   animation: adminPulse 1.8s infinite;
+}
+
+#adminLiveText {
+  display: none !important;
 }
 
 @keyframes adminPulse {

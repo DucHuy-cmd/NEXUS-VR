@@ -12,6 +12,9 @@
   const STORAGE_KEY_ORDERS = "nexus_orders";
   const STORAGE_KEY_BOOKINGS = "nexus_bookings";
   const STORAGE_KEY_USER = "nexus_user";
+  const CACHE_KEY_ORDERS = "nexus_admin_cache_orders";
+  const CACHE_KEY_BOOKINGS = "nexus_admin_cache_bookings";
+  const CACHE_KEY_USERS = "nexus_admin_cache_users";
 
   let currentTab = "overview";
   let ordersList = [];
@@ -32,54 +35,58 @@
   }
 
   /* ---------------------------------------------------------
-     1. KIỂM TRA KẾT NỐI SERVERLESS & POSTGRESQL ĐÁM MÂY
+     1. KIỂM TRA KẾT NỐI SERVERLESS & POSTGRESQL ĐÁM MÂY (CHẠY SONG SONG)
      --------------------------------------------------------- */
   async function checkDatabaseConnection() {
     const dot = document.getElementById("adminLiveDot");
-    const text = document.getElementById("adminLiveText");
-    if (!dot || !text) return;
+    const container = document.getElementById("adminLiveStatus");
+    if (!dot) return;
 
-    if (window.apiService && typeof window.apiService.checkHealth === "function") {
-      try {
-        const res = await window.apiService.checkHealth();
-        if (res.database && res.database.connected) {
-          dot.style.background = "#4CAF50";
-          text.textContent = "DB: PostgreSQL Online";
-          text.title = `Cơ sở dữ liệu đám mây: ${res.database.host || "Vercel Neon"}`;
-          await refreshDataFromServerless();
-        } else {
-          dot.style.background = "#FF9800";
-          text.textContent = "DB: Hybrid Local Mode";
-          text.title = "Đang chạy chế độ lưu trữ cục bộ an toàn";
-        }
-      } catch (e) {
-        dot.style.background = "#FF9800";
-        text.textContent = "DB: Hybrid Local Mode";
-      }
-    }
-  }
-
-  async function refreshDataFromServerless() {
     if (!window.apiService) return;
+
     try {
-      // 1. Nạp Đơn hàng từ Serverless / Postgres
-      const serverOrders = await window.apiService.getOrders({ isAdmin: true });
-      if (serverOrders && Array.isArray(serverOrders) && serverOrders.length > 0) {
-        ordersList = serverOrders;
+      // Chạy song song cả 4 request siêu tốc: Health, Orders, Bookings, Users (< 1.5s)
+      const [healthRes, ordersRes, bookingsRes, usersRes] = await Promise.allSettled([
+        typeof window.apiService.checkHealth === "function" ? window.apiService.checkHealth() : Promise.resolve(null),
+        typeof window.apiService.getOrders === "function" ? window.apiService.getOrders({ isAdmin: true }) : Promise.resolve([]),
+        typeof window.apiService.getBookings === "function" ? window.apiService.getBookings() : Promise.resolve([]),
+        typeof window.apiService.getUsers === "function" ? window.apiService.getUsers() : Promise.resolve([])
+      ]);
+
+      // 1. Cập nhật trạng thái đèn LED (Xanh lá: Online, Vàng: Local)
+      const isOnline = healthRes.status === "fulfilled" && healthRes.value?.database?.connected;
+      if (isOnline) {
+        dot.style.background = "#4CAF50";
+        dot.style.boxShadow = "0 0 10px #4CAF50";
+        if (container) container.title = "Cơ sở dữ liệu đám mây: Trực tuyến (Neon PostgreSQL Online)";
+      } else {
+        dot.style.background = "#FF9800";
+        dot.style.boxShadow = "0 0 10px #FF9800";
+        if (container) container.title = "Chế độ lưu trữ cục bộ an toàn (Local Storage)";
       }
-      // 2. Nạp Lịch hẹn Showroom VIP
-      const serverBookings = await window.apiService.getBookings();
-      if (serverBookings && Array.isArray(serverBookings) && serverBookings.length > 0) {
-        bookingsList = serverBookings;
+
+      // 2. Cập nhật Đơn hàng
+      if (ordersRes.status === "fulfilled" && Array.isArray(ordersRes.value)) {
+        ordersList = ordersRes.value;
+        localStorage.setItem(CACHE_KEY_ORDERS, JSON.stringify(ordersList));
       }
-      // 3. Nạp Danh sách Tài khoản Khách hàng từ Database
-      const serverUsers = await window.apiService.getUsers();
-      if (serverUsers && Array.isArray(serverUsers) && serverUsers.length > 0) {
-        usersList = serverUsers;
+
+      // 3. Cập nhật Lịch hẹn Showroom VIP
+      if (bookingsRes.status === "fulfilled" && Array.isArray(bookingsRes.value)) {
+        bookingsList = bookingsRes.value;
+        localStorage.setItem(CACHE_KEY_BOOKINGS, JSON.stringify(bookingsList));
       }
+
+      // 4. Cập nhật Tài khoản Khách hàng
+      if (usersRes.status === "fulfilled" && Array.isArray(usersRes.value)) {
+        usersList = usersRes.value;
+        localStorage.setItem(CACHE_KEY_USERS, JSON.stringify(usersList));
+      }
+
+      // Cập nhật lại giao diện ngay lập tức
       renderAllViews();
-    } catch (e) {
-      console.warn("[Admin] Nạp dữ liệu serverless thất bại, dùng local:", e);
+    } catch (err) {
+      console.warn("[Admin] Tải dữ liệu song song gặp sự cố:", err);
     }
   }
 
@@ -131,69 +138,39 @@
   }
 
   /* ---------------------------------------------------------
-     3. NẠP DỮ LIỆU BAN ĐẦU (OFFLINE FALLBACK & SEED DATA)
+     3. NẠP DỮ LIỆU BAN ĐẦU (TỪ CACHE LOCALSTORAGE TRONG 0.05S)
      --------------------------------------------------------- */
   function loadAllData() {
-    // 3.1. Đơn hàng
+    // 3.1. Đơn hàng từ Cache hoặc localStorage
     try {
-      let allOrders = JSON.parse(localStorage.getItem(STORAGE_KEY_ORDERS) || "[]");
-      if (allOrders.length === 0) {
-        allOrders = getSeedOrders();
-        localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(allOrders));
-      }
-      ordersList = allOrders;
+      ordersList = JSON.parse(localStorage.getItem(CACHE_KEY_ORDERS) || localStorage.getItem(STORAGE_KEY_ORDERS) || "[]");
     } catch (e) {
-      ordersList = getSeedOrders();
+      ordersList = [];
     }
 
-    // 3.2. Lịch hẹn Showroom VIP
+    // 3.2. Lịch hẹn Showroom VIP từ Cache hoặc localStorage
     try {
-      let allBookings = JSON.parse(localStorage.getItem(STORAGE_KEY_BOOKINGS) || "[]");
-      if (allBookings.length === 0) {
-        allBookings = getSeedBookings();
-        localStorage.setItem(STORAGE_KEY_BOOKINGS, JSON.stringify(allBookings));
-      }
-      bookingsList = allBookings;
+      bookingsList = JSON.parse(localStorage.getItem(CACHE_KEY_BOOKINGS) || localStorage.getItem(STORAGE_KEY_BOOKINGS) || "[]");
     } catch (e) {
-      bookingsList = getSeedBookings();
+      bookingsList = [];
     }
 
-    // 3.3. Người dùng
+    // 3.3. Người dùng từ Cache hoặc fallback người dùng hiện tại
     try {
-      const registered = JSON.parse(localStorage.getItem("nexus_registered_users") || "[]");
-      const defaultUsers = [
-        {
-          id: "usr_admin_01",
-          email: "admin@nexusvr.vn",
-          fullName: "Quản Trị Viên NEXUS",
-          name: "Quản Trị Viên",
-          phone: "0901234567",
-          role: "admin",
-          createdAt: "31/10/2026, 14:00:00"
-        },
-        {
-          id: "usr_cust_01",
-          email: "khachhang@nexusvr.vn",
-          fullName: "Trần Hoàng Nam",
-          name: "Nam",
-          phone: "0988123456",
-          role: "customer",
-          createdAt: "31/10/2026, 14:30:00"
+      usersList = JSON.parse(localStorage.getItem(CACHE_KEY_USERS) || "[]");
+      if (usersList.length === 0) {
+        const curr = getCurrentUser();
+        if (curr) {
+          usersList = [{
+            id: curr.id || "usr_admin_01",
+            email: curr.email || "admin@nexusvr.vn",
+            fullName: curr.fullName || curr.name || "Quản trị viên",
+            phone: curr.phone || "0901234567",
+            role: "admin",
+            createdAt: "31/10/2026"
+          }];
         }
-      ];
-      usersList = [...defaultUsers];
-      registered.forEach(r => {
-        if (!usersList.some(u => u.email === r.email)) {
-          usersList.push({
-            id: r.id || "usr_" + Date.now().toString(36),
-            email: r.email,
-            fullName: r.fullName || r.name || "Khách",
-            phone: r.phone || "Chưa cập nhật",
-            role: r.role || "customer",
-            createdAt: "Mới đăng ký"
-          });
-        }
-      });
+      }
     } catch (e) {
       usersList = [];
     }
@@ -512,11 +489,23 @@
     const order = ordersList.find((o) => o.id === orderIdOrCode || o.code === orderIdOrCode);
     if (!order) return;
 
+    let reason = "";
+    if (newStatus === "cancelled") {
+      const inputReason = prompt(`Vui lòng nhập lý do hủy đơn hàng ${order.code}:`, "Hết hàng tạm thời / Khách yêu cầu hủy đơn");
+      if (inputReason === null) {
+        return; // Hủy thao tác nếu ấn nút Cancel
+      }
+      reason = inputReason.trim() || "Admin hủy đơn theo chính sách";
+      order.notes = reason;
+      order.cancelReason = reason;
+    }
+
     order.status = newStatus;
     localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(ordersList));
+    localStorage.setItem(CACHE_KEY_ORDERS, JSON.stringify(ordersList));
 
     if (window.apiService && typeof window.apiService.updateOrderStatus === "function") {
-      window.apiService.updateOrderStatus(orderIdOrCode, newStatus).catch(() => {});
+      window.apiService.updateOrderStatus(orderIdOrCode, newStatus, reason).catch(() => {});
     }
 
     if (typeof window.showToast === "function") {
@@ -532,11 +521,22 @@
     const booking = bookingsList.find((b) => b.id === bookingId);
     if (!booking) return;
 
+    let reason = "";
+    if (newStatus === "cancelled") {
+      const inputReason = prompt(`Vui lòng nhập lý do từ chối lịch hẹn của khách ${booking.name}:`, "Khung giờ đã kín / Showroom tạm thời nâng cấp");
+      if (inputReason === null) {
+        return; // Hủy thao tác nếu ấn nút Cancel
+      }
+      reason = inputReason.trim() || "Từ chối lịch hẹn";
+      booking.message = (booking.message ? booking.message + " | " : "") + `Lý do: ${reason}`;
+    }
+
     booking.status = newStatus;
     localStorage.setItem(STORAGE_KEY_BOOKINGS, JSON.stringify(bookingsList));
+    localStorage.setItem(CACHE_KEY_BOOKINGS, JSON.stringify(bookingsList));
 
     if (window.apiService && typeof window.apiService.updateBookingStatus === "function") {
-      window.apiService.updateBookingStatus(bookingId, newStatus).catch(() => {});
+      window.apiService.updateBookingStatus(bookingId, newStatus, reason).catch(() => {});
     }
 
     if (typeof window.showToast === "function") {

@@ -266,25 +266,60 @@
     /**
      * Đơn hàng: Cập nhật trạng thái
      */
-    async updateOrderStatus(orderIdOrCode, status) {
+    async updateOrderStatus(orderIdOrCode, status, reason) {
       try {
         const localOrders = JSON.parse(localStorage.getItem("nexus_orders") || "[]");
         let found = false;
         const updated = localOrders.map(o => {
           if (o.id === orderIdOrCode || o.code === orderIdOrCode) {
             found = true;
-            return { ...o, status };
+            return {
+              ...o,
+              status,
+              notes: reason || o.notes || "",
+              cancelReason: reason || o.cancelReason || ""
+            };
           }
           return o;
         });
         if (found) localStorage.setItem("nexus_orders", JSON.stringify(updated));
+
+        // Cập nhật vào từng storage user nếu có
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith("nexus_orders_")) {
+            try {
+              const uOrders = JSON.parse(localStorage.getItem(k) || "[]");
+              let uFound = false;
+              const uUpdated = uOrders.map(uo => {
+                if (uo.id === orderIdOrCode || uo.code === orderIdOrCode) {
+                  uFound = true;
+                  return {
+                    ...uo,
+                    status,
+                    notes: reason || uo.notes || "",
+                    cancelReason: reason || uo.cancelReason || ""
+                  };
+                }
+                return uo;
+              });
+              if (uFound) localStorage.setItem(k, JSON.stringify(uUpdated));
+            } catch (errKey) {}
+          }
+        }
       } catch (e) {}
 
       try {
         const res = await fetch(`${API_BASE}/orders`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: orderIdOrCode, code: orderIdOrCode, status })
+          body: JSON.stringify({
+            id: orderIdOrCode,
+            code: orderIdOrCode,
+            status,
+            reason: reason || "",
+            notes: reason || ""
+          })
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();
@@ -339,10 +374,14 @@
     /**
      * Lịch hẹn: Cập nhật trạng thái
      */
-    async updateBookingStatus(bookingId, status) {
+    async updateBookingStatus(bookingId, status, reason) {
       try {
         const bookings = JSON.parse(localStorage.getItem("nexus_bookings") || "[]");
-        const updated = bookings.map(b => (b.id === bookingId ? { ...b, status } : b));
+        const updated = bookings.map(b => (b.id === bookingId ? {
+          ...b,
+          status,
+          message: reason ? (b.message ? b.message + " | Lý do: " + reason : "Lý do: " + reason) : b.message
+        } : b));
         localStorage.setItem("nexus_bookings", JSON.stringify(updated));
       } catch (e) {}
 
@@ -350,7 +389,7 @@
         const res = await fetch(`${API_BASE}/bookings`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: bookingId, status })
+          body: JSON.stringify({ id: bookingId, bookingId, status, reason: reason || "" })
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();

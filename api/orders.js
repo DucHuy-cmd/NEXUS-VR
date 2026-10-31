@@ -45,6 +45,7 @@ module.exports = async function handler(req, res) {
           shippingFee: Number(row.shipping_fee || 0),
           paymentMethod: row.payment_method,
           status: row.status,
+          notes: row.notes || "",
           items: typeof row.items === "string" ? JSON.parse(row.items) : row.items,
           createdAt: new Date(row.created_at).toLocaleString("vi-VN")
         }));
@@ -109,19 +110,28 @@ module.exports = async function handler(req, res) {
 
   // 3. PATCH: CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG (DÀNH CHO ADMIN HOẶC XÁC NHẬN NHẬN HÀNG)
   if (req.method === "PATCH") {
-    const { orderId, code, status } = req.body || {};
+    const { orderId, id, code, status, reason, notes } = req.body || {};
     const newStatus = status;
+    const targetId = orderId || id;
+    const cancelNote = reason || notes || null;
 
-    if (!newStatus || (!orderId && !code)) {
+    if (!newStatus || (!targetId && !code)) {
       return res.status(400).json({ success: false, message: "Thiếu thông tin cập nhật." });
     }
 
     if (hasDatabaseConfigured()) {
       try {
-        await query(
-          "UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 OR order_code = $3",
-          [newStatus, orderId || "", code || ""]
-        );
+        if (cancelNote) {
+          await query(
+            "UPDATE orders SET status = $1, notes = $2, updated_at = NOW() WHERE id = $3 OR order_code = $4",
+            [newStatus, cancelNote, targetId || "", code || ""]
+          );
+        } else {
+          await query(
+            "UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 OR order_code = $3",
+            [newStatus, targetId || "", code || ""]
+          );
+        }
       } catch (err) {
         console.error("[Orders PATCH] Lỗi cập nhật DB:", err.message);
       }
