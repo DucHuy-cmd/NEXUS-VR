@@ -19,12 +19,55 @@
 
   document.addEventListener("DOMContentLoaded", initAdminDashboard);
 
-  function initAdminDashboard() {
+  async function initAdminDashboard() {
     initAuthCheck();
     initTabNavigation();
     loadAllData();
     renderAllViews();
     initSearchAndFilters();
+    checkDatabaseConnection();
+  }
+
+  async function checkDatabaseConnection() {
+    const dot = document.getElementById("adminLiveDot");
+    const text = document.getElementById("adminLiveText");
+    if (!dot || !text) return;
+
+    if (window.apiService && typeof window.apiService.checkHealth === "function") {
+      try {
+        const res = await window.apiService.checkHealth();
+        if (res.database && res.database.connected) {
+          dot.style.background = "#4CAF50";
+          text.textContent = "DB: PostgreSQL Online";
+          text.title = `Cơ sở dữ liệu đám mây: ${res.database.host || "Vercel Neon"}`;
+          await refreshDataFromServerless();
+        } else {
+          dot.style.background = "#FF9800";
+          text.textContent = "DB: Hybrid Local Mode";
+          text.title = "Đang chạy chế độ lưu trữ cục bộ an toàn (Sẵn sàng kết nối Vercel Postgres)";
+        }
+      } catch (e) {
+        dot.style.background = "#FF9800";
+        text.textContent = "DB: Hybrid Local Mode";
+      }
+    }
+  }
+
+  async function refreshDataFromServerless() {
+    if (!window.apiService) return;
+    try {
+      const serverOrders = await window.apiService.getOrders({ isAdmin: true });
+      if (serverOrders && Array.isArray(serverOrders) && serverOrders.length > 0) {
+        ordersList = serverOrders;
+      }
+      const serverBookings = await window.apiService.getBookings();
+      if (serverBookings && Array.isArray(serverBookings) && serverBookings.length > 0) {
+        bookingsList = serverBookings;
+      }
+      renderAllViews();
+    } catch (e) {
+      console.warn("[Admin] Nạp dữ liệu serverless thất bại, dùng local:", e);
+    }
   }
 
   /* ---------------------------------------------------------
@@ -475,7 +518,7 @@
   }
 
   /* ---------------------------------------------------------
-     8. GLOBAL ACTIONS CHO GIAO DIỆN ADMIN
+     8. GLOBAL ACTIONS CHO GIAO DIỆN ADMIN (HYBRID API + LOCAL)
      --------------------------------------------------------- */
   global.__adminUpdateOrderStatus = function (orderIdOrCode, newStatus) {
     const order = ordersList.find((o) => o.id === orderIdOrCode || o.code === orderIdOrCode);
@@ -484,8 +527,13 @@
     order.status = newStatus;
     localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(ordersList));
 
+    if (window.apiService && typeof window.apiService.updateOrderStatus === "function") {
+      window.apiService.updateOrderStatus(orderIdOrCode, newStatus).catch(() => {});
+    }
+
     if (typeof window.showToast === "function") {
-      window.showToast(`Đã chuyển trạng thái đơn hàng ${order.code} sang "${newStatus === 'completed' ? 'Đã giao' : 'Đã hủy'}"!`, "success");
+      const statusVN = newStatus === "completed" ? "Đã giao" : newStatus === "cancelled" ? "Đã hủy" : "Đang xử lý";
+      window.showToast(`Đã chuyển trạng thái đơn hàng ${order.code} sang "${statusVN}"!`, "success");
     }
     renderKPIs();
     renderOverviewTables();
@@ -498,6 +546,10 @@
 
     booking.status = newStatus;
     localStorage.setItem(STORAGE_KEY_BOOKINGS, JSON.stringify(bookingsList));
+
+    if (window.apiService && typeof window.apiService.updateBookingStatus === "function") {
+      window.apiService.updateBookingStatus(bookingId, newStatus).catch(() => {});
+    }
 
     if (typeof window.showToast === "function") {
       window.showToast(`Đã cập nhật lịch hẹn của ${booking.name}!`, "success");
@@ -512,6 +564,11 @@
       p.stock = Math.max(0, (p.stock || 0) + delta);
       const stockEl = document.getElementById("stock-" + productId);
       if (stockEl) stockEl.textContent = p.stock;
+
+      if (window.apiService && typeof window.apiService.updateProductStock === "function") {
+        window.apiService.updateProductStock(productId, p.stock).catch(() => {});
+      }
+
       if (typeof window.showToast === "function") {
         window.showToast(`Đã cập nhật tồn kho ${p.name}: ${p.stock}`, "success");
       }

@@ -916,6 +916,21 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     existingOrders.unshift(newOrder);
     localStorage.setItem(orderKey, JSON.stringify(existingOrders));
 
+    // Đồng bộ vào kho nexus_orders tổng cho Admin và gửi lên Serverless API / PostgreSQL
+    try {
+      const masterOrders = JSON.parse(localStorage.getItem("nexus_orders") || "[]");
+      masterOrders.unshift(newOrder);
+      localStorage.setItem("nexus_orders", JSON.stringify(masterOrders));
+
+      if (window.apiService && typeof window.apiService.createOrder === "function") {
+        window.apiService.createOrder(newOrder).catch(function(e) {
+          console.warn("[checkout] Gửi đơn hàng lên serverless:", e);
+        });
+      }
+    } catch (errSync) {
+      console.warn("[checkout] Lỗi đồng bộ master orders:", errSync);
+    }
+
     // Xóa giỏ hàng và xóa voucher đã sử dụng
     if (window.cartManager && typeof window.cartManager.clear === "function") {
       window.cartManager.clear();

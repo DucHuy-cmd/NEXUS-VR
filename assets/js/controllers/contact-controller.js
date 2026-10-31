@@ -1234,6 +1234,12 @@
           var existingBookings = JSON.parse(localStorage.getItem("nexus_bookings") || "[]");
           existingBookings.unshift(newBooking);
           localStorage.setItem("nexus_bookings", JSON.stringify(existingBookings));
+
+          if (window.apiService && typeof window.apiService.createBooking === "function") {
+            window.apiService.createBooking(newBooking).catch(function(e) {
+              console.warn("[contact] Lỗi gửi booking lên serverless:", e);
+            });
+          }
           
           showNotification("Đặt lịch VIP thành công! Yêu cầu đã được gửi đến Ban Quản Trị NEXUS VR.", "success");
         } catch (err) {

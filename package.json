@@ -1,0 +1,15 @@
+{
+  "name": "nexus-vr",
+  "version": "1.0.0",
+  "description": "NEXUS VR E-Commerce Platform with Serverless SQL API",
+  "main": "api/health.js",
+  "scripts": {
+    "test": "node api/health.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
