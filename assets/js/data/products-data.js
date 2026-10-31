@@ -2,6 +2,7 @@
    NEXUS VR — data/products-data.js
    TẦNG 1 - DATA & SERVICES: PRODUCT CATALOG & POSTS
    Catalog chuẩn 18 sản phẩm (11 Kính VR, 2 Tay cầm, 5 Phụ kiện)
+   Đã tối ưu 100% ánh xạ màu sắc & hình ảnh thực tế (1-to-1 Swatches)
    ========================================================= */
 
 const PRODUCTS = [
@@ -165,12 +166,6 @@ const PRODUCTS = [
         "name": "Xám Than",
         "hex": "#1D1916",
         "imageIndex": 0,
-        "image": "assets/images/products/vr-vision-studio.webp"
-      },
-      {
-        "name": "Titanium",
-        "hex": "#4B4F56",
-        "imageIndex": 1,
         "image": "assets/images/products/vr-vision-studio.webp"
       }
     ],
@@ -349,17 +344,10 @@ const PRODUCTS = [
         "hex": "#9F9FA1",
         "imageIndex": 0,
         "image": "assets/images/products/hero-vr-headset-xam.webp"
-      },
-      {
-        "name": "Trắng Nâu",
-        "hex": "#EFEBE5",
-        "imageIndex": 1,
-        "image": "assets/images/products/vr-horizon-quest.webp"
       }
     ],
     "images": [
-      "assets/images/products/hero-vr-headset-xam.webp",
-      "assets/images/products/vr-horizon-quest.webp"
+      "assets/images/products/hero-vr-headset-xam.webp"
     ],
     "shortDesc": "Lựa chọn thực tế ảo di động, gọn nhẹ và đa dụng. Thiết kế tối giản.",
     "description": "NEXUS Air Lite mang đến trải nghiệm VR mượt mà với mức giá dễ tiếp cận. Thiết kế siêu nhẹ 295g, không cần kết nối dây rườm rà, tối ưu cho nhu cầu giải trí và làm việc văn phòng không gian.",
@@ -776,12 +764,6 @@ const PRODUCTS = [
         "hex": "#4B4F56",
         "imageIndex": 0,
         "image": "assets/images/products/stylus-xr.webp"
-      },
-      {
-        "name": "Champagne",
-        "hex": "#C8B29B",
-        "imageIndex": 1,
-        "image": "assets/images/products/stylus-xr.webp"
       }
     ],
     "images": [
@@ -1097,12 +1079,6 @@ const PRODUCTS = [
         "name": "Champagne",
         "hex": "#C8B29B",
         "imageIndex": 0,
-        "image": "assets/images/products/battery-pack.webp"
-      },
-      {
-        "name": "Titanium",
-        "hex": "#4B4F56",
-        "imageIndex": 1,
         "image": "assets/images/products/battery-pack.webp"
       }
     ],
