@@ -232,6 +232,7 @@ function updateUserState() {
           <span class="navbar__user-name"></span>
         </a>
         <div class="navbar__user-dropdown">
+          <a href="orders.html">Đơn hàng của tôi</a>
           <a href="login.html">Hồ sơ cá nhân</a>
           <a href="#" id="navbar-logout-btn">Đăng xuất</a>
         </div>
