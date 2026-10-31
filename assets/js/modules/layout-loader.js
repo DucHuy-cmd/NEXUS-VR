@@ -225,13 +225,15 @@ function updateUserState() {
   const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   
   if (user && user.name) {
+    const isAdmin = user && (user.role === "admin" || user.email === "admin@nexusvr.vn");
     slot.innerHTML = `
       <div class="navbar__user-pill-wrap">
-        <a href="login.html" class="navbar__user-pill" aria-label="Tài khoản cá nhân">
+        <a href="${isAdmin ? 'admin.html' : 'login.html'}" class="navbar__user-pill" aria-label="Tài khoản cá nhân" style="${isAdmin ? 'border-color: #A67C52; background: rgba(166,124,82,0.15);' : ''}">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-          <span class="navbar__user-name"></span>
+          <span class="navbar__user-name">${isAdmin ? '[Admin] ' : ''}</span>
         </a>
         <div class="navbar__user-dropdown">
+          ${isAdmin ? '<a href="admin.html" style="color:#A67C52; font-weight:700;">✦ Bảng Quản Trị (Admin)</a>' : ''}
           <a href="orders.html">Đơn hàng của tôi</a>
           <a href="login.html">Hồ sơ cá nhân</a>
           <a href="#" id="navbar-logout-btn">Đăng xuất</a>

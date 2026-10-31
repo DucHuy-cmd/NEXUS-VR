@@ -34,6 +34,21 @@
     initConfirmCancelModal();
     updateTabBadges();
     renderOrders();
+
+    // HỖ TRỢ IN HÓA ĐƠN TỰ ĐỘNG TỪ ADMIN CONSOLE (?print=#NEXUS-...)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const printCode = urlParams.get("print");
+      if (printCode) {
+        const allOrders = getOrders();
+        const targetOrder = allOrders.find(o => o.code === printCode || o.id === printCode);
+        if (targetOrder) {
+          setTimeout(() => {
+            printSingleOrderInvoice(targetOrder.id);
+          }, 600);
+        }
+      }
+    } catch (e) {}
   }
 
   /* --------------------------------------------------------------------------

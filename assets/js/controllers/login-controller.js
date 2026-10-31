@@ -235,9 +235,24 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
       }
 
       if (typeof window.showToast === "function") {
-        window.showToast("Đã nạp tài khoản mẫu: tuong@gmail.com / 123456", "info");
+        window.showToast("Đã nạp tài khoản Khách hàng mẫu: tuong@gmail.com / 123456", "info");
       }
     });
+
+    const fillAdminBtn = document.getElementById("fillAdminDemoBtn");
+    if (fillAdminBtn) {
+      fillAdminBtn.addEventListener("click", () => {
+        const accountInput = document.getElementById("loginAccount");
+        const pwdInput = document.getElementById("loginPassword");
+        if (accountInput && pwdInput) {
+          accountInput.value = "admin@nexusvr.vn";
+          pwdInput.value = "admin123";
+        }
+        if (typeof window.showToast === "function") {
+          window.showToast("Đã nạp tài khoản Admin: admin@nexusvr.vn / admin123 (Nhấn Đăng nhập để vào Admin Console)", "info");
+        }
+      });
+    }
   }
 
   /* --------------------------------------------------------------------------
@@ -273,6 +288,28 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
 
       if (hasError) return;
 
+      // KIỂM TRA ĐĂNG NHẬP QUẢN TRỊ VIÊN (ADMIN ROOT)
+      if (accountVal === "admin@nexusvr.vn" && passwordVal === "admin123") {
+        const adminUser = {
+          account: "admin@nexusvr.vn",
+          email: "admin@nexusvr.vn",
+          password: "admin123",
+          name: "Quản Trị Viên",
+          fullName: "Quản Trị Viên NEXUS",
+          phone: "0901234567",
+          role: "admin",
+          joinedDate: "10/2026"
+        };
+        saveCurrentSession(adminUser);
+        if (typeof window.showToast === "function") {
+          window.showToast("Đăng nhập thành công với quyền Quản Trị Viên! Đang mở Admin Dashboard...", "success");
+        }
+        setTimeout(() => {
+          window.location.href = "admin.html";
+        }, 900);
+        return;
+      }
+
       const registeredUsers = getRegisteredUsers();
       const matchedUser = registeredUsers.find(
         (u) => (u.account === accountVal || u.email === accountVal || u.phone === accountVal) && u.password === passwordVal
@@ -293,7 +330,11 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
       initProfileState();
 
       setTimeout(() => {
-        window.location.href = "index.html";
+        if (matchedUser && matchedUser.role === "admin") {
+          window.location.href = "admin.html";
+        } else {
+          window.location.href = "index.html";
+        }
       }, 1000);
     });
   }
@@ -344,6 +385,28 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
       }
 
       if (hasError) return;
+
+      // KIỂM TRA ĐĂNG NHẬP QUẢN TRỊ VIÊN (ADMIN ROOT)
+      if (accountVal === "admin@nexusvr.vn" && passwordVal === "admin123") {
+        const adminUser = {
+          account: "admin@nexusvr.vn",
+          email: "admin@nexusvr.vn",
+          password: "admin123",
+          name: "Quản Trị Viên",
+          fullName: "Quản Trị Viên NEXUS",
+          phone: "0901234567",
+          role: "admin",
+          joinedDate: "10/2026"
+        };
+        saveCurrentSession(adminUser);
+        if (typeof window.showToast === "function") {
+          window.showToast("Đăng nhập thành công với quyền Quản Trị Viên! Đang mở Admin Dashboard...", "success");
+        }
+        setTimeout(() => {
+          window.location.href = "admin.html";
+        }, 900);
+        return;
+      }
 
       const registeredUsers = getRegisteredUsers();
       if (registeredUsers.some((u) => u.account === accountVal || u.email === accountVal || u.phone === accountVal)) {

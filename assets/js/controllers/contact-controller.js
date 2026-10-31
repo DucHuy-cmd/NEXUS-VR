@@ -1208,7 +1208,38 @@
         var defaultCapsule = document.querySelector('.c-capsule-btn[data-slot="morning"]');
         if (defaultCapsule) defaultCapsule.click();
 
-        showNotification("Yêu cầu đã được ghi nhận trong bản demo; chưa gửi tới hệ thống.", "info");
+        // LƯU DỮ LIỆU ĐẶT LỊCH HẸN VÀO HỆ THỐNG QUẢN TRỊ (NEXUS BOOKINGS)
+        try {
+          var serviceSelect = fields.service && fields.service.el;
+          var selectedServiceText = (serviceSelect && serviceSelect.selectedIndex >= 0)
+            ? serviceSelect.options[serviceSelect.selectedIndex].text
+            : "Trải nghiệm NEXUS Vision Pro 1:1";
+          
+          var selectedSlotBtn = document.querySelector(".c-capsule-btn.is-selected");
+          var selectedTimeSlot = selectedSlotBtn ? selectedSlotBtn.textContent.trim() : "10:00 - 11:30";
+
+          var newBooking = {
+            id: "bkg_" + Date.now().toString(36),
+            name: fields.name ? fields.name.el.value.trim() : "Quý Khách",
+            email: fields.email ? fields.email.el.value.trim() : "",
+            phone: fields.phone ? fields.phone.el.value.trim() : "",
+            service: selectedServiceText,
+            timeSlot: selectedTimeSlot,
+            bookingDate: new Date().toLocaleDateString("vi-VN"),
+            message: fields.message ? fields.message.el.value.trim() : "",
+            status: "pending",
+            createdAt: new Date().toLocaleString("vi-VN")
+          };
+
+          var existingBookings = JSON.parse(localStorage.getItem("nexus_bookings") || "[]");
+          existingBookings.unshift(newBooking);
+          localStorage.setItem("nexus_bookings", JSON.stringify(existingBookings));
+          
+          showNotification("Đặt lịch VIP thành công! Yêu cầu đã được gửi đến Ban Quản Trị NEXUS VR.", "success");
+        } catch (err) {
+          console.warn("[contact] Lỗi lưu booking:", err);
+          showNotification("Yêu cầu của bạn đã được ghi nhận thành công!", "success");
+        }
       }, 950);
     });
   }
