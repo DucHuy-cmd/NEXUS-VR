@@ -14,3 +14,10 @@ Thumbs.db
 # IDE & AI Assistant rules
 .agent/
 .cursorrules
+
+
+# Báo cáo học thuật & Đề cương đồ án (chỉ lưu trữ cục bộ trên máy, không đưa lên GitHub)
+CauTruc/
+Chuong_3_Thiet_Ke_Va_Trien_Khai_Website.docx
+De_Cuong_Chi_Tiet_Bao_Cao_NEXUS_VR.pdf
+Bao quát dự án.txt
