@@ -466,6 +466,12 @@
 
   grid.addEventListener('click', handleProductGridClick);
 
+  // Đọc từ khóa tìm kiếm từ URL parameter (?search=... hoặc ?q=...)
+  const urlSearchQuery = new URLSearchParams(window.location.search).get('search') || new URLSearchParams(window.location.search).get('q');
+  if (urlSearchQuery && searchInput) {
+    searchInput.value = urlSearchQuery;
+  }
+
   priceRangeValue.textContent = formatVND(Number(priceRange.value));
   update();
 })();

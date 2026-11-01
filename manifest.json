@@ -1,0 +1,26 @@
+{
+  "name": "NEXUS VR — Điện Toán Không Gian & Thiết Bị VR Cao Cấp",
+  "short_name": "NEXUS VR",
+  "description": "Nền tảng thương mại điện tử kính thực tế ảo và thiết bị không gian điện toán cao cấp hàng đầu Việt Nam.",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#12100E",
+  "theme_color": "#A67C52",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/images/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/images/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "technology", "lifestyle"]
+}

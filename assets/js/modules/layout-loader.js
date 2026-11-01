@@ -274,23 +274,74 @@ function initLiveSearch() {
   const dropdown = document.getElementById("search-dropdown");
   if (!input || !dropdown || typeof PRODUCTS === "undefined") return;
 
+  const escapeSearchHtml = (str) => {
+    return String(str || "").replace(/[&<>"']/g, (m) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[m]);
+  };
+
   input.addEventListener("input", () => {
     const q = input.value.trim().toLowerCase();
-    if (!q) { dropdown.classList.remove("is-open"); return; }
+    if (!q) {
+      dropdown.classList.remove("is-open");
+      return;
+    }
 
-    const results = PRODUCTS.filter(p => p.name.toLowerCase().includes(q) || (p.shortDesc && p.shortDesc.toLowerCase().includes(q))).slice(0, 4);
-    dropdown.innerHTML = results.length === 0
-      ? `<div class="search-dropdown__empty">Không tìm thấy sản phẩm phù hợp</div>`
-      : results.map(p => `
-          <a href="product.html?id=${p.id}" class="search-dropdown__item">
-            <img src="${p.images[0]}" alt="${p.name}" class="search-dropdown__thumb" onerror="this.onerror=null; this.src='assets/images/placeholder.svg';">
-            <div class="search-dropdown__info">
-              <span class="search-dropdown__name">${p.name}</span>
-              <span class="search-dropdown__price">${p.price.toLocaleString("vi-VN")}₫</span>
-            </div>
+    const results = PRODUCTS.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        (p.shortDesc && p.shortDesc.toLowerCase().includes(q)) ||
+        (p.category && p.category.toLowerCase().includes(q))
+    ).slice(0, 5);
+
+    if (results.length === 0) {
+      dropdown.innerHTML = `<div class="search-dropdown__empty">Không tìm thấy sản phẩm nào với từ khóa "<strong>${escapeSearchHtml(input.value.trim())}</strong>"</div>`;
+    } else {
+      const itemsHtml = results
+        .map((p) => {
+          const categoryTag = p.category === "accessories" ? "Phụ kiện VIP" : "Kính VR";
+          return `
+            <a href="product.html?id=${p.id}" class="search-dropdown__item">
+              <img src="${p.images[0]}" alt="${escapeSearchHtml(p.name)}" class="search-dropdown__thumb" onerror="this.onerror=null; this.src='assets/images/placeholder.svg';">
+              <div class="search-dropdown__info">
+                <span class="search-dropdown__name">${escapeSearchHtml(p.name)}</span>
+                <div class="search-dropdown__meta">
+                  <span class="search-dropdown__tag">${categoryTag}</span>
+                  <span class="search-dropdown__price">${p.price.toLocaleString("vi-VN")} ₫</span>
+                </div>
+              </div>
+            </a>
+          `;
+        })
+        .join("");
+
+      const footerHtml = `
+        <div class="search-dropdown__footer">
+          <a href="shop.html?search=${encodeURIComponent(input.value.trim())}" class="search-dropdown__view-all">
+            Xem tất cả kết quả cho "${escapeSearchHtml(input.value.trim())}" →
           </a>
-        `).join("");
+        </div>
+      `;
+
+      dropdown.innerHTML = itemsHtml + footerHtml;
+    }
+
     dropdown.classList.add("is-open");
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const q = input.value.trim();
+      if (q) {
+        window.location.href = `shop.html?search=${encodeURIComponent(q)}`;
+      }
+    } else if (e.key === "Escape") {
+      dropdown.classList.remove("is-open");
+    }
   });
 
   document.addEventListener("click", (e) => {
@@ -960,6 +1011,12 @@ function initAllLayout() {
   updateUserState();
   initLiveSearch();
   syncAllPageWishlistButtons();
+
+  if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
 }
 
 if (document.readyState === "loading") {

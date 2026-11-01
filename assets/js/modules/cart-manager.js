@@ -10,11 +10,23 @@
 
   const CART_KEY = 'nexus_cart';
   const FREE_SHIPPING_THRESHOLD = 50000000; // 50.000.000đ
-  const VALID_COUPONS = {
-    'KM10VR': { type: 'percent', rate: 0.10, label: 'Giảm 10%' },
-    'NEXUS10': { type: 'percent', rate: 0.10, label: 'Giảm 10%' },
-    'FREESHIP': { type: 'freeship', rate: 0, label: 'Miễn phí vận chuyển' }
+  const DEFAULT_COUPONS = {
+    'KM10VR': { code: 'KM10VR', type: 'percent', rate: 0.10, label: 'Giảm 10%', desc: 'Ưu đãi thành viên mới - Giảm 10%', disabled: false },
+    'NEXUS10': { code: 'NEXUS10', type: 'percent', rate: 0.10, label: 'Giảm 10%', desc: 'Mã tri ân khách hàng NEXUS VR - Giảm 10%', disabled: false },
+    'VIP2026': { code: 'VIP2026', type: 'percent', rate: 0.15, label: 'Giảm 15% VIP', minOrder: 30000000, desc: 'Đặc quyền VIP 2026 cho đơn từ 30tr - Giảm 15%', disabled: false },
+    'FREESHIP': { code: 'FREESHIP', type: 'freeship', rate: 0, label: 'Miễn phí vận chuyển', desc: 'Miễn phí giao hàng VIP toàn quốc', disabled: false }
   };
+
+  function getAllCoupons() {
+    try {
+      const raw = localStorage.getItem('nexus_coupons');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) return parsed;
+      }
+    } catch (e) {}
+    return DEFAULT_COUPONS;
+  }
 
   let activeCoupon = null;
 
@@ -351,28 +363,47 @@
 
   function applyCoupon(code) {
     const normalized = String(code || '').trim().toUpperCase();
+    const coupons = getAllCoupons();
 
-    if (VALID_COUPONS[normalized]) {
+    if (coupons[normalized]) {
+      const c = coupons[normalized];
+      if (c.disabled) {
+        activeCoupon = null;
+        return { valid: false, success: false, message: 'Mã giảm giá này hiện đang tạm dừng', code: null, rate: 0 };
+      }
+      const subtotal = getSubtotal();
+      if (c.minOrder && subtotal < c.minOrder) {
+        activeCoupon = null;
+        return { valid: false, success: false, message: `Mã này chỉ áp dụng cho đơn từ ${(c.minOrder).toLocaleString('vi-VN')} ₫`, code: null, rate: 0 };
+      }
+
       activeCoupon = {
         code: normalized,
-        ...VALID_COUPONS[normalized]
+        ...c,
+        label: c.label || (c.type === 'percent' ? `Giảm ${Math.round(c.rate * 100)}%` : (c.type === 'fixed' ? `Giảm ${Number(c.rate).toLocaleString('vi-VN')} ₫` : 'Miễn phí vận chuyển'))
       };
+
       return {
         valid: true,
+        success: true,
         code: normalized,
         label: activeCoupon.label,
-        rate: activeCoupon.rate
+        rate: activeCoupon.rate,
+        type: activeCoupon.type
       };
     }
 
     activeCoupon = null;
-    return { valid: false, code: null, rate: 0 };
+    return { valid: false, success: false, code: null, rate: 0 };
   }
 
   function getDiscount(subtotal = getSubtotal()) {
     if (!activeCoupon) return 0;
     if (activeCoupon.type === 'percent') {
-      return Math.round(subtotal * activeCoupon.rate);
+      return Math.round(subtotal * (activeCoupon.rate || 0));
+    }
+    if (activeCoupon.type === 'fixed') {
+      return Math.min(subtotal, Number(activeCoupon.rate) || 0);
     }
     return 0;
   }

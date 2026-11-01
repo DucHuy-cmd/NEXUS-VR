@@ -7,6 +7,9 @@
 <meta name="description" content="Xem chi tiết sản phẩm kính thực tế ảo NEXUS VR, thông số kỹ thuật, hình ảnh thực tế và đánh giá.">
 <meta name="theme-color" content="#F9F6F0">
 <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <!-- OPEN GRAPH (SEO / Social Share) -->
 <meta property="og:type" content="product">
@@ -110,6 +113,22 @@
               <span id="pd-wishlist-text">Yêu thích</span>
             </button>
           </div>
+
+          <!-- BANNER TRẢ GÓP 0% LINH HOẠT -->
+          <div class="installment-badge-bar" id="installmentBadgeBar">
+            <div class="installment-badge-left">
+              <span class="installment-badge-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+              </span>
+              <div class="installment-badge-content">
+                <span class="installment-badge-tag">ĐẶC QUYỀN VIP 0% LÃI SUẤT</span>
+                <span class="installment-badge-text">Trả góp chỉ từ <strong id="pd-installment-monthly">0 ₫/tháng</strong></span>
+              </div>
+            </div>
+            <button type="button" class="btn-open-installment-modal" id="btnOpenInstallment">
+              Bảng tính 0% ›
+            </button>
+          </div>
         </div>
       </div>
 
@@ -118,6 +137,7 @@
         <div class="product-detail__tabs-nav" role="tablist">
           <button type="button" class="product-detail__tab-btn is-active" data-tab="desc" role="tab" aria-selected="true">Mô tả</button>
           <button type="button" class="product-detail__tab-btn" data-tab="specs" role="tab" aria-selected="false">Thông số kỹ thuật</button>
+          <button type="button" class="product-detail__tab-btn" data-tab="compare" role="tab" aria-selected="false">So sánh cấu hình</button>
           <button type="button" class="product-detail__tab-btn" data-tab="reviews" role="tab" aria-selected="false">Đánh giá (<span id="pd-tab-review-count">0</span>)</button>
         </div>
 
@@ -127,6 +147,72 @@
 
         <div class="product-detail__tab-panel" data-tab-panel="specs" role="tabpanel" hidden>
           <table class="product-detail__specs-table" id="pd-specs-table"></table>
+        </div>
+
+        <!-- TAB SO SÁNH CẤU HÌNH CÁC DÒNG KÍNH VR -->
+        <div class="product-detail__tab-panel" data-tab-panel="compare" role="tabpanel" hidden>
+          <div class="compare-matrix-wrap">
+            <div class="compare-matrix-header">
+              <h3 style="margin: 0; font-family: var(--font-head); font-size: 1.15rem; color: var(--text-primary);">Bảng Đối Soát Cấu Hình Flagship NEXUS VR Series</h3>
+              <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">So sánh trực quan các thông số cốt lõi giúp bạn chọn thiết bị thực tế ảo hoàn hảo nhất.</p>
+            </div>
+            <div class="table-responsive">
+              <table class="compare-table">
+                <thead>
+                  <tr>
+                    <th>Tiêu chí cấu hình</th>
+                    <th class="col-highlight">NEXUS Vision Pro<span class="tag-flagship">Flagship Đỉnh Cao</span></th>
+                    <th>NEXUS Vision Studio<span>Sáng Tạo &amp; Đồ Họa</span></th>
+                    <th>NEXUS Air Lite<span>Siêu Nhẹ Giải Trí</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Màn hình &amp; Độ phân giải</strong></td>
+                    <td class="col-highlight">Micro-OLED Kép 8K (3840×2160/mắt)</td>
+                    <td>Micro-OLED Kép 4K (2048×2048/mắt)</td>
+                    <td>Fast-LCD Kép 2.5K (1832×1920/mắt)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Tần số quét hình ảnh</strong></td>
+                    <td class="col-highlight">120Hz Spatial Motion Pro</td>
+                    <td>90Hz - 120Hz Ultra Smooth</td>
+                    <td>90Hz Dynamic Refresh</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Trọng lượng thân kính</strong></td>
+                    <td class="col-highlight">420g (Vải dệt 3D siêu êm)</td>
+                    <td>380g (Hợp kim Magie siêu bền)</td>
+                    <td>295g (Thân nhựa hàng không siêu nhẹ)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Vi xử lý tính toán</strong></td>
+                    <td class="col-highlight">Dual-Chip Apple M2 + R1 Sensor Processor</td>
+                    <td>NEXUS Quantum Spatial Core Octa-core</td>
+                    <td>Snapdragon XR2 Gen 2 Platform</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Theo dõi mắt &amp; Cử chỉ tay</strong></td>
+                    <td class="col-highlight">12 Camera + LiDAR Scanner 3D + Eye-Tracking 0ms</td>
+                    <td>8 Camera + Eye-Tracking chuẩn xác</td>
+                    <td>4 Camera quang học + Bộ điều khiển cầm tay</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Thời lượng pin</strong></td>
+                    <td class="col-highlight">3.5 giờ (Kèm dock pin MagSafe dự phòng)</td>
+                    <td>3.0 giờ liên tục</td>
+                    <td>4.0 giờ đàm thoại &amp; phim ảnh</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Giá niêm yết chính hãng</strong></td>
+                    <td class="col-highlight"><strong style="color: var(--accent-deep); font-size: 1.05rem;">79.990.000 ₫</strong></td>
+                    <td><strong style="color: var(--text-primary); font-size: 1rem;">49.990.000 ₫</strong></td>
+                    <td><strong style="color: var(--text-primary); font-size: 1rem;">24.990.000 ₫</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <div class="product-detail__tab-panel" data-tab-panel="reviews" role="tabpanel" hidden>
@@ -200,6 +286,83 @@
     </div>
   </div>
 </main>
+
+  <!-- MODAL BẢNG TÍNH TRẢ GÓP 0% QUA 25 NGÂN HÀNG LIÊN KẾT -->
+  <div class="installment-modal-overlay" id="installmentModalOverlay" style="display: none;">
+    <div class="installment-modal-card">
+      <div class="installment-modal-header">
+        <div>
+          <span class="installment-modal-badge">ƯU ĐÃI LIÊN KẾT 25 NGÂN HÀNG</span>
+          <h3 class="installment-modal-title">Bảng Tính Trả Góp 0% Lãi Suất</h3>
+        </div>
+        <button type="button" class="btn-installment-modal-close" id="btnCloseInstallmentModal" aria-label="Đóng">&times;</button>
+      </div>
+
+      <div class="installment-modal-body">
+        <!-- PRODUCT SUMMARY MINI -->
+        <div class="installment-prod-summary">
+          <img id="instModalImg" src="assets/images/placeholder.svg" alt="Sản phẩm" class="inst-modal-thumb">
+          <div>
+            <h4 id="instModalName" class="inst-modal-name">Tên sản phẩm</h4>
+            <div class="inst-modal-price">Giá niêm yết: <strong id="instModalPrice" style="color: var(--accent-deep, #A67C52);">0 ₫</strong></div>
+          </div>
+        </div>
+
+        <!-- TERMS TABS -->
+        <div class="installment-terms-nav" id="installmentTermsNav">
+          <button type="button" class="btn-term is-active" data-term="3">3 Tháng</button>
+          <button type="button" class="btn-term" data-term="6">6 Tháng</button>
+          <button type="button" class="btn-term" data-term="9">9 Tháng</button>
+          <button type="button" class="btn-term" data-term="12">12 Tháng</button>
+        </div>
+
+        <!-- CALCULATION BOX -->
+        <div class="installment-calc-card">
+          <div class="calc-card-row">
+            <span>Số tiền thanh toán mỗi tháng:</span>
+            <strong class="calc-highlight" id="instMonthlyPay">0 ₫/tháng</strong>
+          </div>
+          <div class="calc-card-row">
+            <span>Lãi suất ưu đãi:</span>
+            <strong style="color: #2E7D32;">0.0% (NEXUS tài trợ 100%)</strong>
+          </div>
+          <div class="calc-card-row">
+            <span>Phí hồ sơ &amp; bảo hiểm:</span>
+            <span>0 ₫ (Miễn phí)</span>
+          </div>
+          <div class="calc-card-row calc-card-total">
+            <span>Tổng tiền trả góp (<span id="instTermLabel">3</span> tháng):</span>
+            <strong id="instTotalPay">0 ₫</strong>
+          </div>
+        </div>
+
+        <!-- BANK PARTNERS -->
+        <div class="installment-banks-section">
+          <span class="installment-banks-title">Hỗ trợ thẻ tín dụng 25 ngân hàng tại Việt Nam:</span>
+          <div class="bank-tags-wrap">
+            <span class="bank-pill">Vietcombank</span>
+            <span class="bank-pill">Techcombank</span>
+            <span class="bank-pill">MB Bank</span>
+            <span class="bank-pill">VPBank</span>
+            <span class="bank-pill">ACB</span>
+            <span class="bank-pill">BIDV</span>
+            <span class="bank-pill">TPBank</span>
+            <span class="bank-pill">Sacombank</span>
+            <span class="bank-pill">Shinhan Bank</span>
+            <span class="bank-pill">HSBC</span>
+            <span class="bank-pill">VIB</span>
+            <span class="bank-pill">VietinBank</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="installment-modal-footer">
+        <button type="button" class="btn-installment-choose" id="btnApplyInstallmentPlan">
+          Mua Trả Góp 0% Gói Này
+        </button>
+      </div>
+    </div>
+  </div>
 
 <div id="footer-root"></div>
 

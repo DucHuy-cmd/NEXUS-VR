@@ -34,6 +34,7 @@ function initProductDetailPage() {
   initQtyControls(product);
   initWishlistButton(product);
   initAddToCart(product);
+  initInstallmentPlan(product);
 
   root.hidden = false;
 }
@@ -679,4 +680,91 @@ function buildRelatedProductCard(product) {
   card.appendChild(thumb);
   card.appendChild(body);
   return card;
+}
+
+function initInstallmentPlan(product) {
+  const badgeMonthly = document.getElementById("pd-installment-monthly");
+  const modal = document.getElementById("installmentModalOverlay");
+  const btnOpen = document.getElementById("btnOpenInstallment");
+  const btnClose = document.getElementById("btnCloseInstallmentModal");
+  const btnApply = document.getElementById("btnApplyInstallmentPlan");
+
+  const minMonthly = Math.round(product.price / 12);
+  if (badgeMonthly) {
+    badgeMonthly.textContent = minMonthly.toLocaleString("vi-VN") + " ₫/tháng";
+  }
+
+  const modalImg = document.getElementById("instModalImg");
+  const modalName = document.getElementById("instModalName");
+  const modalPrice = document.getElementById("instModalPrice");
+
+  if (modalImg && product.images && product.images[0]) {
+    modalImg.src = product.images[0];
+  }
+  if (modalName) modalName.textContent = product.name;
+  if (modalPrice) modalPrice.textContent = formatVND(product.price);
+
+  let currentTerm = 3;
+  function updateCalc(term) {
+    currentTerm = term;
+    const monthly = Math.round(product.price / term);
+    const monthlyEl = document.getElementById("instMonthlyPay");
+    const termLabel = document.getElementById("instTermLabel");
+    const totalEl = document.getElementById("instTotalPay");
+
+    if (monthlyEl) monthlyEl.textContent = monthly.toLocaleString("vi-VN") + " ₫/tháng";
+    if (termLabel) termLabel.textContent = String(term);
+    if (totalEl) totalEl.textContent = formatVND(product.price);
+  }
+
+  updateCalc(3);
+
+  const termBtns = document.querySelectorAll("#installmentTermsNav .btn-term");
+  termBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      termBtns.forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      const term = Number(btn.dataset.term) || 3;
+      updateCalc(term);
+    });
+  });
+
+  const openModal = () => {
+    if (modal) modal.style.display = "flex";
+  };
+  const closeModal = () => {
+    if (modal) modal.style.display = "none";
+  };
+
+  if (btnOpen) btnOpen.addEventListener("click", openModal);
+  if (btnClose) btnClose.addEventListener("click", closeModal);
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  if (btnApply) {
+    btnApply.addEventListener("click", () => {
+      closeModal();
+      if (window.CartManager && typeof window.CartManager.addItem === "function") {
+        const colorName = product.colors && product.colors[selectedColorIndex]
+          ? product.colors[selectedColorIndex].name
+          : "Mặc định";
+        window.CartManager.addItem(product.id, 1, colorName);
+      } else if (window.cartManager && typeof window.cartManager.addItem === "function") {
+        window.cartManager.addItem(product.id, 1);
+      }
+      if (typeof window.showToast === "function") {
+        window.showToast(`Đã chọn gói trả góp 0% (${currentTerm} tháng) & thêm vào giỏ hàng!`, "success");
+      }
+      if (window.CartManager && typeof window.CartManager.openDrawer === "function") {
+        window.CartManager.openDrawer();
+      }
+    });
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
 }

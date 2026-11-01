@@ -6,6 +6,9 @@
   <title>Bảng Điều Khiển Quản Trị | NEXUS VR Admin</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <!-- FONTS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,6 +91,12 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
         <span>Khách Hàng</span>
         <span class="admin-nav-badge" id="sidebarBadgeUsers" style="background: rgba(33,150,243,0.3); color:#90CAF9;">0</span>
+      </button>
+
+      <button type="button" class="admin-nav-item" data-admin-tab="coupons">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+        <span>Mã Khuyến Mãi</span>
+        <span class="admin-nav-badge" id="sidebarBadgeCoupons" style="background: rgba(230,81,0,0.3); color:#FFB74D;">4</span>
       </button>
     </aside>
 
@@ -243,6 +252,10 @@
                 <option value="completed">Đã giao hàng</option>
                 <option value="cancelled">Đã hủy</option>
               </select>
+              <button type="button" class="btn-admin-action" id="btnExportOrdersCSV" style="display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; background: rgba(166,124,82,0.18); border: 1px solid rgba(166,124,82,0.4); color: #F0DFC8; border-radius: 8px; font-weight: 600; font-size: 0.84rem; cursor: pointer; transition: all 0.2s ease;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Xuất Excel (CSV)
+              </button>
             </div>
           </div>
 
@@ -348,6 +361,10 @@
                 <option value="customer">Khách hàng (Customer)</option>
                 <option value="admin">Quản trị viên (Admin)</option>
               </select>
+              <button type="button" class="btn-admin-action" id="btnExportUsersCSV" style="display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; background: rgba(166,124,82,0.18); border: 1px solid rgba(166,124,82,0.4); color: #F0DFC8; border-radius: 8px; font-weight: 600; font-size: 0.84rem; cursor: pointer; transition: all 0.2s ease;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Xuất Khách Hàng (CSV)
+              </button>
             </div>
           </div>
 
@@ -369,7 +386,199 @@
         </div>
       </section>
 
+      <!-- ==========================================
+           TAB 6: QUẢN LÝ MÃ KHUYẾN MÃI / VOUCHER
+           ========================================== -->
+      <section class="admin-tab-pane" id="pane-coupons" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h1 class="admin-header-title" style="margin: 0;">Quản Lý Voucher &amp; Khuyến Mãi</h1>
+            <p style="color: #9E9282; font-size: 0.85rem; margin-top: 4px;">Cấu hình mã giảm giá, kiểm soát mức chiết khấu và tự động đồng bộ thời gian thực với Giỏ hàng &amp; Thanh toán.</p>
+          </div>
+          <button type="button" class="btn-admin-primary" id="btnOpenAddCouponModal" style="display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; background: linear-gradient(135deg, #A67C52 0%, #704B26 100%); color: #FFF; border: none; border-radius: 8px; font-weight: 600; font-size: 0.88rem; cursor: pointer; box-shadow: 0 4px 14px rgba(166,124,82,0.35); transition: all 0.2s ease;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Tạo Mã Voucher Mới
+          </button>
+        </div>
+
+        <div class="admin-card-panel">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Mã Voucher</th>
+                  <th>Loại Giảm</th>
+                  <th>Mức Chiết Khấu</th>
+                  <th>Đơn Tối Thiểu</th>
+                  <th>Mô Tả &amp; Đặc Quyền</th>
+                  <th>Trạng Thái</th>
+                  <th>Hành Động</th>
+                </tr>
+              </thead>
+              <tbody id="couponsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
+  </div>
+
+  <!-- =======================================================
+       DRAWER: XEM CHI TIẾT ĐƠN HÀNG SLIDE-OVER (LUXURY TECH)
+       ======================================================= -->
+  <div class="admin-drawer-overlay" id="adminOrderDetailOverlay" style="display: none;">
+    <div class="admin-drawer" id="adminOrderDetailDrawer">
+      <div class="admin-drawer-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <h2 class="admin-drawer-title" id="drawerOrderCode">#NEXUS-000000</h2>
+            <span class="status-pill status-pill--processing" id="drawerOrderStatusBadge">Đang xử lý</span>
+          </div>
+          <div class="admin-drawer-subtitle" id="drawerOrderDate">Thời gian đặt hàng</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" class="btn-drawer-action" id="drawerBtnPrint" title="In Hóa Đơn A4">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            In Đơn
+          </button>
+          <button type="button" class="btn-drawer-close" id="drawerBtnClose" aria-label="Đóng">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="admin-drawer-body">
+        <!-- TIẾN TRÌNH 4 BƯỚC -->
+        <div class="drawer-section">
+          <div class="drawer-timeline-stepper" id="drawerTimelineStepper">
+            <div class="stepper-step is-active" id="step-created">
+              <div class="stepper-circle">1</div>
+              <div class="stepper-label">Đặt hàng</div>
+            </div>
+            <div class="stepper-line" id="line-1"></div>
+            <div class="stepper-step" id="step-processing">
+              <div class="stepper-circle">2</div>
+              <div class="stepper-label">Xử lý</div>
+            </div>
+            <div class="stepper-line" id="line-2"></div>
+            <div class="stepper-step" id="step-shipping">
+              <div class="stepper-circle">3</div>
+              <div class="stepper-label">Vận chuyển</div>
+            </div>
+            <div class="stepper-line" id="line-3"></div>
+            <div class="stepper-step" id="step-completed">
+              <div class="stepper-circle">4</div>
+              <div class="stepper-label">Hoàn tất</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- THÔNG TIN KHÁCH HÀNG -->
+        <div class="drawer-section">
+          <h3 class="drawer-section-title">Khách Hàng &amp; Địa Chỉ Nhận Hàng</h3>
+          <div class="drawer-info-grid">
+            <div class="drawer-info-box">
+              <span class="drawer-info-label">Người nhận</span>
+              <span class="drawer-info-val" id="drawerCustomerName">—</span>
+            </div>
+            <div class="drawer-info-box">
+              <span class="drawer-info-label">Số điện thoại</span>
+              <span class="drawer-info-val" id="drawerCustomerPhone">—</span>
+            </div>
+            <div class="drawer-info-box" style="grid-column: 1 / -1;">
+              <span class="drawer-info-label">Địa chỉ giao hàng</span>
+              <span class="drawer-info-val" id="drawerCustomerAddress">—</span>
+            </div>
+            <div class="drawer-info-box" style="grid-column: 1 / -1;" id="drawerFeedbackBox" hidden>
+              <span class="drawer-info-label" style="color: #FFA726;">💬 Đánh giá &amp; Góp ý từ khách hàng</span>
+              <div class="drawer-feedback-text" id="drawerCustomerFeedback">—</div>
+            </div>
+            <div class="drawer-info-box" style="grid-column: 1 / -1;" id="drawerCancelReasonBox" hidden>
+              <span class="drawer-info-label" style="color: #EF5350;">⚠️ Lý do hủy đơn</span>
+              <div class="drawer-cancel-text" id="drawerCancelReason">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SẢN PHẨM ĐẶT HÀNG -->
+        <div class="drawer-section">
+          <h3 class="drawer-section-title">Danh Sách Thiết Bị &amp; Phụ Kiện</h3>
+          <div class="drawer-items-list" id="drawerItemsList"></div>
+        </div>
+
+        <!-- TỔNG KẾT TÀI CHÍNH -->
+        <div class="drawer-section">
+          <h3 class="drawer-section-title">Chi Phí &amp; Thanh Toán</h3>
+          <div class="drawer-financial-summary">
+            <div class="drawer-line"><span>Tạm tính tiền hàng:</span><span id="drawerSubtotal">0 ₫</span></div>
+            <div class="drawer-line drawer-line-discount" id="drawerDiscountLine" style="display: none;">
+              <span>Voucher giảm giá (<strong id="drawerVoucherCode"></strong>):</span>
+              <span id="drawerDiscountAmount" style="color: #81C784; font-weight: 600;">- 0 ₫</span>
+            </div>
+            <div class="drawer-line"><span>Phí vận chuyển VIP:</span><span id="drawerShipping">Miễn phí</span></div>
+            <div class="drawer-line"><span>Phương thức:</span><span id="drawerPaymentMethod">COD</span></div>
+            <div class="drawer-line drawer-line-total"><span>Tổng cộng thanh toán:</span><span id="drawerGrandTotal" style="color: #FFD54F;">0 ₫</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRAWER FOOTER: DUYỆT ĐƠN -->
+      <div class="admin-drawer-footer" id="drawerActionFooter">
+        <button type="button" class="btn-drawer-status btn-status-confirm" id="drawerBtnConfirm">Duyệt Giao Hàng</button>
+        <button type="button" class="btn-drawer-status btn-status-cancel" id="drawerBtnCancel">Hủy Đơn</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       MODAL: TẠO MÃ VOUCHER MỚI
+       ======================================================= -->
+  <div class="admin-modal-overlay" id="adminAddCouponOverlay" style="display: none;">
+    <div class="admin-modal-card">
+      <div class="admin-modal-header">
+        <h3 class="admin-modal-title">Tạo Mã Voucher Khuyến Mãi Mới</h3>
+        <button type="button" class="btn-modal-close" id="btnCloseCouponModal">&times;</button>
+      </div>
+      <form id="formAddCoupon" class="admin-modal-body">
+        <div class="admin-form-group">
+          <label class="admin-form-label">Mã Code Voucher (Viết liền, in hoa) *</label>
+          <input type="text" id="couponCodeInput" class="admin-form-input" placeholder="VD: VIP2026, SUMMER15" required style="text-transform: uppercase;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Loại Giảm Giá *</label>
+            <select id="couponTypeInput" class="admin-form-select">
+              <option value="percent">Giảm theo % (Phần trăm)</option>
+              <option value="fixed">Giảm số tiền cố định (₫)</option>
+              <option value="freeship">Miễn phí vận chuyển</option>
+            </select>
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-form-label">Mức Giảm *</label>
+            <input type="number" id="couponRateInput" class="admin-form-input" placeholder="VD: 15 (cho 15%) hoặc 1000000" required min="1">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Đơn Hàng Tối Thiểu (₫)</label>
+            <input type="number" id="couponMinOrderInput" class="admin-form-input" placeholder="0 = Không yêu cầu" value="0" min="0">
+          </div>
+          <div class="admin-form-group">
+            <label class="admin-form-label">Hạn Sử Dụng</label>
+            <input type="date" id="couponExpiryInput" class="admin-form-input">
+          </div>
+        </div>
+        <div class="admin-form-group">
+          <label class="admin-form-label">Mô Tả / Ý Nghĩa Chương Trình</label>
+          <input type="text" id="couponDescInput" class="admin-form-input" placeholder="VD: Đặc quyền VIP trải nghiệm hệ thống kính thực tế ảo 2026">
+        </div>
+        <div class="admin-modal-footer">
+          <button type="button" class="btn-admin-ghost" id="btnCancelCouponModal">Hủy Bỏ</button>
+          <button type="submit" class="btn-admin-primary" style="padding: 10px 22px; background: linear-gradient(135deg, #A67C52 0%, #704B26 100%); color: #FFF; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Lưu &amp; Kích Hoạt Mã</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- =======================================================

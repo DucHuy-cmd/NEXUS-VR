@@ -217,7 +217,9 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN HOÀN CHỈNH GIAO DIỆN GIỎ HÀNG & 
     let discountVal = 0;
     if (activeCoupon) {
       if (activeCoupon.type === "percent") {
-        discountVal = Math.round(subtotal * activeCoupon.rate);
+        discountVal = Math.round(subtotal * (activeCoupon.rate || 0.10));
+      } else if (activeCoupon.type === "fixed") {
+        discountVal = Math.min(subtotal, Number(activeCoupon.rate) || 0);
       }
       if (discountRow) discountRow.hidden = false;
       if (couponCodeLabel) couponCodeLabel.textContent = `(${activeCoupon.code})`;
@@ -353,12 +355,31 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN HOÀN CHỈNH GIAO DIỆN GIỎ HÀNG & 
         return;
       }
 
-      let couponData = COUPONS[code];
-      if (!couponData && window.cartManager && typeof window.cartManager.applyCoupon === "function") {
+      let couponData = null;
+      if (window.cartManager && typeof window.cartManager.applyCoupon === "function") {
         const res = window.cartManager.applyCoupon(code);
         if (res && res.valid) {
           couponData = { type: res.type || 'percent', rate: res.rate || 0.1, label: res.label || 'Giảm giá' };
+        } else if (res && res.message) {
+          if (couponMessage) {
+            couponMessage.textContent = res.message;
+            couponMessage.style.color = "var(--error, #d32f2f)";
+          }
+          activeCoupon = null;
+          saveAppliedCoupon(null);
+          renderCart();
+          return;
         }
+      }
+      if (!couponData) {
+        try {
+          const raw = localStorage.getItem('nexus_coupons');
+          const all = raw ? JSON.parse(raw) : null;
+          if (all && all[code] && !all[code].disabled) {
+            const c = all[code];
+            couponData = { type: c.type || 'percent', rate: c.rate || 0.1, label: c.desc || c.label || 'Giảm giá' };
+          }
+        } catch (e) {}
       }
 
       if (couponData) {

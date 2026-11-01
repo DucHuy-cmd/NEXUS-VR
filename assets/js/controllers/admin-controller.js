@@ -47,6 +47,7 @@
     renderAllViews();
     initSearchAndFilters();
     initTimeToolbar();
+    initNewFeatures();
     checkDatabaseConnection();
     initRealtimeSync();
   }
@@ -349,6 +350,7 @@
     renderBookingsTable();
     renderProductsTable();
     renderUsersTable();
+    renderCouponsTable();
   }
 
   /* ---------------------------------------------------------
@@ -673,7 +675,10 @@
 
         return `
           <tr>
-            <td><strong>${ord.code}</strong><br><span style="font-size:0.78rem; color:#877D72;">${ord.createdAt || "Vừa xong"}</span></td>
+            <td>
+              <a href="javascript:void(0)" onclick="window.__adminViewOrderDetail('${ord.code}')" style="color:#F0DFC8; font-weight:700; text-decoration:underline dotted; cursor:pointer;" title="Nhấn xem toàn bộ chi tiết đơn hàng">${ord.code}</a><br>
+              <span style="font-size:0.78rem; color:#877D72;">${ord.createdAt || "Vừa xong"}</span>
+            </td>
             <td>
               <strong>${ord.customer ? ord.customer.name : "Khách vãng lai"}</strong><br>
               <span style="font-size:0.8rem; color:#877D72;">${ord.customer ? ord.customer.phone : ""}</span>
@@ -685,9 +690,10 @@
             <td><span class="status-pill ${s.cls}">${s.label}</span></td>
             <td>
               <div style="display:flex; gap:6px;">
+                <button type="button" class="btn-table-action" style="background:rgba(33,150,243,0.18); color:#90CAF9; border:1px solid rgba(33,150,243,0.35);" onclick="window.__adminViewOrderDetail('${ord.code}')" title="Xem chi tiết đơn hàng">Chi Tiết</button>
                 ${
                   ord.status === "processing"
-                    ? `<button type="button" class="btn-table-action btn-table-success" onclick="window.__adminUpdateOrderStatus('${ord.id}', 'completed')">Duyệt Giao</button>
+                    ? `<button type="button" class="btn-table-action btn-table-success" onclick="window.__adminUpdateOrderStatus('${ord.id}', 'completed')">Duyệt</button>
                        <button type="button" class="btn-table-action btn-table-danger" onclick="window.__adminUpdateOrderStatus('${ord.id}', 'cancelled')">Hủy</button>`
                     : `<span style="font-size:0.8rem; color:#877D72;">Đã chốt</span>`
                 }
@@ -1122,5 +1128,574 @@
     const userRole = document.getElementById("userRoleFilter");
     if (userSearch) userSearch.addEventListener("input", renderUsersTable);
     if (userRole) userRole.addEventListener("change", renderUsersTable);
+  }
+
+  /* ---------------------------------------------------------
+     8. XUẤT DỮ LIỆU EXCEL / CSV CHUẨN ENTERPRISE (UTF-8 BOM)
+     --------------------------------------------------------- */
+  function exportOrdersToCSV() {
+    if (!ordersList || ordersList.length === 0) {
+      if (typeof window.showToast === "function") window.showToast("Không có đơn hàng nào để xuất!", "warning");
+      return;
+    }
+
+    const searchKeyword = (document.getElementById("orderSearchInput")?.value || "").toLowerCase().trim();
+    const filterStatus = document.getElementById("orderStatusFilter")?.value || "all";
+
+    let list = ordersList.filter((ord) => {
+      const matchStatus = filterStatus === "all" || ord.status === filterStatus;
+      const custName = (ord.customer?.name || "").toLowerCase();
+      const custPhone = (ord.customer?.phone || "").toLowerCase();
+      const code = (ord.code || "").toLowerCase();
+      return matchStatus && (!searchKeyword || code.includes(searchKeyword) || custName.includes(searchKeyword) || custPhone.includes(searchKeyword));
+    });
+
+    if (list.length === 0) list = ordersList;
+
+    const statusLabelMap = {
+      processing: "Đang xử lý",
+      completed: "Đã giao hàng",
+      cancelled: "Đã hủy"
+    };
+
+    const headers = [
+      "Mã Đơn Hàng",
+      "Ngày Đặt Hàng",
+      "Tên Khách Hàng",
+      "Số Điện Thoại",
+      "Địa Chỉ Giao Hàng",
+      "Chi Tiết Thiết Bị & Số Lượng",
+      "Tổng Số Món",
+      "Phương Thức Thanh Toán",
+      "Tạm Tính (VNĐ)",
+      "Giảm Giá (VNĐ)",
+      "Tổng Tiền (VNĐ)",
+      "Trạng Thái Đơn",
+      "Đánh Giá / Góp Ý Khách Hàng"
+    ];
+
+    const escapeCSV = (val) => {
+      if (val === null || val === undefined) return '""';
+      const s = String(val).replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
+    const rows = list.map((ord) => {
+      const cust = ord.customer || {};
+      const fullAddress = [cust.address, cust.ward, cust.district, cust.province].filter(Boolean).join(", ") || cust.address || "Chưa có địa chỉ";
+      const itemsDetail = Array.isArray(ord.items)
+        ? ord.items.map(it => `${it.name} (${it.color || 'Tiêu chuẩn'}) x${it.qty || 1}`).join("; ")
+        : "Thiết bị VR";
+      const totalQty = Array.isArray(ord.items)
+        ? ord.items.reduce((sum, it) => sum + (it.qty || 1), 0)
+        : 1;
+      const subtotal = ord.subtotal || ord.totalAmount || ord.total || 0;
+      const discount = ord.discountFee || (ord.discount ? ord.discount.amount : 0) || 0;
+      const total = ord.totalAmount || ord.total || 0;
+      const payment = (ord.paymentMethod === "vietqr" ? "Chuyển khoản VietQR 24/7" : (ord.paymentMethod === "installment" ? "Trả góp 0%" : "Thanh toán khi nhận (COD)"));
+
+      return [
+        escapeCSV(ord.code),
+        escapeCSV(ord.createdAt || "N/A"),
+        escapeCSV(cust.name || "Khách vãng lai"),
+        escapeCSV(cust.phone || ""),
+        escapeCSV(fullAddress),
+        escapeCSV(itemsDetail),
+        escapeCSV(totalQty),
+        escapeCSV(payment),
+        escapeCSV(subtotal),
+        escapeCSV(discount),
+        escapeCSV(total),
+        escapeCSV(statusLabelMap[ord.status] || ord.status),
+        escapeCSV(ord.feedback || ord.notes || "")
+      ].join(",");
+    });
+
+    // \uFEFF là UTF-8 BOM giúp Excel mở tiếng Việt không bị lỗi font
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
+    a.href = url;
+    a.download = `NEXUS_VR_Don_Hang_${dateStr}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    if (typeof window.showToast === "function") {
+      window.showToast(`Đã xuất thành công ${list.length} đơn hàng ra file Excel (CSV)!`, "success");
+    }
+  }
+
+  function exportUsersToCSV() {
+    if (!usersList || usersList.length === 0) {
+      if (typeof window.showToast === "function") window.showToast("Không có khách hàng nào để xuất!", "warning");
+      return;
+    }
+
+    const headers = [
+      "ID Khách Hàng",
+      "Họ Và Tên",
+      "Email",
+      "Số Điện Thoại",
+      "Vai Trò",
+      "Ngày Đăng Ký",
+      "Tổng Đơn Đã Đặt"
+    ];
+
+    const escapeCSV = (val) => {
+      if (val === null || val === undefined) return '""';
+      const s = String(val).replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
+    const rows = usersList.map((u) => {
+      const userOrdersCount = ordersList.filter(o => {
+        const matchEmail = u.email && o.customer?.email && o.customer.email.toLowerCase() === u.email.toLowerCase();
+        const matchPhone = u.phone && o.customer?.phone && o.customer.phone === u.phone;
+        return matchEmail || matchPhone;
+      }).length;
+
+      return [
+        escapeCSV(u.id || "N/A"),
+        escapeCSV(u.name || "Khách hàng"),
+        escapeCSV(u.email || "N/A"),
+        escapeCSV(u.phone || "N/A"),
+        escapeCSV(u.role === "admin" ? "Quản trị viên (Admin)" : "Khách hàng (Customer)"),
+        escapeCSV(u.createdAt || "Hệ thống"),
+        escapeCSV(userOrdersCount)
+      ].join(",");
+    });
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
+    a.href = url;
+    a.download = `NEXUS_VR_Khach_Hang_${dateStr}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    if (typeof window.showToast === "function") {
+      window.showToast(`Đã xuất thành công ${usersList.length} tài khoản khách hàng ra file Excel (CSV)!`, "success");
+    }
+  }
+
+  /* ---------------------------------------------------------
+     9. MODAL / DRAWER XEM CHI TIẾT ĐƠN HÀNG (SLIDE-OVER)
+     --------------------------------------------------------- */
+  function closeOrderDetailDrawer() {
+    const overlay = document.getElementById("adminOrderDetailOverlay");
+    if (!overlay) return;
+    overlay.classList.remove("is-open");
+    setTimeout(() => {
+      overlay.style.display = "none";
+    }, 300);
+  }
+
+  global.__adminViewOrderDetail = function (orderCode) {
+    const ord = ordersList.find((o) => o.code === orderCode || o.id === orderCode);
+    if (!ord) {
+      if (typeof window.showToast === "function") window.showToast("Không tìm thấy đơn hàng " + orderCode, "warning");
+      return;
+    }
+
+    const overlay = document.getElementById("adminOrderDetailOverlay");
+    if (!overlay) return;
+
+    // Header info
+    const codeEl = document.getElementById("drawerOrderCode");
+    const dateEl = document.getElementById("drawerOrderDate");
+    const badgeEl = document.getElementById("drawerOrderStatusBadge");
+
+    if (codeEl) codeEl.textContent = ord.code;
+    if (dateEl) dateEl.textContent = "Đặt lúc: " + (ord.createdAt || "Vừa xong");
+
+    const statusMap = {
+      processing: { label: "Đang xử lý", cls: "status-pill--processing" },
+      completed: { label: "Đã giao hàng", cls: "status-pill--completed" },
+      cancelled: { label: "Đã hủy đơn", cls: "status-pill--cancelled" }
+    };
+    const s = statusMap[ord.status] || statusMap.processing;
+    if (badgeEl) {
+      badgeEl.className = "status-pill " + s.cls;
+      badgeEl.textContent = s.label;
+    }
+
+    // Stepper logic
+    const s1 = document.getElementById("step-created");
+    const s2 = document.getElementById("step-processing");
+    const s3 = document.getElementById("step-shipping");
+    const s4 = document.getElementById("step-completed");
+    const l1 = document.getElementById("line-1");
+    const l2 = document.getElementById("line-2");
+    const l3 = document.getElementById("line-3");
+
+    [s1, s2, s3, s4].forEach(step => { if (step) step.className = "stepper-step"; });
+    [l1, l2, l3].forEach(line => { if (line) line.className = "stepper-line"; });
+
+    if (ord.status === "processing") {
+      s1?.classList.add("is-done");
+      l1?.classList.add("is-done");
+      s2?.classList.add("is-active");
+    } else if (ord.status === "completed") {
+      s1?.classList.add("is-done");
+      l1?.classList.add("is-done");
+      s2?.classList.add("is-done");
+      l2?.classList.add("is-done");
+      s3?.classList.add("is-done");
+      l3?.classList.add("is-done");
+      s4?.classList.add("is-done");
+    } else if (ord.status === "cancelled") {
+      s1?.classList.add("is-done");
+      if (s2) {
+        s2.classList.add("is-active");
+        const lbl = s2.querySelector(".stepper-label");
+        if (lbl) lbl.textContent = "Đã hủy";
+      }
+    }
+
+    // Customer Info
+    const cust = ord.customer || {};
+    const nameEl = document.getElementById("drawerCustomerName");
+    const phoneEl = document.getElementById("drawerCustomerPhone");
+    const addrEl = document.getElementById("drawerCustomerAddress");
+    const feedbackBox = document.getElementById("drawerFeedbackBox");
+    const feedbackText = document.getElementById("drawerCustomerFeedback");
+    const cancelBox = document.getElementById("drawerCancelReasonBox");
+    const cancelText = document.getElementById("drawerCancelReason");
+
+    if (nameEl) nameEl.textContent = cust.name || "Khách vãng lai";
+    if (phoneEl) phoneEl.textContent = cust.phone || "Chưa cung cấp";
+    if (addrEl) {
+      const fullAddr = [cust.address, cust.ward, cust.district, cust.province].filter(Boolean).join(", ") || cust.address || "Chưa có địa chỉ";
+      addrEl.textContent = fullAddr;
+    }
+
+    if (ord.feedback) {
+      if (feedbackBox) feedbackBox.hidden = false;
+      if (feedbackText) feedbackText.textContent = ord.feedback;
+    } else if (feedbackBox) {
+      feedbackBox.hidden = true;
+    }
+
+    if (ord.notes && ord.status === "cancelled") {
+      if (cancelBox) cancelBox.hidden = false;
+      if (cancelText) cancelText.textContent = ord.notes;
+    } else if (cancelBox) {
+      cancelBox.hidden = true;
+    }
+
+    // Items list
+    const itemsContainer = document.getElementById("drawerItemsList");
+    if (itemsContainer) {
+      const items = Array.isArray(ord.items) && ord.items.length > 0
+        ? ord.items
+        : [{ id: "vr-item", name: "Kính Thực Tế Ảo NEXUS VR", price: ord.totalAmount || ord.total || 0, qty: 1, color: "Tiêu chuẩn" }];
+
+      itemsContainer.innerHTML = items.map(it => {
+        const itemThumb = it.image || "assets/images/placeholder.svg";
+        const itemPrice = typeof it.price === "number" ? it.price : 0;
+        const itemQty = it.qty || 1;
+        const lineTotal = itemPrice * itemQty;
+
+        return `
+          <div class="drawer-item-row">
+            <img src="${itemThumb}" alt="${escapeHtml(it.name || 'Sản phẩm')}" class="drawer-item-thumb" onerror="this.onerror=null; this.src='assets/images/placeholder.svg';">
+            <div class="drawer-item-info">
+              <span class="drawer-item-name">${escapeHtml(it.name || 'Sản phẩm VR')}</span>
+              <span class="drawer-item-variant">Phiên bản: ${escapeHtml(it.color || 'Tiêu chuẩn')} • SL: x${itemQty}</span>
+            </div>
+            <div class="drawer-item-price-box">
+              <span class="drawer-item-total">${formatVND(lineTotal)}</span>
+              <span class="drawer-item-unit">${formatVND(itemPrice)} / chiếc</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // Financial breakdown
+    const subtotalEl = document.getElementById("drawerSubtotal");
+    const discountLine = document.getElementById("drawerDiscountLine");
+    const voucherCodeEl = document.getElementById("drawerVoucherCode");
+    const discountAmtEl = document.getElementById("drawerDiscountAmount");
+    const shippingEl = document.getElementById("drawerShipping");
+    const paymentEl = document.getElementById("drawerPaymentMethod");
+    const grandTotalEl = document.getElementById("drawerGrandTotal");
+
+    const subtotal = ord.subtotal || ord.totalAmount || ord.total || 0;
+    const discount = ord.discountFee || (ord.discount ? ord.discount.amount : 0) || 0;
+    const finalTotal = ord.totalAmount || ord.total || 0;
+
+    if (subtotalEl) subtotalEl.textContent = formatVND(subtotal);
+
+    if (discount > 0 || ord.couponCode) {
+      if (discountLine) discountLine.style.display = "flex";
+      if (voucherCodeEl) voucherCodeEl.textContent = ord.couponCode || "VOUCHER";
+      if (discountAmtEl) discountAmtEl.textContent = `- ${formatVND(discount)}`;
+    } else if (discountLine) {
+      discountLine.style.display = "none";
+    }
+
+    if (shippingEl) shippingEl.textContent = ord.shippingFee ? formatVND(ord.shippingFee) : "Miễn phí toàn quốc (0 ₫)";
+    if (paymentEl) {
+      paymentEl.textContent = ord.paymentMethod === "vietqr"
+        ? "Chuyển khoản VietQR 24/7 (Đã xác thực)"
+        : (ord.paymentMethod === "installment" ? "Trả góp 0% Thẻ tín dụng" : "Thanh toán khi nhận (COD)");
+    }
+    if (grandTotalEl) grandTotalEl.textContent = formatVND(finalTotal);
+
+    // Footer actions
+    const footer = document.getElementById("drawerActionFooter");
+    const btnConfirm = document.getElementById("drawerBtnConfirm");
+    const btnCancel = document.getElementById("drawerBtnCancel");
+
+    if (ord.status === "processing") {
+      if (footer) footer.style.display = "flex";
+      if (btnConfirm) {
+        btnConfirm.onclick = () => {
+          closeOrderDetailDrawer();
+          global.__adminUpdateOrderStatus(ord.id, "completed");
+        };
+      }
+      if (btnCancel) {
+        btnCancel.onclick = () => {
+          closeOrderDetailDrawer();
+          global.__adminUpdateOrderStatus(ord.id, "cancelled");
+        };
+      }
+    } else if (footer) {
+      footer.style.display = "none";
+    }
+
+    // Print invoice button
+    const btnPrint = document.getElementById("drawerBtnPrint");
+    if (btnPrint) {
+      btnPrint.onclick = () => {
+        global.__adminPrintOrder(ord.code);
+      };
+    }
+
+    // Open Drawer Animation
+    overlay.style.display = "flex";
+    requestAnimationFrame(() => {
+      overlay.classList.add("is-open");
+    });
+  };
+
+  /* ---------------------------------------------------------
+     10. QUẢN LÝ VOUCHER / MÃ KHUYẾN MÃI (COUPON MANAGER)
+     --------------------------------------------------------- */
+  const DEFAULT_COUPONS = {
+    'KM10VR': { code: 'KM10VR', type: 'percent', rate: 0.10, minOrder: 0, desc: 'Ưu đãi thành viên mới - Giảm 10%', disabled: false },
+    'NEXUS10': { code: 'NEXUS10', type: 'percent', rate: 0.10, minOrder: 0, desc: 'Mã tri ân khách hàng NEXUS VR - Giảm 10%', disabled: false },
+    'VIP2026': { code: 'VIP2026', type: 'percent', rate: 0.15, minOrder: 30000000, desc: 'Đặc quyền VIP 2026 cho đơn từ 30tr - Giảm 15%', disabled: false },
+    'FREESHIP': { code: 'FREESHIP', type: 'freeship', rate: 0, minOrder: 0, desc: 'Miễn phí giao hàng VIP toàn quốc', disabled: false }
+  };
+
+  function getStoredCoupons() {
+    try {
+      const raw = localStorage.getItem("nexus_coupons");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object" && Object.keys(parsed).length > 0) return parsed;
+      }
+    } catch (e) {}
+    localStorage.setItem("nexus_coupons", JSON.stringify(DEFAULT_COUPONS));
+    return DEFAULT_COUPONS;
+  }
+
+  function saveStoredCoupons(coupons) {
+    localStorage.setItem("nexus_coupons", JSON.stringify(coupons));
+  }
+
+  function renderCouponsTable() {
+    const tbody = document.getElementById("couponsTableBody");
+    const badge = document.getElementById("sidebarBadgeCoupons");
+    if (!tbody) return;
+
+    const coupons = getStoredCoupons();
+    const list = Object.values(coupons);
+
+    if (badge) badge.textContent = list.length;
+
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#877D72; padding:30px;">Chưa có mã voucher nào</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map(c => {
+      let typeLabel = "Giảm %";
+      let rateLabel = `${Math.round((c.rate || 0) * 100)}%`;
+      if (c.type === "fixed") {
+        typeLabel = "Tiền mặt (₫)";
+        rateLabel = formatVND(c.rate);
+      } else if (c.type === "freeship") {
+        typeLabel = "Vận chuyển";
+        rateLabel = "Miễn phí ship";
+      }
+
+      const minOrderText = c.minOrder > 0 ? `Từ ${formatVND(c.minOrder)}` : "Mọi đơn hàng";
+      const statusPill = c.disabled
+        ? `<span class="status-pill status-pill--cancelled">Tạm tắt</span>`
+        : `<span class="status-pill status-pill--completed">Đang chạy</span>`;
+
+      return `
+        <tr>
+          <td><strong style="color: #FFD54F; letter-spacing: 1px; font-family: monospace; font-size: 0.95rem;">${escapeHtml(c.code)}</strong></td>
+          <td><span class="admin-badge" style="background: rgba(166,124,82,0.2); color: #F0DFC8; border: 1px solid rgba(166,124,82,0.3);">${typeLabel}</span></td>
+          <td><strong style="color: #81C784;">${rateLabel}</strong></td>
+          <td style="color: #BDB4A8;">${minOrderText}</td>
+          <td style="font-size: 0.82rem; color: #EDE4D8; max-width: 260px;">${escapeHtml(c.desc || "Ưu đãi trải nghiệm NEXUS VR")}${c.expiry ? `<br><span style="color:#877D72;">HSD: ${c.expiry}</span>` : ""}</td>
+          <td>${statusPill}</td>
+          <td>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="btn-table-action btn-table-outline" onclick="window.__adminToggleCoupon('${c.code}')">
+                ${c.disabled ? "Kích Hoạt" : "Tạm Tắt"}
+              </button>
+              <button type="button" class="btn-table-action btn-table-danger" onclick="window.__adminDeleteCoupon('${c.code}')">
+                Xóa
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  global.__adminToggleCoupon = function (code) {
+    const coupons = getStoredCoupons();
+    if (coupons[code]) {
+      coupons[code].disabled = !coupons[code].disabled;
+      saveStoredCoupons(coupons);
+      renderCouponsTable();
+      if (typeof window.showToast === "function") {
+        window.showToast(`${coupons[code].disabled ? "Đã tạm dừng" : "Đã kích hoạt"} mã voucher ${code}!`, "success");
+      }
+    }
+  };
+
+  global.__adminDeleteCoupon = function (code) {
+    if (!confirm(`Bạn có chắc chắn muốn xóa mã voucher [${code}] không?`)) return;
+    const coupons = getStoredCoupons();
+    if (coupons[code]) {
+      delete coupons[code];
+      saveStoredCoupons(coupons);
+      renderCouponsTable();
+      if (typeof window.showToast === "function") {
+        window.showToast(`Đã xóa vĩnh viễn voucher ${code}!`, "success");
+      }
+    }
+  };
+
+  /* ---------------------------------------------------------
+     11. KHỞI TẠO TẤT CẢ SỰ KIỆN MỚI CHO ADMIN (DRAWER, CSV, COUPONS)
+     --------------------------------------------------------- */
+  function initNewFeatures() {
+    // 1. Xuất Excel CSV Đơn Hàng & Khách Hàng
+    const btnExpOrders = document.getElementById("btnExportOrdersCSV");
+    if (btnExpOrders) btnExpOrders.addEventListener("click", exportOrdersToCSV);
+
+    const btnExpUsers = document.getElementById("btnExportUsersCSV");
+    if (btnExpUsers) btnExpUsers.addEventListener("click", exportUsersToCSV);
+
+    // 2. Order Detail Drawer Events
+    const overlay = document.getElementById("adminOrderDetailOverlay");
+    const btnCloseDrawer = document.getElementById("drawerBtnClose");
+    if (btnCloseDrawer) btnCloseDrawer.addEventListener("click", closeOrderDetailDrawer);
+
+    if (overlay) {
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) closeOrderDetailDrawer();
+      });
+    }
+
+    // 3. Add Coupon Modal Events
+    const couponModalOverlay = document.getElementById("adminAddCouponOverlay");
+    const btnOpenAddCoupon = document.getElementById("btnOpenAddCouponModal");
+    const btnCloseAddCoupon = document.getElementById("btnCloseCouponModal");
+    const btnCancelAddCoupon = document.getElementById("btnCancelCouponModal");
+    const formAddCoupon = document.getElementById("formAddCoupon");
+
+    const openCouponModal = () => {
+      if (couponModalOverlay) couponModalOverlay.style.display = "flex";
+    };
+    const closeCouponModal = () => {
+      if (couponModalOverlay) {
+        couponModalOverlay.style.display = "none";
+        formAddCoupon?.reset();
+      }
+    };
+
+    if (btnOpenAddCoupon) btnOpenAddCoupon.addEventListener("click", openCouponModal);
+    if (btnCloseAddCoupon) btnCloseAddCoupon.addEventListener("click", closeCouponModal);
+    if (btnCancelAddCoupon) btnCancelAddCoupon.addEventListener("click", closeCouponModal);
+
+    if (couponModalOverlay) {
+      couponModalOverlay.addEventListener("click", (e) => {
+        if (e.target === couponModalOverlay) closeCouponModal();
+      });
+    }
+
+    if (formAddCoupon) {
+      formAddCoupon.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const codeInput = document.getElementById("couponCodeInput");
+        const typeInput = document.getElementById("couponTypeInput");
+        const rateInput = document.getElementById("couponRateInput");
+        const minOrderInput = document.getElementById("couponMinOrderInput");
+        const expiryInput = document.getElementById("couponExpiryInput");
+        const descInput = document.getElementById("couponDescInput");
+
+        const rawCode = (codeInput?.value || "").trim().toUpperCase();
+        if (!rawCode) return;
+
+        const type = typeInput?.value || "percent";
+        let rawRate = Number(rateInput?.value || 0);
+        let rate = rawRate;
+        if (type === "percent") {
+          rate = rawRate > 1 ? rawRate / 100 : rawRate;
+        }
+
+        const minOrder = Number(minOrderInput?.value || 0);
+        const expiry = expiryInput?.value || "";
+        const desc = descInput?.value || `Ưu đãi ${type === 'percent' ? `${Math.round(rate*100)}%` : formatVND(rate)}`;
+
+        const coupons = getStoredCoupons();
+        coupons[rawCode] = {
+          code: rawCode,
+          type: type,
+          rate: rate,
+          minOrder: minOrder,
+          expiry: expiry,
+          desc: desc,
+          disabled: false
+        };
+
+        saveStoredCoupons(coupons);
+        renderCouponsTable();
+        closeCouponModal();
+
+        if (typeof window.showToast === "function") {
+          window.showToast(`Đã tạo thành công voucher [${rawCode}]!`, "success");
+        }
+      });
+    }
+
+    // Keyboard ESC listener to close modal or drawer
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeOrderDetailDrawer();
+        closeCouponModal();
+      }
+    });
   }
 })(window);

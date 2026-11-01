@@ -180,11 +180,12 @@
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  width: 280px;
+  width: 350px;
+  max-width: 90vw;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-elevated);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.16);
   padding: 8px;
   opacity: 0;
   visibility: hidden;
@@ -242,9 +243,47 @@
 }
 
 .search-dropdown__price {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: var(--accent-deep);
-  font-weight: 500;
+  font-weight: 700;
+}
+
+.search-dropdown__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 3px;
+}
+
+.search-dropdown__tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.search-dropdown__footer {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.search-dropdown__view-all {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-deep);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  transition: background-color var(--dur-fast);
+}
+
+.search-dropdown__view-all:hover {
+  background-color: var(--bg-secondary);
 }
 
 /* Icon Buttons (Cart, Profile) */

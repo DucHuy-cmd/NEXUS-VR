@@ -440,6 +440,8 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     if (coupon) {
       if (coupon.type === "percent") {
         discountFee = Math.round(subtotal * (coupon.rate || 0.10));
+      } else if (coupon.type === "fixed") {
+        discountFee = Math.min(subtotal, Number(coupon.rate) || 0);
       }
     }
 
@@ -527,7 +529,11 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     cart.forEach((i) => (subtotal += (Number(i.price) || 0) * (Number(i.qty) || 1)));
 
     const coupon = getAppliedCoupon();
-    let discountVal = (coupon && coupon.type === "percent") ? Math.round(subtotal * (coupon.rate || 0.10)) : 0;
+    let discountVal = 0;
+    if (coupon) {
+      if (coupon.type === "percent") discountVal = Math.round(subtotal * (coupon.rate || 0.10));
+      else if (coupon.type === "fixed") discountVal = Math.min(subtotal, Number(coupon.rate) || 0);
+    }
     const isFreeshipCoupon = coupon && coupon.type === "freeship";
 
     let calcShipping = shippingFee;
@@ -856,7 +862,11 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     cart.forEach((i) => (subtotal += (Number(i.price) || 0) * (Number(i.qty) || 1)));
 
     const coupon = getAppliedCoupon();
-    let discountFee = (coupon && coupon.type === "percent") ? Math.round(subtotal * (coupon.rate || 0.10)) : 0;
+    let discountFee = 0;
+    if (coupon) {
+      if (coupon.type === "percent") discountFee = Math.round(subtotal * (coupon.rate || 0.10));
+      else if (coupon.type === "fixed") discountFee = Math.min(subtotal, Number(coupon.rate) || 0);
+    }
     const isFreeshipCoupon = coupon && coupon.type === "freeship";
 
     let calcShipping = shippingFee;
