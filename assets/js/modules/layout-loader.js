@@ -1021,7 +1021,10 @@ function initAllLayout() {
 
   if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      navigator.serviceWorker.register('sw.js').then((registration) => {
+        // Tự động kiểm tra bản cập nhật mới nhất và giải phóng cache cũ
+        registration.update().catch(() => {});
+      }).catch(() => {});
     });
   }
 }

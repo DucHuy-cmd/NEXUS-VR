@@ -78,6 +78,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     if (window.__nexusCheckoutInitialized) return;
     window.__nexusCheckoutInitialized = true;
 
+    ensureInstallmentMarkupInDOM();
     initAddressCascading();
     initRealtimeInputFormatting();
     initCreditCardInputs();
@@ -1002,6 +1003,9 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     }
 
     clearAppliedCoupon();
+    try {
+      localStorage.removeItem("nexus_selected_installment");
+    } catch (e) {}
 
     // RENDER HÓA ĐƠN BƯỚC 3 & CHUYỂN BƯỚC HOÀN TẤT
     lastCreatedOrderId = newOrder.id;
@@ -1181,100 +1185,242 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     });
   }
 
-})();
-/* --------------------------------------------------------------------------
-   XỬ LÝ THANH TOÁN TRẢ GÓP 0% QUA THẺ TÍN DỤNG LIÊN KẾT 12 NGÂN HÀNG
-   -------------------------------------------------------------------------- */
-let selectedInstallmentBank = "Techcombank";
-let selectedInstallmentTerm = 3;
+  /* --------------------------------------------------------------------------
+     11. BẢO VỆ GIAO DIỆN TRẢ GÓP 0% TỰ PHỤC HỒI (SELF-HEALING DOM INJECTION)
+     Đảm bảo ô Trả góp 0% và Khối chọn 12 ngân hàng luôn luôn xuất hiện 100%
+     dù trình duyệt có dính cache HTML cũ hay không.
+     -------------------------------------------------------------------------- */
+  let selectedInstallmentBank = "Techcombank";
+  let selectedInstallmentTerm = 3;
 
-function initInstallmentCheckout() {
-  const banks = [
-    "Techcombank", "Vietcombank", "MB Bank", "VPBank",
-    "ACB", "BIDV", "TPBank", "Sacombank",
-    "Shinhan Bank", "HSBC", "VIB", "VietinBank"
-  ];
+  function ensureInstallmentMarkupInDOM() {
+    // 1. Kiểm tra radio button Trả góp đã có chưa
+    let installmentRadio = document.getElementById("payInstallmentRadio");
+    let installmentLabel = document.getElementById("labelPaymentInstallment");
 
-  const banksGrid = document.getElementById("instBanksGrid");
-  if (banksGrid) {
-    banksGrid.innerHTML = banks.map(b => `
-      <div class="inst-bank-card ${b === selectedInstallmentBank ? 'is-active' : ''}" data-bank="${b}">
-        ${b}
-      </div>
-    `).join("");
-
-    banksGrid.querySelectorAll(".inst-bank-card").forEach(card => {
-      card.addEventListener("click", () => {
-        banksGrid.querySelectorAll(".inst-bank-card").forEach(c => c.classList.remove("is-active"));
-        card.classList.add("is-active");
-        selectedInstallmentBank = card.dataset.bank;
-        const sumBank = document.getElementById("instSummaryBank");
-        if (sumBank) sumBank.textContent = selectedInstallmentBank;
-      });
-    });
-  }
-
-  const termBtns = document.querySelectorAll("#instTermsGrid .btn-inst-term");
-  termBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      termBtns.forEach(b => b.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      selectedInstallmentTerm = Number(btn.dataset.instTerm) || 3;
-      renderOrderSummary();
-    });
-  });
-
-  // Tự động kiểm tra nếu khách đến từ nút "Mua Trả Góp 0%" bên trang sản phẩm
-  try {
-    const rawSaved = localStorage.getItem("nexus_selected_installment");
-    if (rawSaved) {
-      const parsed = JSON.parse(rawSaved);
-      if (parsed && parsed.term) {
-        selectedInstallmentTerm = Number(parsed.term) || 3;
-        if (parsed.bank) selectedInstallmentBank = parsed.bank;
-
-        const payInstallmentRadio = document.getElementById("payInstallmentRadio");
-        if (payInstallmentRadio) {
-          payInstallmentRadio.checked = true;
-          document.querySelectorAll(".payment-card").forEach(c => c.classList.remove("is-selected"));
-          payInstallmentRadio.closest(".payment-card")?.classList.add("is-selected");
-          const instBlock = document.getElementById("installmentSelectionBox");
-          if (instBlock) instBlock.style.display = "block";
-
-          termBtns.forEach(b => {
-            const isMatch = Number(b.dataset.instTerm) === selectedInstallmentTerm;
-            b.classList.toggle("is-active", isMatch);
-          });
-        }
+    if (!installmentRadio || !installmentLabel) {
+      // Tìm nhóm payment options
+      const anyPayRadio = document.querySelector('input[name="paymentMethod"]');
+      const payGroup = anyPayRadio ? anyPayRadio.closest(".option-cards-group") : null;
+      if (payGroup) {
+        // Tạo thẻ label cho Trả góp 0%
+        const label = document.createElement("label");
+        label.className = "option-card payment-card";
+        label.id = "labelPaymentInstallment";
+        label.innerHTML = `
+          <div class="option-card__left">
+            <input type="radio" name="paymentMethod" value="installment" class="option-card__radio" id="payInstallmentRadio">
+            <div>
+              <div class="option-card__title" style="display: flex; align-items: center; gap: 8px;">
+                <span>Trả góp 0% Lãi suất qua thẻ tín dụng</span>
+                <span class="badge-installment-0pct" style="background: rgba(166,124,82,0.15); color: #A67C52; border: 1px solid rgba(166,124,82,0.4); font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 4px;">0% LÃI SUẤT</span>
+              </div>
+              <div class="option-card__sub">Liên kết 12 ngân hàng lớn tại Việt Nam • Kỳ hạn 3, 6, 9, 12 tháng linh hoạt</div>
+            </div>
+          </div>
+        `;
+        payGroup.appendChild(label);
+        installmentRadio = label.querySelector("#payInstallmentRadio");
+        installmentLabel = label;
       }
     }
-  } catch (e) {}
-}
 
-function updateInstallmentCalculations(grandTotal) {
-  const t3 = Math.round(grandTotal / 3);
-  const t6 = Math.round(grandTotal / 6);
-  const t9 = Math.round(grandTotal / 9);
-  const t12 = Math.round(grandTotal / 12);
+    // 2. Kiểm tra khối cấu hình ngân hàng & kỳ hạn
+    let installmentBox = document.getElementById("installmentSelectionBox");
+    if (!installmentBox) {
+      const anyPayRadio = document.querySelector('input[name="paymentMethod"]');
+      const payGroup = anyPayRadio ? anyPayRadio.closest(".option-cards-group") : null;
+      if (payGroup && payGroup.parentNode) {
+        const box = document.createElement("div");
+        box.id = "installmentSelectionBox";
+        box.className = "checkout-installment-box";
+        box.style.display = "none";
+        box.innerHTML = `
+          <div class="inst-box-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="inst-box-icon" style="width: 38px; height: 38px; border-radius: 50%; background: var(--accent, #A67C52); color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">💳</div>
+              <div>
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">Cấu hình gói trả góp 0% lãi suất</h3>
+                <p style="margin: 3px 0 0 0; font-size: 0.82rem; color: var(--text-muted);">Được tài trợ 100% lãi suất bởi đối tác tài chính NEXUS VR và các ngân hàng liên kết.</p>
+              </div>
+            </div>
+          </div>
 
-  const el3 = document.getElementById("termPay3");
-  const el6 = document.getElementById("termPay6");
-  const el9 = document.getElementById("termPay9");
-  const el12 = document.getElementById("termPay12");
+          <!-- 1. CHỌN NGÂN HÀNG -->
+          <div class="inst-step-group" style="margin-top: 18px;">
+            <label class="inst-step-label" style="display: block; font-weight: 600; font-size: 0.86rem; color: var(--text-primary); margin-bottom: 8px;">1. Chọn ngân hàng phát hành thẻ tín dụng của bạn:</label>
+            <div class="inst-banks-grid" id="instBanksGrid"></div>
+          </div>
 
-  if (el3) el3.textContent = formatVND(t3) + "/tháng";
-  if (el6) el6.textContent = formatVND(t6) + "/tháng";
-  if (el9) el9.textContent = formatVND(t9) + "/tháng";
-  if (el12) el12.textContent = formatVND(t12) + "/tháng";
+          <!-- 2. CHỌN KỲ HẠN -->
+          <div class="inst-step-group" style="margin-top: 18px;">
+            <label class="inst-step-label" style="display: block; font-weight: 600; font-size: 0.86rem; color: var(--text-primary); margin-bottom: 8px;">2. Chọn kỳ hạn trả góp:</label>
+            <div class="inst-terms-grid" id="instTermsGrid">
+              <button type="button" class="btn-inst-term is-active" data-inst-term="3">
+                <span class="term-months">3 Tháng</span>
+                <span class="term-pay" id="termPay3">0 ₫/tháng</span>
+              </button>
+              <button type="button" class="btn-inst-term" data-inst-term="6">
+                <span class="term-months">6 Tháng</span>
+                <span class="term-pay" id="termPay6">0 ₫/tháng</span>
+              </button>
+              <button type="button" class="btn-inst-term" data-inst-term="9">
+                <span class="term-months">9 Tháng</span>
+                <span class="term-pay" id="termPay9">0 ₫/tháng</span>
+              </button>
+              <button type="button" class="btn-inst-term" data-inst-term="12">
+                <span class="term-months">12 Tháng</span>
+                <span class="term-pay" id="termPay12">0 ₫/tháng</span>
+              </button>
+            </div>
+          </div>
 
-  const currentMonthly = Math.round(grandTotal / selectedInstallmentTerm);
-  const sumMonthly = document.getElementById("instSummaryMonthly");
-  const sumTerm = document.getElementById("instSummaryTerm");
-  const sumTotal = document.getElementById("instSummaryTotal");
-  const sumBank = document.getElementById("instSummaryBank");
+          <!-- BẢNG TỔNG KẾT TÀI CHÍNH TRẢ GÓP -->
+          <div class="inst-financial-summary" style="margin-top: 20px; padding: 14px 18px; background: rgba(166,124,82,0.06); border: 1px dashed rgba(166,124,82,0.35); border-radius: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 0.85rem; color: var(--text-muted);">Số tiền trả hàng tháng:</span>
+              <strong id="instSummaryMonthly" style="font-size: 1.15rem; color: var(--accent-deep, #A67C52); font-weight: 700;">0 ₫/tháng</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.82rem; color: var(--text-muted);">
+              <span>Kỳ hạn trả góp:</span>
+              <span style="font-weight: 600; color: var(--text-primary);"><span id="instSummaryTerm">3</span> tháng</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.82rem; color: var(--text-muted);">
+              <span>Tổng số tiền trả góp:</span>
+              <span id="instSummaryTotal" style="font-weight: 600; color: var(--text-primary);">0 ₫</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.82rem; color: var(--text-muted);">
+              <span>Ngân hàng tài trợ:</span>
+              <span id="instSummaryBank" style="font-weight: 600; color: var(--accent, #A67C52);">Techcombank</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: #2E7D32;">
+              <span>Lãi suất &amp; Phí hồ sơ:</span>
+              <strong>0 ₫ (Miễn phí 100%)</strong>
+            </div>
+          </div>
+        `;
+        payGroup.parentNode.insertBefore(box, payGroup.nextSibling);
+      }
+    }
+  }
 
-  if (sumMonthly) sumMonthly.textContent = formatVND(currentMonthly) + "/tháng";
-  if (sumTerm) sumTerm.textContent = String(selectedInstallmentTerm);
-  if (sumTotal) sumTotal.textContent = formatVND(grandTotal);
-  if (sumBank) sumBank.textContent = selectedInstallmentBank;
-}
+  function initInstallmentCheckout() {
+    const banks = [
+      "Techcombank", "Vietcombank", "MB Bank", "VPBank",
+      "ACB", "BIDV", "TPBank", "Sacombank",
+      "Shinhan Bank", "HSBC", "VIB", "VietinBank"
+    ];
+
+    const banksGrid = document.getElementById("instBanksGrid");
+    if (banksGrid) {
+      banksGrid.innerHTML = banks.map(b => `
+        <div class="inst-bank-card ${b === selectedInstallmentBank ? 'is-active' : ''}" data-bank="${b}">
+          ${b}
+        </div>
+      `).join("");
+
+      banksGrid.querySelectorAll(".inst-bank-card").forEach(card => {
+        card.addEventListener("click", () => {
+          banksGrid.querySelectorAll(".inst-bank-card").forEach(c => c.classList.remove("is-active"));
+          card.classList.add("is-active");
+          selectedInstallmentBank = card.dataset.bank;
+          const sumBank = document.getElementById("instSummaryBank");
+          if (sumBank) sumBank.textContent = selectedInstallmentBank;
+        });
+      });
+    }
+
+    const termBtns = document.querySelectorAll("#instTermsGrid .btn-inst-term");
+    termBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        termBtns.forEach(b => b.classList.remove("is-active"));
+        btn.classList.add("is-active");
+        selectedInstallmentTerm = Number(btn.dataset.instTerm) || 3;
+        renderOrderSummary();
+      });
+    });
+
+    // Bắt sự kiện chọn radio Trả góp trực tiếp (đảm bảo hoạt động ngay cả khi chèn động)
+    const payInstallmentRadio = document.getElementById("payInstallmentRadio");
+    const instBlock = document.getElementById("installmentSelectionBox");
+    if (payInstallmentRadio && !payInstallmentRadio.dataset.boundInst) {
+      payInstallmentRadio.dataset.boundInst = "true";
+      payInstallmentRadio.addEventListener("change", () => {
+        if (payInstallmentRadio.checked) {
+          if (instBlock) instBlock.style.display = "block";
+          renderOrderSummary();
+        }
+      });
+    }
+
+    // Tự động kiểm tra nếu khách đến từ nút "Mua Trả Góp 0%" bên trang sản phẩm
+    try {
+      const rawSaved = localStorage.getItem("nexus_selected_installment");
+      if (rawSaved) {
+        const parsed = JSON.parse(rawSaved);
+        if (parsed && parsed.term) {
+          selectedInstallmentTerm = Number(parsed.term) || 3;
+          if (parsed.bank) selectedInstallmentBank = parsed.bank;
+
+          if (payInstallmentRadio) {
+            payInstallmentRadio.checked = true;
+            document.querySelectorAll(".payment-card").forEach(c => c.classList.remove("is-selected"));
+            payInstallmentRadio.closest(".payment-card")?.classList.add("is-selected");
+            if (instBlock) instBlock.style.display = "block";
+
+            termBtns.forEach(b => {
+              const isMatch = Number(b.dataset.instTerm) === selectedInstallmentTerm;
+              b.classList.toggle("is-active", isMatch);
+            });
+
+            const sumBank = document.getElementById("instSummaryBank");
+            if (sumBank) sumBank.textContent = selectedInstallmentBank;
+            if (banksGrid) {
+              banksGrid.querySelectorAll(".inst-bank-card").forEach(c => {
+                c.classList.toggle("is-active", c.dataset.bank === selectedInstallmentBank);
+              });
+            }
+
+            if (typeof window.showToast === "function") {
+              window.showToast(`Đã tự động chọn gói Trả góp 0% (${selectedInstallmentTerm} tháng - ${selectedInstallmentBank})!`, "success");
+            }
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  function updateInstallmentCalculations(grandTotal) {
+    const t3 = Math.round(grandTotal / 3);
+    const t6 = Math.round(grandTotal / 6);
+    const t9 = Math.round(grandTotal / 9);
+    const t12 = Math.round(grandTotal / 12);
+
+    const el3 = document.getElementById("termPay3");
+    const el6 = document.getElementById("termPay6");
+    const el9 = document.getElementById("termPay9");
+    const el12 = document.getElementById("termPay12");
+
+    if (el3) el3.textContent = formatVND(t3) + "/tháng";
+    if (el6) el6.textContent = formatVND(t6) + "/tháng";
+    if (el9) el9.textContent = formatVND(t9) + "/tháng";
+    if (el12) el12.textContent = formatVND(t12) + "/tháng";
+
+    const currentMonthly = Math.round(grandTotal / selectedInstallmentTerm);
+    const sumMonthly = document.getElementById("instSummaryMonthly");
+    const sumTerm = document.getElementById("instSummaryTerm");
+    const sumTotal = document.getElementById("instSummaryTotal");
+    const sumBank = document.getElementById("instSummaryBank");
+
+    if (sumMonthly) sumMonthly.textContent = formatVND(currentMonthly) + "/tháng";
+    if (sumTerm) sumTerm.textContent = String(selectedInstallmentTerm);
+    if (sumTotal) sumTotal.textContent = formatVND(grandTotal);
+    if (sumBank) sumBank.textContent = selectedInstallmentBank;
+  }
+
+  // Expose ra window để tương thích toàn cục
+  window.updateInstallmentCalculations = updateInstallmentCalculations;
+  window.initInstallmentCheckout = initInstallmentCheckout;
+  window.ensureInstallmentMarkupInDOM = ensureInstallmentMarkupInDOM;
+
+})();

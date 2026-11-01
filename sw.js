@@ -1,5 +1,5 @@
-// NEXUS VR Service Worker for Offline Caching & PWA Support
-const CACHE_NAME = 'nexus-vr-cache-v1';
+// NEXUS VR Service Worker for Offline Caching & PWA Support (Network-First Strategy)
+const CACHE_NAME = 'nexus-vr-cache-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -18,12 +18,12 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE).catch(() => {});
     })
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -31,7 +31,9 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
         })
       );
     })
@@ -39,19 +41,32 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Network-First with cache fallback for fresh and reliable content delivery
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  // Ignore API requests from cache
+  // Ignore API requests
   if (event.request.url.includes('/api/')) return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-      return fetch(event.request).catch(() => {
-        if (event.request.headers.get('accept')?.includes('text/html')) {
-          return caches.match('./index.html');
+    fetch(event.request)
+      .then((networkResponse) => {
+        // If successful, clone and update cache in background
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache).catch(() => {});
+          });
         }
-      });
-    })
+        return networkResponse;
+      })
+      .catch(() => {
+        // Network failed (offline or network error), serve from cache
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) return cachedResponse;
+          if (event.request.headers.get('accept')?.includes('text/html')) {
+            return caches.match('./index.html');
+          }
+        });
+      })
   );
 });

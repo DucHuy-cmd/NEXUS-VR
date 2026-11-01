@@ -504,6 +504,9 @@
 
       // Thông tin tổng kết tài chính thẻ đơn
       let financialMeta = `Phương thức: ${order.paymentMethod || 'COD'}`;
+      if (order.installmentInfo && order.installmentInfo.monthlyPay) {
+        financialMeta += ` • Trả góp: ${formatVND(order.installmentInfo.monthlyPay)}/tháng (${order.installmentInfo.term}T)`;
+      }
       if (order.discountFee > 0) {
         financialMeta += ` • Giảm giá: -${formatVND(order.discountFee)}`;
       }

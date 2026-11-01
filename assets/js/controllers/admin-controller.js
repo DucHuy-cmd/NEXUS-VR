@@ -1447,7 +1447,11 @@
 
     if (shippingEl) shippingEl.textContent = ord.shippingFee ? formatVND(ord.shippingFee) : "Miễn phí toàn quốc (0 ₫)";
     if (paymentEl) {
-      paymentEl.textContent = ord.paymentMethod || "Thanh toán khi nhận (COD)";
+      if (ord.installmentInfo && ord.installmentInfo.monthlyPay) {
+        paymentEl.innerHTML = `<span style="color: #A67C52; font-weight: 700;">💳 ${escapeHtml(ord.paymentMethod || "Trả góp 0%")}</span> &bull; <em>${formatVND(ord.installmentInfo.monthlyPay)}/tháng</em>`;
+      } else {
+        paymentEl.textContent = ord.paymentMethod || "Thanh toán khi nhận (COD)";
+      }
     }
     if (grandTotalEl) grandTotalEl.textContent = formatVND(finalTotal);
 
