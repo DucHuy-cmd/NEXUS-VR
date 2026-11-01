@@ -444,12 +444,10 @@
         </button>
       `;
 
-      // Nút góp ý phản hồi đơn hàng
-      const feedbackBtnHTML = `
-        <button type="button" class="btn-order-feedback" data-code="${order.code || ''}" data-id="${order.id || ''}" style="padding: 8px 14px; border-radius: 8px; border: 1px solid #A67C52; background: rgba(166,124,82,0.08); color: #A67C52; font-weight: 600; cursor: pointer; font-size: 0.85rem;" title="Góp ý trải nghiệm về đơn hàng này">
-          💬 Góp ý
-        </button>
-      `;
+      // Nút góp ý phản hồi đơn hàng (Khóa nếu đã gửi)
+      const feedbackBtnHTML = order.feedback
+        ? `<button type="button" class="btn-order-feedback is-submitted" disabled style="padding: 8px 14px; border-radius: 8px; border: 1px solid #D1C7BD; background: #F2ECE4; color: #877D72; font-weight: 600; cursor: not-allowed; font-size: 0.85rem;" title="Bạn đã gửi góp ý cho đơn hàng này">✓ Đã góp ý</button>`
+        : `<button type="button" class="btn-order-feedback" data-code="${order.code || ''}" data-id="${order.id || ''}" style="padding: 8px 14px; border-radius: 8px; border: 1.5px solid #A67C52; background: rgba(166,124,82,0.08); color: #A67C52; font-weight: 600; cursor: pointer; font-size: 0.85rem;" title="Góp ý trải nghiệm về đơn hàng này">💬 Góp ý</button>`;
 
       // Hàng nút thao tác theo trạng thái
       let actionsHTML = "";
@@ -490,12 +488,16 @@
         `;
       }
 
-      // Khung hiển thị phản hồi của khách hàng nếu đã có
+      // Khung hiển thị phản hồi của khách hàng (Luxury Emerald / Gold Accent)
       let customerFeedbackHTML = "";
       if (order.feedback) {
         customerFeedbackHTML = `
-          <div style="margin-top: 10px; padding: 10px 14px; background: rgba(166, 124, 82, 0.08); border-left: 4px solid #A67C52; border-radius: 6px; font-size: 0.85rem; color: #5D4037; line-height: 1.5;">
-            <strong>💬 Góp ý của bạn:</strong> ${escapeHtml(order.feedback)}
+          <div style="margin-top: 10px; margin-bottom: 6px; padding: 12px 16px; background: linear-gradient(135deg, rgba(212,175,55,0.14), rgba(166,124,82,0.08)); border-radius: 10px; border: 1.5px solid rgba(166,124,82,0.35); border-left: 4px solid #A67C52; font-size: 0.88rem; line-height: 1.55; box-shadow: 0 2px 8px rgba(166,124,82,0.05);">
+            <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; color: #8C653E; margin-bottom: 3px;">
+              <span>💬</span>
+              <span>Góp ý của bạn đã ghi nhận:</span>
+            </div>
+            <div style="font-weight: 500; color: #231F1C;">${escapeHtml(order.feedback)}</div>
           </div>
         `;
       }
@@ -525,7 +527,7 @@
         <div class="order-card-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; margin-top: 8px; flex-wrap: wrap; gap: 12px;">
           <div>
             <div style="font-size: 0.825rem; color: var(--text-secondary, #726657); margin-bottom: 2px;">${financialMeta}</div>
-            <div class="order-total-price" style="font-size: 1.1rem; font-weight: 700; color: var(--accent, #A67C52);">Tổng cộng: ${formatVND(order.totalAmount)}</div>
+            <div class="order-total-price" style="font-size: 1.1rem; font-weight: 700; color: var(--accent, #A67C52);">Tổng cộng: ${formatVND(Number(order.totalAmount || order.total) || (order.items || []).reduce((acc, it) => acc + (Number(it.price) || 0) * (Number(it.qty) || 1), 0))}</div>
           </div>
           ${actionsHTML}
         </div>
@@ -715,7 +717,7 @@
             </div>
             <div class="nexus-invoice__calc-row grand-total">
               <span>TỔNG THANH TOÁN:</span>
-              <span>${formatVND(order.totalAmount || 0)}</span>
+              <span>${formatVND(Number(order.totalAmount || order.total) || (order.items || []).reduce((acc, it) => acc + (Number(it.price) || 0) * (Number(it.qty) || 1), 0))}</span>
             </div>
           </div>
         </div>
@@ -1126,7 +1128,11 @@
       } catch (e) {}
 
       // Gửi lên Serverless API
-      if (window.apiService && typeof window.apiService.updateOrderStatus === "function") {
+      if (window.apiService && typeof window.apiService.submitOrderFeedback === "function") {
+        try {
+          await window.apiService.submitOrderFeedback(currentFeedbackOrderId, fullFeedback);
+        } catch (e) {}
+      } else if (window.apiService && typeof window.apiService.updateOrderStatus === "function") {
         try {
           await window.apiService.updateOrderStatus(currentFeedbackOrderId, order?.status || "processing", fullFeedback);
         } catch (e) {}

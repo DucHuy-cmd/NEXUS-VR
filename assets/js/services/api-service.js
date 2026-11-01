@@ -192,12 +192,12 @@
     /**
      * Người dùng: Xóa tài khoản khách hàng
      */
-    async deleteUser(id) {
+    async deleteUser(id, cascade, email, phone) {
       try {
         const res = await fetch(`${API_BASE}/users`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id })
+          body: JSON.stringify({ id, cascade: Boolean(cascade), email, phone })
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();
@@ -329,6 +329,58 @@
     },
 
     /**
+     * Đơn hàng: Gửi góp ý / phản hồi trải nghiệm
+     */
+    async submitOrderFeedback(orderIdOrCode, feedback) {
+      try {
+        const localOrders = JSON.parse(localStorage.getItem("nexus_orders") || "[]");
+        let found = false;
+        const updated = localOrders.map(o => {
+          if (o.id === orderIdOrCode || o.code === orderIdOrCode) {
+            found = true;
+            return { ...o, feedback };
+          }
+          return o;
+        });
+        if (found) localStorage.setItem("nexus_orders", JSON.stringify(updated));
+
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith("nexus_orders_")) {
+            try {
+              const uOrders = JSON.parse(localStorage.getItem(k) || "[]");
+              let uFound = false;
+              const uUpdated = uOrders.map(uo => {
+                if (uo.id === orderIdOrCode || uo.code === orderIdOrCode) {
+                  uFound = true;
+                  return { ...uo, feedback };
+                }
+                return uo;
+              });
+              if (uFound) localStorage.setItem(k, JSON.stringify(uUpdated));
+            } catch (errKey) {}
+          }
+        }
+      } catch (e) {}
+
+      try {
+        const res = await fetch(`${API_BASE}/orders`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: orderIdOrCode,
+            code: orderIdOrCode,
+            feedback
+          })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (err) {
+        return { success: true, mode: "local_storage" };
+      }
+    },
+
+        /**
      * Lịch hẹn: Lấy danh sách cho Admin Console
      */
     async getBookings() {
@@ -423,15 +475,25 @@
      */
     async updateProductStock(id, stock) {
       try {
+        const numStock = typeof stock === "number" ? stock : Number(stock) || 0;
+        if (window.PRODUCTS) {
+          const item = window.PRODUCTS.find(p => p.id === id);
+          if (item) item.stock = numStock;
+        }
         if (window.NEXUS_PRODUCTS) {
           const item = window.NEXUS_PRODUCTS.find(p => p.id === id);
-          if (item) item.stock = Boolean(stock);
+          if (item) item.stock = numStock;
         }
+        try {
+          const stockMap = JSON.parse(localStorage.getItem("nexus_products_stock") || "{}");
+          stockMap[id] = numStock;
+          localStorage.setItem("nexus_products_stock", JSON.stringify(stockMap));
+        } catch (e) {}
 
         const res = await fetch(`${API_BASE}/products`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, stock })
+          body: JSON.stringify({ id, stock: numStock })
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();

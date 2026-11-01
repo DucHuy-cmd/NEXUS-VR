@@ -934,6 +934,37 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
       console.warn("[checkout] Lỗi đồng bộ master orders:", errSync);
     }
 
+    // Tự động trừ tồn kho sản phẩm trong kho hàng (Inventory Stock Deduction)
+    try {
+      let stockMap = {};
+      try {
+        stockMap = JSON.parse(localStorage.getItem("nexus_products_stock") || "{}");
+      } catch (e) {
+        stockMap = {};
+      }
+
+      (newOrder.items || []).forEach((item) => {
+        const prodId = item.id;
+        const buyQty = Number(item.qty) || 1;
+
+        const prod = (window.PRODUCTS || []).find((p) => p.id === prodId || p.slug === prodId);
+        if (prod) {
+          const currentStock = typeof prod.stock === "number" ? prod.stock : (Number(stockMap[prod.id]) || 15);
+          const newStock = Math.max(0, currentStock - buyQty);
+          prod.stock = newStock;
+          stockMap[prod.id] = newStock;
+
+          if (window.apiService && typeof window.apiService.updateProductStock === "function") {
+            window.apiService.updateProductStock(prod.id, newStock).catch(() => {});
+          }
+        }
+      });
+
+      localStorage.setItem("nexus_products_stock", JSON.stringify(stockMap));
+    } catch (errStock) {
+      console.warn("[checkout] Lỗi trừ kho sản phẩm:", errStock);
+    }
+
     // Xóa giỏ hàng và xóa voucher đã sử dụng
     if (window.cartManager && typeof window.cartManager.clear === "function") {
       window.cartManager.clear();

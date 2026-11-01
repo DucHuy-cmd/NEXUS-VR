@@ -428,7 +428,7 @@
     });
 
     if (list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#877D72; padding:30px;">Không tìm thấy đơn hàng nào phù hợp</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#877D72; padding:30px;">Không tìm thấy đơn hàng nào phù hợp</td></tr>`;
       return;
     }
 
@@ -448,11 +448,11 @@
             <td>
               <strong>${ord.customer ? ord.customer.name : "Khách vãng lai"}</strong><br>
               <span style="font-size:0.8rem; color:#877D72;">${ord.customer ? ord.customer.phone : ""}</span>
-              ${ord.feedback ? `<div style="margin-top:6px; font-size:0.78rem; color:#D4AF37; background:rgba(212,175,55,0.12); padding:3px 8px; border-radius:4px; border:1px solid rgba(212,175,55,0.3); max-width:240px; line-height:1.4;">💬 <strong>Góp ý khách:</strong> ${escapeHtml(ord.feedback)}</div>` : ''}
+              ${ord.feedback ? `<div style="margin-top:7px; font-size:0.82rem; color:#FFE082; background:linear-gradient(135deg, rgba(255,183,77,0.22), rgba(166,124,82,0.28)); padding:6px 10px; border-radius:6px; border:1.5px solid rgba(255,183,77,0.5); max-width:280px; line-height:1.45; box-shadow:0 2px 6px rgba(0,0,0,0.25);"><strong style="color:#FFA726;">💬 Góp ý khách:</strong> ${escapeHtml(ord.feedback)}</div>` : ''}
               ${ord.notes && ord.status === 'cancelled' ? `<div style="margin-top:6px; font-size:0.78rem; color:#EF5350; background:rgba(239,83,80,0.12); padding:3px 8px; border-radius:4px; border:1px solid rgba(239,83,80,0.3); max-width:240px; line-height:1.4;">⚠️ <strong>Lý do hủy:</strong> ${escapeHtml(ord.notes)}</div>` : ''}
             </td>
             <td><span class="admin-badge">${itemsCount} món</span></td>
-            <td><strong>${formatVND(ord.total)}</strong></td>
+            <td><strong>${formatVND(ord.totalAmount || ord.total)}</strong></td>
             <td><span class="status-pill ${s.cls}">${s.label}</span></td>
             <td>
               <div style="display:flex; gap:6px;">
@@ -527,10 +527,20 @@
     const tbody = document.getElementById("productsTableBody");
     if (!tbody) return;
 
+    let stockMap = {};
+    try {
+      stockMap = JSON.parse(localStorage.getItem("nexus_products_stock") || "{}");
+    } catch (e) {
+      stockMap = {};
+    }
+
     const products = window.PRODUCTS || [];
     tbody.innerHTML = products
       .map((p) => {
         const thumb = (p.images && p.images[0]) || "assets/images/placeholder.svg";
+        const currentStock = stockMap[p.id] !== undefined ? stockMap[p.id] : (p.stock || 15);
+        p.stock = currentStock;
+
         return `
           <tr>
             <td>
@@ -540,7 +550,7 @@
             <td><span class="admin-badge" style="background:#24201D; border:1px solid rgba(166,124,82,0.3);">${p.categoryLabel || p.category}</span></td>
             <td><strong>${formatVND(p.price)}</strong></td>
             <td>
-              <span id="stock-${p.id}" style="font-weight:700; color:#81C784;">${p.stock || 15}</span>
+              <span id="stock-${p.id}" style="font-weight:700; color:#81C784;">${currentStock}</span>
             </td>
             <td>
               <button type="button" class="btn-table-action btn-table-print" onclick="window.__adminAdjustStock('${p.id}', 5)">+5 Kho</button>
@@ -685,6 +695,12 @@
       const stockEl = document.getElementById("stock-" + productId);
       if (stockEl) stockEl.textContent = p.stock;
 
+      try {
+        const stockMap = JSON.parse(localStorage.getItem("nexus_products_stock") || "{}");
+        stockMap[productId] = p.stock;
+        localStorage.setItem("nexus_products_stock", JSON.stringify(stockMap));
+      } catch (e) {}
+
       if (window.apiService && typeof window.apiService.updateProductStock === "function") {
         window.apiService.updateProductStock(productId, p.stock).catch(() => {});
       }
@@ -716,20 +732,83 @@
     const user = usersList.find((u) => u.id === userId);
     if (!user) return;
 
-    if (!confirm(`Bạn có chắc chắn muốn xóa tài khoản "${user.fullName || user.email}" khỏi hệ thống?`)) {
+    if (user.id === "usr_admin_01" || user.email === "admin@nexusvr.vn") {
+      alert("Không thể xóa tài khoản Quản trị viên tối cao.");
       return;
     }
 
+    const email = (user.email || "").toLowerCase().trim();
+    const phone = (user.phone || "").trim();
+
+    // Tìm các đơn hàng thuộc về khách hàng này
+    const relatedOrders = ordersList.filter(o => {
+      const oEmail = (o.customer?.email || "").toLowerCase().trim();
+      const oPhone = (o.customer?.phone || "").trim();
+      return (email && oEmail === email) || (phone && oPhone === phone);
+    });
+
+    // Tìm các lịch hẹn showroom thuộc về khách hàng này
+    const relatedBookings = bookingsList.filter(b => {
+      const bEmail = (b.email || "").toLowerCase().trim();
+      const bPhone = (b.phone || "").trim();
+      return (email && bEmail === email) || (phone && bPhone === phone);
+    });
+
+    const confirmMsg =
+      `⚠️ CẢNH BÁO QUẢN TRỊ DỮ LIỆU (CASCADE DELETE):\n` +
+      `Bạn có chắc chắn muốn xóa vĩnh viễn khách hàng "${user.fullName || user.email}"?\n\n` +
+      `Hành động này sẽ XÓA LIÊN HOÀN:\n` +
+      `- ${relatedOrders.length} đơn hàng liên quan của khách này ở cả Admin và tài khoản người dùng\n` +
+      `- ${relatedBookings.length} lịch hẹn showroom của khách này\n` +
+      `- Toàn bộ dữ liệu tài khoản trên hệ thống và Cloud Database.\n\n` +
+      `Dữ liệu đã xóa KHÔNG THỂ khôi phục. Bấm OK để tiếp tục xóa sạch.`;
+
+    if (!confirm(confirmMsg)) {
+      return;
+    }
+
+    // 1. Xóa khỏi usersList
     usersList = usersList.filter((u) => u.id !== userId);
 
+    // 2. Xóa liên hoàn các đơn hàng liên quan trong ordersList (Admin)
+    if (relatedOrders.length > 0) {
+      const relatedIds = new Set(relatedOrders.map(o => o.id || o.code));
+      ordersList = ordersList.filter(o => !relatedIds.has(o.id) && !relatedIds.has(o.code));
+      localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(ordersList));
+      localStorage.setItem(CACHE_KEY_ORDERS, JSON.stringify(ordersList));
+    }
+
+    // 3. Xóa các kho đơn hàng người dùng nexus_orders_* và giỏ hàng của khách này
+    if (email) {
+      const userKey = "_" + email.toLowerCase().replace(/[^a-z0-9]/g, "_");
+      localStorage.removeItem("nexus_orders" + userKey);
+      localStorage.removeItem("nexus_cart" + userKey);
+      localStorage.removeItem("nexus_wishlist" + userKey);
+    }
+
+    // 4. Xóa liên hoàn các lịch hẹn liên quan trong bookingsList
+    if (relatedBookings.length > 0) {
+      const bIds = new Set(relatedBookings.map(b => b.id));
+      bookingsList = bookingsList.filter(b => !bIds.has(b.id));
+      localStorage.setItem("nexus_bookings", JSON.stringify(bookingsList));
+    }
+
+    // 5. Đồng bộ xóa lên Cloud Database qua API
     if (window.apiService && typeof window.apiService.deleteUser === "function") {
-      await window.apiService.deleteUser(userId);
+      try {
+        await window.apiService.deleteUser(userId, true, email, phone);
+      } catch (errApi) {
+        console.warn("[Admin] Lỗi gọi API xóa user:", errApi);
+      }
     }
 
     if (typeof window.showToast === "function") {
-      window.showToast(`Đã xóa tài khoản ${user.email}!`, "success");
+      window.showToast(`Đã xóa sạch tài khoản ${user.email} cùng ${relatedOrders.length} đơn hàng liên quan!`, "success");
     }
+
     renderKPIs();
+    renderOrdersTable();
+    renderBookingsTable();
     renderUsersTable();
   };
 

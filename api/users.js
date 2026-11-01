@@ -96,21 +96,55 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ success: true, mode: "local_storage" });
   }
 
-  // 3. DELETE: XÓA TÀI KHOẢN KHÁCH HÀNG (BẢO VỆ ADMIN GỐC KHÔNG THỂ BỊ XÓA)
+  // 3. DELETE: XÓA LIÊN HOÀN TÀI KHOẢN KHÁCH HÀNG VÀ ĐƠN HÀNG (CASCADE DELETE)
   if (req.method === "DELETE") {
-    const { id } = req.body || req.query || {};
-    if (!id) {
-      return res.status(400).json({ success: false, message: "Thiếu ID người dùng cần xóa." });
+    const { id, email, phone } = req.body || req.query || {};
+    if (!id && !email) {
+      return res.status(400).json({ success: false, message: "Thiếu ID hoặc email người dùng cần xóa." });
     }
 
-    if (id === "usr_admin_01") {
+    if (id === "usr_admin_01" || email === "admin@nexusvr.vn") {
       return res.status(403).json({ success: false, message: "Không thể xóa tài khoản Quản trị viên tối cao." });
     }
 
     if (hasDatabaseConfigured()) {
       try {
-        await query("DELETE FROM users WHERE id = $1 AND role != 'admin'", [id]);
-        return res.status(200).json({ success: true, message: "Đã xóa tài khoản người dùng thành công." });
+        let userEmail = email;
+        let userPhone = phone;
+
+        if (id && (!userEmail || !userPhone)) {
+          const uRes = await query("SELECT email, phone FROM users WHERE id = $1", [id]);
+          if (uRes.rows && uRes.rows.length > 0) {
+            userEmail = userEmail || uRes.rows[0].email;
+            userPhone = userPhone || uRes.rows[0].phone;
+          }
+        }
+
+        // Xóa liên hoàn các đơn hàng của khách hàng này
+        if (userEmail || userPhone) {
+          await query(
+            "DELETE FROM orders WHERE user_email = $1 OR customer_phone = $2",
+            [userEmail || "", userPhone || ""]
+          ).catch((e) => console.warn("[Users DELETE] Lỗi xóa orders liên hoàn:", e.message));
+
+          // Xóa liên hoàn các lịch hẹn showroom
+          await query(
+            "DELETE FROM showroom_bookings WHERE customer_email = $1 OR customer_phone = $2",
+            [userEmail || "", userPhone || ""]
+          ).catch((e) => console.warn("[Users DELETE] Lỗi xóa bookings liên hoàn:", e.message));
+        }
+
+        // Xóa tài khoản khách hàng
+        if (id) {
+          await query("DELETE FROM users WHERE id = $1 AND role != 'admin'", [id]);
+        } else if (userEmail) {
+          await query("DELETE FROM users WHERE email = $1 AND role != 'admin'", [userEmail]);
+        }
+
+        return res.status(200).json({
+          success: true,
+          message: "Đã xóa tài khoản và dữ liệu liên quan thành công (Cascade Delete)."
+        });
       } catch (err) {
         return res.status(500).json({ success: false, message: err.message });
       }

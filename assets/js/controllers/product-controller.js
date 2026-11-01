@@ -230,7 +230,7 @@ function renderSpecsTable(product) {
 
 let currentProductReviews = [];
 
-async function renderReviews(product) {
+function drawReviewsUI(reviews, product) {
   const list = document.getElementById("pd-reviews-list");
   const countBadge = document.getElementById("pd-tab-review-count");
   const avgNumEl = document.getElementById("pd-reviews-avg");
@@ -238,23 +238,6 @@ async function renderReviews(product) {
   const countTextEl = document.getElementById("pd-reviews-count-text");
 
   if (!list) return;
-
-  // Lấy reviews từ product data gốc
-  let reviews = Array.isArray(product.reviews) ? [...product.reviews] : [];
-
-  // Lấy thêm reviews từ Serverless API / Cloud Database
-  if (window.apiService && typeof window.apiService.getProductReviews === "function") {
-    try {
-      const serverReviews = await window.apiService.getProductReviews(product.id);
-      if (Array.isArray(serverReviews) && serverReviews.length > 0) {
-        serverReviews.forEach(sr => {
-          if (!reviews.some(r => r.id === sr.id || (r.comment === sr.comment && r.author === sr.author))) {
-            reviews.unshift(sr);
-          }
-        });
-      }
-    } catch (e) {}
-  }
 
   currentProductReviews = reviews;
 
@@ -308,6 +291,45 @@ async function renderReviews(product) {
   }
 
   initReviewForm(product);
+}
+
+function renderReviews(product) {
+  // 1. Tải tức thì 0ms từ product data gốc và LocalStorage Cache (Stale-While-Revalidate)
+  let reviews = Array.isArray(product.reviews) ? [...product.reviews] : [];
+  try {
+    const cached = localStorage.getItem("nexus_cached_reviews_" + product.id);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        parsed.forEach(sr => {
+          if (!reviews.some(r => r.id === sr.id || (r.comment === sr.comment && r.author === sr.author))) {
+            reviews.unshift(sr);
+          }
+        });
+      }
+    }
+  } catch (e) {}
+
+  // Vẽ giao diện ngay lập tức trong 0 mili-giây
+  drawReviewsUI(reviews, product);
+
+  // 2. Chạy ngầm đồng bộ từ Serverless API / Cloud Database
+  if (window.apiService && typeof window.apiService.getProductReviews === "function") {
+    window.apiService.getProductReviews(product.id).then(serverReviews => {
+      if (Array.isArray(serverReviews) && serverReviews.length > 0) {
+        let hasNew = false;
+        serverReviews.forEach(sr => {
+          if (!reviews.some(r => r.id === sr.id || (r.comment === sr.comment && r.author === sr.author))) {
+            reviews.unshift(sr);
+            hasNew = true;
+          }
+        });
+        if (hasNew) {
+          drawReviewsUI(reviews, product);
+        }
+      }
+    }).catch(() => {});
+  }
 }
 
 function escapeReviewText(str) {

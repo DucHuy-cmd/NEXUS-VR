@@ -23,6 +23,7 @@ module.exports = async function handler(req, res) {
 
     if (hasDatabaseConfigured()) {
       try {
+        await query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS feedback TEXT;").catch(() => {});
         let sql = "SELECT * FROM orders ORDER BY created_at DESC";
         let params = [];
 
@@ -42,10 +43,12 @@ module.exports = async function handler(req, res) {
             address: row.customer_address
           },
           total: Number(row.total_amount),
+          totalAmount: Number(row.total_amount),
           shippingFee: Number(row.shipping_fee || 0),
           paymentMethod: row.payment_method,
           status: row.status,
           notes: row.notes || "",
+          feedback: row.feedback || "",
           items: typeof row.items === "string" ? JSON.parse(row.items) : row.items,
           createdAt: new Date(row.created_at).toLocaleString("vi-VN")
         }));
@@ -110,27 +113,36 @@ module.exports = async function handler(req, res) {
 
   // 3. PATCH: CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG (DÀNH CHO ADMIN HOẶC XÁC NHẬN NHẬN HÀNG)
   if (req.method === "PATCH") {
-    const { orderId, id, code, status, reason, notes } = req.body || {};
+    const { orderId, id, code, status, reason, notes, feedback } = req.body || {};
     const newStatus = status;
     const targetId = orderId || id;
     const cancelNote = reason || notes || null;
 
-    if (!newStatus || (!targetId && !code)) {
+    if ((!newStatus && feedback === undefined) || (!targetId && !code)) {
       return res.status(400).json({ success: false, message: "Thiếu thông tin cập nhật." });
     }
 
     if (hasDatabaseConfigured()) {
       try {
-        if (cancelNote) {
+        await query("ALTER TABLE orders ADD COLUMN IF NOT EXISTS feedback TEXT;").catch(() => {});
+        if (feedback !== undefined) {
           await query(
-            "UPDATE orders SET status = $1, notes = $2, updated_at = NOW() WHERE id = $3 OR order_code = $4",
-            [newStatus, cancelNote, targetId || "", code || ""]
+            "UPDATE orders SET feedback = $1, updated_at = NOW() WHERE id = $2 OR order_code = $3",
+            [feedback, targetId || "", code || ""]
           );
-        } else {
-          await query(
-            "UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 OR order_code = $3",
-            [newStatus, targetId || "", code || ""]
-          );
+        }
+        if (newStatus) {
+          if (cancelNote) {
+            await query(
+              "UPDATE orders SET status = $1, notes = $2, updated_at = NOW() WHERE id = $3 OR order_code = $4",
+              [newStatus, cancelNote, targetId || "", code || ""]
+            );
+          } else {
+            await query(
+              "UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 OR order_code = $3",
+              [newStatus, targetId || "", code || ""]
+            );
+          }
         }
       } catch (err) {
         console.error("[Orders PATCH] Lỗi cập nhật DB:", err.message);
@@ -145,8 +157,13 @@ module.exports = async function handler(req, res) {
 
     // 4. DELETE: XÓA ĐƠN HÀNG HOẶC DỌN SẠCH ĐƠN RÁC
   if (req.method === "DELETE") {
+    const { email, phone } = req.body || req.query || {};
     if (hasDatabaseConfigured()) {
       try {
+        if (email || phone) {
+          await query("DELETE FROM orders WHERE user_email = $1 OR customer_phone = $2", [email || "", phone || ""]);
+          return res.status(200).json({ success: true, message: "Đã xóa các đơn hàng của khách hàng." });
+        }
         await query("DELETE FROM orders");
         return res.status(200).json({ success: true, message: "Đã xóa toàn bộ đơn hàng trong Database." });
       } catch (err) {

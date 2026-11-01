@@ -190,7 +190,13 @@
         <div class="admin-card-panel">
           <div class="admin-panel-head">
             <div class="admin-filter-bar">
-              <input type="text" id="orderSearchInput" class="admin-search-input" placeholder="Tìm kiếm theo mã đơn, tên, SĐT...">
+              <div class="admin-search-wrapper" style="position: relative; display: inline-flex; align-items: center;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A67C52" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; pointer-events: none;">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="orderSearchInput" class="admin-search-input" style="padding-left: 36px; min-width: 280px;" placeholder="Tìm kiếm theo mã đơn, tên, SĐT...">
+              </div>
               <select id="orderStatusFilter" class="admin-select">
                 <option value="all">Tất cả trạng thái</option>
                 <option value="processing">Đang xử lý</option>
@@ -209,7 +215,6 @@
                   <th>Sản Phẩm Đặt</th>
                   <th>Tổng Tiền</th>
                   <th>Trạng Thái</th>
-                  <th>Thời Gian</th>
                   <th>Hành Động</th>
                 </tr>
               </thead>
@@ -291,7 +296,13 @@
         <div class="admin-card-panel">
           <div class="admin-panel-head">
             <div class="admin-filter-bar">
-              <input type="text" id="userSearchInput" class="admin-input" placeholder="🔍 Tìm theo tên, email hoặc số điện thoại...">
+              <div class="admin-search-wrapper" style="position: relative; display: inline-flex; align-items: center;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A67C52" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; pointer-events: none;">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="userSearchInput" class="admin-search-input" style="padding-left: 36px; min-width: 280px;" placeholder="Tìm theo tên, email hoặc số điện thoại...">
+              </div>
               <select id="userRoleFilter" class="admin-select">
                 <option value="all">Tất cả vai trò</option>
                 <option value="customer">Khách hàng (Customer)</option>
