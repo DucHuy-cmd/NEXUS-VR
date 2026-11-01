@@ -27,6 +27,19 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
     initRegisterForm();
     initProfileDetailsForm();
     initProfileState();
+
+    // KIỂM TRA LÝ DO CHUYỂN HƯỚNG TỪ ADMIN BẢO MẬT
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const reason = urlParams.get("reason");
+      if (reason === "reload" || reason === "security") {
+        setTimeout(() => {
+          if (typeof window.showToast === "function") {
+            window.showToast("🔒 Phiên làm việc Quản trị đã hết hạn để bảo mật. Vui lòng đăng nhập lại!", "info");
+          }
+        }, 300);
+      }
+    } catch (e) {}
   }
 
   /* --------------------------------------------------------------------------
@@ -281,6 +294,8 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
           if (res && res.success && res.user) {
             saveCurrentSession(res.user);
             if (res.user.role === "admin") {
+              sessionStorage.setItem("nexus_admin_session_valid", "true");
+              sessionStorage.setItem("nexus_admin_session_token", "adm_" + Date.now());
               if (typeof window.showToast === "function") {
                 window.showToast("Đăng nhập Quản trị viên thành công! Đang chuyển hướng...", "success");
               }

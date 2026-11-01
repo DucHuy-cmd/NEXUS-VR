@@ -221,6 +221,8 @@
     // Color dot click on product card
     const colorDot = e.target.closest('.card-color-dot');
     if (colorDot) {
+      e.preventDefault();
+      e.stopPropagation();
       const card = colorDot.closest('.product-card');
       if (!card) return;
       const colorIndex = Number(colorDot.dataset.colorIndex);
@@ -228,6 +230,7 @@
 
       const imgEl = card.querySelector('.product-card__image');
       if (imgEl && imgPath) {
+        imgEl.style.transition = 'opacity 0.15s ease';
         imgEl.style.opacity = '0.5';
         setTimeout(() => {
           imgEl.setAttribute("onerror", "this.onerror=null; this.src='assets/images/placeholder.svg';");
@@ -237,24 +240,39 @@
           };
           imgEl.src = imgPath;
           imgEl.style.opacity = '1';
-        }, 120);
+        }, 80);
       }
 
       card.querySelectorAll('.card-color-dot').forEach(dot => dot.classList.remove('is-active'));
       colorDot.classList.add('is-active');
-      card.dataset.selectedColorIndex = colorIndex;
+      card.dataset.selectedColorIndex = String(colorIndex);
+      return;
     }
   }
 
-  function renderProductCard(p) {
+  function renderProductCard(p, activeColors) {
     const card = document.createElement('article');
     card.className = 'product-card';
     card.dataset.id = p.id;
-    card.dataset.selectedColorIndex = "0";
+
+    // Xác định màu hiển thị ưu tiên theo bộ lọc màu đang chọn
+    let selectedColorIndex = 0;
+    if (activeColors && activeColors.length > 0 && Array.isArray(p.colors)) {
+      const matchedIdx = p.colors.findIndex(c => activeColors.includes(c.name));
+      if (matchedIdx !== -1) {
+        selectedColorIndex = matchedIdx;
+      }
+    }
+    card.dataset.selectedColorIndex = String(selectedColorIndex);
 
     const onSale = isOnSale(p);
     const discount = onSale ? Math.round((1 - p.price / p.oldPrice) * 100) : null;
-    const initialImg = (p.colors && p.colors[0] && p.colors[0].image) ? p.colors[0].image : (p.images[0] || 'assets/images/placeholder.svg');
+    
+    // Lấy ảnh tương ứng với màu được chọn
+    const activeColorObj = (p.colors && p.colors[selectedColorIndex]) ? p.colors[selectedColorIndex] : null;
+    const initialImg = (activeColorObj && activeColorObj.image)
+      ? activeColorObj.image
+      : ((p.images && p.images[selectedColorIndex]) || (p.images && p.images[0]) || 'assets/images/placeholder.svg');
 
     let colorSwatchesHtml = '';
     if (p.colors && p.colors.length > 0) {
@@ -263,12 +281,12 @@
           ${p.colors.map((c, idx) => `
             <button
               type="button"
-              class="card-color-dot ${idx === 0 ? 'is-active' : ''}"
+              class="card-color-dot ${idx === selectedColorIndex ? 'is-active' : ''}"
               style="background-color: ${c.hex};"
               title="Màu ${c.name}"
               aria-label="Chọn màu ${c.name}"
               data-color-index="${idx}"
-              data-image="${c.image || p.images[idx] || p.images[0]}"
+              data-image="${c.image || (p.images && p.images[idx]) || p.images[0]}"
             ></button>
           `).join('')}
         </div>
@@ -336,6 +354,7 @@
 
   function update() {
     const filtered = getFilteredProducts();
+    const activeColors = getActiveColorFilters();
     const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
     currentPage = Math.min(currentPage, totalPages);
 
@@ -343,7 +362,7 @@
     const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
     grid.innerHTML = '';
-    pageItems.forEach(p => grid.appendChild(renderProductCard(p)));
+    pageItems.forEach(p => grid.appendChild(renderProductCard(p, activeColors)));
 
     resultCount.textContent = filtered.length;
     emptyState.hidden = filtered.length !== 0;

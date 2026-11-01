@@ -37,6 +37,14 @@
         <span class="admin-live-dot" id="adminLiveDot"></span>
         <span id="adminLiveText" style="display: none;">DB: Online</span>
       </div>
+      <button type="button" id="btnAdminRefresh" class="btn-admin-action btn-admin-outline" title="Làm mới đồng bộ dữ liệu đám mây" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="iconAdminRefresh">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        <span>Làm Mới</span>
+      </button>
       <a href="shop.html" class="btn-admin-action btn-admin-outline" target="_blank">Xem Cửa Hàng</a>
       <div class="admin-account-tag" style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #EDE4D8; background: rgba(255,255,255,0.06); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.12);">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -91,7 +99,6 @@
            ========================================== -->
       <section class="admin-tab-pane" id="pane-overview">
         <h1 class="admin-header-title">Tổng Quan Hoạt Động</h1>
-        <p class="admin-header-desc">Theo dõi doanh thu, tốc độ xử lý đơn hàng và lịch đón tiếp khách VIP thời gian thực.</p>
 
         <!-- KPI CARDS -->
         <div class="admin-kpi-grid">
@@ -179,7 +186,6 @@
            ========================================== -->
       <section class="admin-tab-pane" id="pane-orders" style="display: none;">
         <h1 class="admin-header-title">Quản Lý Đơn Hàng</h1>
-        <p class="admin-header-desc">Duyệt giao hàng, xuất hóa đơn và theo dõi lịch sử thanh toán của khách.</p>
 
         <div class="admin-card-panel">
           <div class="admin-panel-head">
@@ -218,7 +224,6 @@
            ========================================== -->
       <section class="admin-tab-pane" id="pane-bookings" style="display: none;">
         <h1 class="admin-header-title">Lịch Hẹn Trải Nghiệm Showroom</h1>
-        <p class="admin-header-desc">Danh sách quý khách đăng ký trải nghiệm kính VR và nhận thẻ VIP Pass từ trang Liên hệ.</p>
 
         <div class="admin-card-panel">
           <div class="admin-panel-head">
@@ -257,7 +262,6 @@
            ========================================== -->
       <section class="admin-tab-pane" id="pane-products" style="display: none;">
         <h1 class="admin-header-title">Quản Lý Kho &amp; Sản Phẩm</h1>
-        <p class="admin-header-desc">Danh mục 18 thiết bị kính thực tế ảo, tay cầm và phụ kiện hệ sinh thái NEXUS VR.</p>
 
         <div class="admin-card-panel">
           <div class="admin-table-wrap">
@@ -283,7 +287,6 @@
            ========================================== -->
       <section class="admin-tab-pane" id="pane-users" style="display: none;">
         <h1 class="admin-header-title">Quản Lý Khách Hàng &amp; Phân Quyền</h1>
-        <p class="admin-header-desc">Danh sách tài khoản khách hàng đăng ký trên hệ thống, phân quyền quản trị và quản lý quyền truy cập.</p>
 
         <div class="admin-card-panel">
           <div class="admin-panel-head">

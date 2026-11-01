@@ -557,6 +557,22 @@
   margin-right: 10px;
 }
 
+/* ẨN PHỤ ĐỀ MÔ TẢ THEO YÊU CẦU */
+.admin-header-desc {
+  display: none !important;
+}
+
+/* HIỆU ỨNG XOAY NÚT LÀM MỚI REALTIME */
+.admin-spinning {
+  animation: adminSpin 0.75s linear infinite;
+}
+
+@keyframes adminSpin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 .btn-table-outline {
   background: rgba(166, 124, 82, 0.15) !important;
   color: #EDE4D8 !important;

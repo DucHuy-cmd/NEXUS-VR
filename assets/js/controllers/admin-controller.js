@@ -26,18 +26,21 @@
   document.addEventListener("DOMContentLoaded", initAdminDashboard);
 
   async function initAdminDashboard() {
-    initAuthCheck();
+    const isAuthed = initAuthCheck();
+    if (!isAuthed) return;
+
     initTabNavigation();
     loadAllData();
     renderAllViews();
     initSearchAndFilters();
     checkDatabaseConnection();
+    initRealtimeSync();
   }
 
   /* ---------------------------------------------------------
      1. KIỂM TRA KẾT NỐI SERVERLESS & POSTGRESQL ĐÁM MÂY (CHẠY SONG SONG)
      --------------------------------------------------------- */
-  async function checkDatabaseConnection() {
+  async function checkDatabaseConnection(isSilent = false) {
     const dot = document.getElementById("adminLiveDot");
     const container = document.getElementById("adminLiveStatus");
     if (!dot) return;
@@ -65,33 +68,53 @@
         if (container) container.title = "Chế độ lưu trữ cục bộ an toàn (Local Storage)";
       }
 
+      let hasNewData = false;
+
       // 2. Cập nhật Đơn hàng
       if (ordersRes.status === "fulfilled" && Array.isArray(ordersRes.value)) {
+        if (JSON.stringify(ordersList) !== JSON.stringify(ordersRes.value)) {
+          hasNewData = true;
+          // Phát hiện đơn hàng mới nếu số lượng tăng
+          if (ordersRes.value.length > ordersList.length && isSilent) {
+            const newest = ordersRes.value[0];
+            if (typeof window.showToast === "function" && newest) {
+              window.showToast(`🔔 Có đơn hàng mới: ${newest.code || newest.id}!`, "info");
+            }
+          }
+        }
         ordersList = ordersRes.value;
         localStorage.setItem(CACHE_KEY_ORDERS, JSON.stringify(ordersList));
       }
 
       // 3. Cập nhật Lịch hẹn Showroom VIP
       if (bookingsRes.status === "fulfilled" && Array.isArray(bookingsRes.value)) {
+        if (JSON.stringify(bookingsList) !== JSON.stringify(bookingsRes.value)) {
+          hasNewData = true;
+        }
         bookingsList = bookingsRes.value;
         localStorage.setItem(CACHE_KEY_BOOKINGS, JSON.stringify(bookingsList));
       }
 
       // 4. Cập nhật Tài khoản Khách hàng
       if (usersRes.status === "fulfilled" && Array.isArray(usersRes.value)) {
+        if (JSON.stringify(usersList) !== JSON.stringify(usersRes.value)) {
+          hasNewData = true;
+        }
         usersList = usersRes.value;
         localStorage.setItem(CACHE_KEY_USERS, JSON.stringify(usersList));
       }
 
-      // Cập nhật lại giao diện ngay lập tức
-      renderAllViews();
+      // Cập nhật lại giao diện nếu có dữ liệu mới hoặc không ở chế độ ngầm
+      if (hasNewData || !isSilent) {
+        renderAllViews();
+      }
     } catch (err) {
       console.warn("[Admin] Tải dữ liệu song song gặp sự cố:", err);
     }
   }
 
   /* ---------------------------------------------------------
-     2. BẢO VỆ ROUTE & PHÂN QUYỀN (ZERO BACKDOORS)
+     2. BẢO VỆ ROUTE & PHÂN QUYỀN (F5 HOẶC TẮT MỞ LẠI BẮT BUỘC ĐĂNG NHẬP)
      --------------------------------------------------------- */
   function getCurrentUser() {
     try {
@@ -102,6 +125,32 @@
   }
 
   function checkIsAdmin() {
+    // 1. Kiểm tra reload (F5)
+    let isReload = false;
+    try {
+      const navEntries = performance.getEntriesByType("navigation");
+      if (navEntries && navEntries.length > 0) {
+        isReload = navEntries[0].type === "reload";
+      } else if (performance.navigation) {
+        isReload = performance.navigation.type === 1;
+      }
+    } catch (e) {}
+
+    // Nếu người dùng F5 -> Hết hạn phiên Admin lập tức
+    if (isReload) {
+      localStorage.removeItem(STORAGE_KEY_USER);
+      sessionStorage.removeItem("nexus_admin_session_valid");
+      sessionStorage.removeItem("nexus_admin_session_token");
+      return false;
+    }
+
+    // 2. Kiểm tra cờ phiên làm việc trong sessionStorage (tắt trình duyệt/tab mở lại sẽ mất)
+    const hasAdminSession = sessionStorage.getItem("nexus_admin_session_valid") === "true";
+    if (!hasAdminSession) {
+      localStorage.removeItem(STORAGE_KEY_USER);
+      return false;
+    }
+
     const user = getCurrentUser();
     return Boolean(user && user.role === "admin");
   }
@@ -118,21 +167,92 @@
       }
     } else {
       if (authOverlay) authOverlay.style.display = "flex";
-      // Chuyển hướng về login sau 1.5 giây nếu không có quyền
+      // Chuyển hướng về login kèm thông báo bảo mật
       setTimeout(() => {
-        if (!checkIsAdmin()) {
-          window.location.href = "login.html?redirect=admin.html";
-        }
-      }, 1500);
+        window.location.href = "login.html?redirect=admin.html&reason=reload";
+      }, 700);
+      return false;
     }
+
+    // Khi F5 hoặc đóng tab, dọn sạch session để lần nạp kế tiếp bắt buộc đăng nhập lại
+    window.addEventListener("beforeunload", () => {
+      const u = getCurrentUser();
+      if (u && u.role === "admin") {
+        sessionStorage.removeItem("nexus_admin_session_valid");
+        sessionStorage.removeItem("nexus_admin_session_token");
+        localStorage.removeItem(STORAGE_KEY_USER);
+      }
+    });
 
     // Nút Đăng xuất Admin
     const btnLogout = document.getElementById("btnAdminLogout");
     if (btnLogout) {
       btnLogout.addEventListener("click", (e) => {
         e.preventDefault();
+        sessionStorage.removeItem("nexus_admin_session_valid");
+        sessionStorage.removeItem("nexus_admin_session_token");
         localStorage.removeItem(STORAGE_KEY_USER);
         window.location.href = "login.html";
+      });
+    }
+
+    return true;
+  }
+
+  /* ---------------------------------------------------------
+     2.1. ĐỒNG BỘ THỜI GIAN THỰC (REALTIME STORAGE & POLLING)
+     --------------------------------------------------------- */
+  function initRealtimeSync() {
+    // A. Lắng nghe đơn hàng mới từ các tab khác ngay khi khách bấm đặt hàng
+    window.addEventListener("storage", (e) => {
+      if (e.key === STORAGE_KEY_ORDERS || e.key === "nexus_orders") {
+        try {
+          const freshOrders = JSON.parse(e.newValue || "[]");
+          if (Array.isArray(freshOrders)) {
+            ordersList = freshOrders;
+            localStorage.setItem(CACHE_KEY_ORDERS, JSON.stringify(ordersList));
+            renderKPIs();
+            renderOverviewTables();
+            renderOrdersTable();
+            if (freshOrders.length > 0 && typeof window.showToast === "function") {
+              const code = freshOrders[0].code || freshOrders[0].id || "";
+              window.showToast(`🔔 Có đơn hàng mới: ${code}!`, "info");
+            }
+          }
+        } catch (err) {}
+      }
+
+      if (e.key === STORAGE_KEY_BOOKINGS) {
+        try {
+          const freshBookings = JSON.parse(e.newValue || "[]");
+          if (Array.isArray(freshBookings)) {
+            bookingsList = freshBookings;
+            localStorage.setItem(CACHE_KEY_BOOKINGS, JSON.stringify(bookingsList));
+            renderKPIs();
+            renderBookingsTable();
+          }
+        } catch (err) {}
+      }
+    });
+
+    // B. Cơ chế Polling ngầm mỗi 10 giây từ PostgreSQL Cloud
+    setInterval(() => {
+      checkDatabaseConnection(true);
+    }, 10000);
+
+    // C. Nút bấm làm mới thủ công (Quick Refresh) trên Topbar
+    const btnRefresh = document.getElementById("btnAdminRefresh");
+    const iconRefresh = document.getElementById("iconAdminRefresh");
+    if (btnRefresh) {
+      btnRefresh.addEventListener("click", async () => {
+        if (iconRefresh) iconRefresh.classList.add("admin-spinning");
+        await checkDatabaseConnection(false);
+        setTimeout(() => {
+          if (iconRefresh) iconRefresh.classList.remove("admin-spinning");
+          if (typeof window.showToast === "function") {
+            window.showToast("Đã đồng bộ dữ liệu mới nhất từ hệ thống!", "success");
+          }
+        }, 400);
       });
     }
   }
