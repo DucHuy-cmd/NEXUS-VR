@@ -115,11 +115,11 @@ const FOOTER_HTML = `
           </div>
           <div class="footer__contact-item">
             <span class="footer__contact-icon">📞</span>
-            <span>Hotline VIP: <a href="tel:0889378929" style="color: var(--accent); font-weight: 700;">0889 378 929</a> (24/7)</span>
+            <span>Hotline VIP: <a href="tel:0342276303" style="color: var(--accent); font-weight: 700;">0342 276 303</a> (24/7)</span>
           </div>
           <div class="footer__contact-item">
             <span class="footer__contact-icon">✉️</span>
-            <span>Email: contact@nexusvr.vn &bull; vu03032007@gmail.com</span>
+            <span>Email: contact@nexusvr.vn &bull; duchuyopg@gmail.com</span>
           </div>
         </div>
       </div>

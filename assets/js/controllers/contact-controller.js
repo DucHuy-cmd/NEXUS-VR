@@ -628,7 +628,7 @@
         "  ĐỊA ĐIỂM TIẾP ĐÓN     : Tầng 38, NEXUS Tower, Phố đi bộ Nguyễn Huệ, Q.1",
         "  ĐẶC QUYỀN VIP         : 45 phút Lounge riêng tư + Cân chỉnh IPD cá nhân",
         "  QUANTUM HASH          : " + data.hash,
-        "  HOTLINE CONCIERGE     : 0889 378 929 (Dịch vụ hỗ trợ 24/7)",
+        "  HOTLINE CONCIERGE     : 0342 276 303 (Dịch vụ hỗ trợ 24/7)",
         "",
         "─────────────────────────────────────────────────────────────────────────────",
         "  Vui lòng xuất trình tệp vé này tại quầy lễ tân VIP Lounge Tầng 38.",
