@@ -57,6 +57,12 @@ const NAVBAR_HTML = `
         <span class="navbar__cart-badge" id="cart-badge" hidden style="display: none;">0</span>
       </a>
 
+      <!-- PWA APP INSTALL BUTTON -->
+      <button type="button" class="navbar__pwa-btn" id="navbar-pwa-btn" title="Cài đặt Ứng dụng NEXUS VR">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+        <span>Cài Đặt App</span>
+      </button>
+
       <!-- USER PROFILE SLOT -->
       <div id="user-slot" class="navbar__user-slot"></div>
 
@@ -1011,6 +1017,7 @@ function initAllLayout() {
   updateUserState();
   initLiveSearch();
   syncAllPageWishlistButtons();
+  initPwaInstallFeature();
 
   if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
     window.addEventListener('load', () => {
@@ -1023,4 +1030,104 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initAllLayout);
 } else {
   initAllLayout();
+}
+/* --------------------------------------------------------------------------
+   PWA INSTALLATION PROMPT & MODAL GUIDE
+   -------------------------------------------------------------------------- */
+let deferredPwaPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPwaPrompt = e;
+  window.__deferredPwaPrompt = e;
+  const floating = document.getElementById("pwaFloatingInstallPill");
+  if (floating) floating.style.display = "block";
+});
+
+function initPwaInstallFeature() {
+  // Tạo modal và floating button nếu chưa có
+  if (!document.getElementById("pwaInstallGuideModal")) {
+    const modalHtml = `
+      <div class="pwa-modal-overlay" id="pwaInstallGuideModal" style="display: none;">
+        <div class="pwa-modal-card">
+          <div class="pwa-modal-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="pwa-modal-app-icon">
+                <img src="assets/images/favicon.svg" alt="NEXUS VR" width="34" height="34">
+              </div>
+              <div>
+                <h3 class="pwa-modal-title">Cài Đặt Ứng Dụng NEXUS VR</h3>
+                <span class="pwa-modal-sub">Trải nghiệm toàn màn hình mượt mà như app gốc</span>
+              </div>
+            </div>
+            <button type="button" class="btn-pwa-modal-close" id="btnClosePwaModal" aria-label="Đóng">&times;</button>
+          </div>
+          <div class="pwa-modal-body">
+            <div class="pwa-guide-item">
+              <div class="guide-badge">💻 Máy Tính (Chrome / Edge / Cốc Cốc)</div>
+              <p>Nhấp vào biểu tượng <strong>Cài đặt [🖥️↓]</strong> nằm ở góc phải của <strong>thanh địa chỉ URL</strong> trên trình duyệt, hoặc nhấp vào menu <strong>(⋮) → "Cài đặt ứng dụng NEXUS VR"</strong>.</p>
+            </div>
+            <div class="pwa-guide-item">
+              <div class="guide-badge">🍏 iPhone / iPad (Safari)</div>
+              <p>Nhấn vào biểu tượng <strong>Chia Sẻ (Share ⎋)</strong> ở thanh công cụ dưới đáy Safari, cuộn xuống chọn <strong>"Thêm vào Màn hình chính" (Add to Home Screen ⊞)</strong>.</p>
+            </div>
+            <div class="pwa-guide-item">
+              <div class="guide-badge">🤖 Điện Thoại Android (Chrome)</div>
+              <p>Nhấn vào menu <strong>3 chấm (⋮)</strong> ở góc trên bên phải trình duyệt, sau đó chọn <strong>"Cài đặt ứng dụng"</strong> hoặc <strong>"Thêm vào Màn hình chính"</strong>.</p>
+            </div>
+          </div>
+          <div class="pwa-modal-footer">
+            <button type="button" class="btn-pwa-understood" id="btnUnderstandPwa">Tôi Đã Hiểu</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FLOATING INSTALL BUTTON -->
+      <div class="pwa-floating-install-pill" id="pwaFloatingInstallPill">
+        <button type="button" class="btn-floating-pwa" id="btnFloatingPwa">
+          <span class="pwa-pulse-dot"></span>
+          <span class="pwa-icon">📲</span>
+          <span>Cài Đặt App NEXUS VR</span>
+        </button>
+      </div>
+    `;
+    document.body.insertAdjacentHTML("beforeend", modalHtml);
+  }
+
+  const pwaBtn = document.getElementById("navbar-pwa-btn");
+  const floatingBtn = document.getElementById("btnFloatingPwa");
+  const modal = document.getElementById("pwaInstallGuideModal");
+  const btnClose = document.getElementById("btnClosePwaModal");
+  const btnUnderstood = document.getElementById("btnUnderstandPwa");
+
+  const handleInstallClick = () => {
+    if (deferredPwaPrompt) {
+      deferredPwaPrompt.prompt();
+      deferredPwaPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === "accepted") {
+          if (typeof window.showToast === "function") window.showToast("Cảm ơn bạn đã cài đặt ứng dụng NEXUS VR!", "success");
+          const floating = document.getElementById("pwaFloatingInstallPill");
+          if (floating) floating.style.display = "none";
+        }
+        deferredPwaPrompt = null;
+      });
+    } else {
+      if (modal) modal.style.display = "flex";
+    }
+  };
+
+  if (pwaBtn) pwaBtn.addEventListener("click", handleInstallClick);
+  if (floatingBtn) floatingBtn.addEventListener("click", handleInstallClick);
+
+  const closeModal = () => {
+    if (modal) modal.style.display = "none";
+  };
+
+  if (btnClose) btnClose.addEventListener("click", closeModal);
+  if (btnUnderstood) btnUnderstood.addEventListener("click", closeModal);
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
 }

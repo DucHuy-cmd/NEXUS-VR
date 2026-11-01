@@ -210,6 +210,87 @@
                     </div>
                   </div>
                 </label>
+
+                <label class="option-card payment-card" id="labelPaymentInstallment">
+                  <div class="option-card__left">
+                    <input type="radio" name="paymentMethod" value="installment" class="option-card__radio" id="payInstallmentRadio">
+                    <div>
+                      <div class="option-card__title" style="display: flex; align-items: center; gap: 8px;">
+                        <span>Trả góp 0% Lãi suất qua thẻ tín dụng</span>
+                        <span class="badge-installment-0pct" style="background: rgba(166,124,82,0.15); color: #A67C52; border: 1px solid rgba(166,124,82,0.4); font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 4px;">0% LÃI SUẤT</span>
+                      </div>
+                      <div class="option-card__sub">Liên kết 12 ngân hàng lớn tại Việt Nam • Kỳ hạn 3, 6, 9, 12 tháng linh hoạt</div>
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <!-- KHỐI CHỌN NGÂN HÀNG & KỲ HẠN TRẢ GÓP 0% -->
+              <div id="installmentSelectionBox" class="checkout-installment-box" style="display: none;">
+                <div class="inst-box-header">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="inst-box-icon" style="width: 38px; height: 38px; border-radius: 50%; background: var(--accent, #A67C52); color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">💳</div>
+                    <div>
+                      <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">Cấu hình gói trả góp 0% lãi suất</h3>
+                      <p style="margin: 3px 0 0 0; font-size: 0.82rem; color: var(--text-muted);">Được tài trợ 100% lãi suất bởi đối tác tài chính NEXUS VR và các ngân hàng liên kết.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 1. CHỌN NGÂN HÀNG -->
+                <div class="inst-step-group" style="margin-top: 18px;">
+                  <label class="inst-step-label" style="display: block; font-weight: 600; font-size: 0.86rem; color: var(--text-primary); margin-bottom: 8px;">1. Chọn ngân hàng phát hành thẻ tín dụng của bạn:</label>
+                  <div class="inst-banks-grid" id="instBanksGrid">
+                    <!-- Populated via checkout-controller.js -->
+                  </div>
+                </div>
+
+                <!-- 2. CHỌN KỲ HẠN -->
+                <div class="inst-step-group" style="margin-top: 18px;">
+                  <label class="inst-step-label" style="display: block; font-weight: 600; font-size: 0.86rem; color: var(--text-primary); margin-bottom: 8px;">2. Chọn kỳ hạn trả góp:</label>
+                  <div class="inst-terms-grid" id="instTermsGrid">
+                    <button type="button" class="btn-inst-term is-active" data-inst-term="3">
+                      <span class="term-months">3 Tháng</span>
+                      <span class="term-pay" id="termPay3">0 ₫/tháng</span>
+                    </button>
+                    <button type="button" class="btn-inst-term" data-inst-term="6">
+                      <span class="term-months">6 Tháng</span>
+                      <span class="term-pay" id="termPay6">0 ₫/tháng</span>
+                    </button>
+                    <button type="button" class="btn-inst-term" data-inst-term="9">
+                      <span class="term-months">9 Tháng</span>
+                      <span class="term-pay" id="termPay9">0 ₫/tháng</span>
+                    </button>
+                    <button type="button" class="btn-inst-term" data-inst-term="12">
+                      <span class="term-months">12 Tháng</span>
+                      <span class="term-pay" id="termPay12">0 ₫/tháng</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 3. TỔNG KẾT TÀI CHÍNH TRẢ GÓP -->
+                <div class="inst-financial-summary" style="margin-top: 18px; padding: 16px; background: #FAF7F2; border: 1px solid rgba(166, 124, 82, 0.25); border-radius: 10px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 8px;">
+                    <span style="color: #6D4C41;">Ngân hàng thanh toán:</span>
+                    <strong id="instSummaryBank" style="color: var(--text-primary);">Techcombank</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 8px;">
+                    <span style="color: #6D4C41;">Số tiền thanh toán mỗi tháng:</span>
+                    <strong class="inst-monthly-highlight" id="instSummaryMonthly" style="color: var(--accent-deep, #A67C52); font-size: 1.15rem; font-weight: 800;">0 ₫/tháng</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 8px;">
+                    <span style="color: #6D4C41;">Lãi suất ưu đãi:</span>
+                    <strong style="color: #2E7D32;">0.0% (NEXUS VR tài trợ 100%)</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 8px;">
+                    <span style="color: #6D4C41;">Phí chuyển đổi hồ sơ:</span>
+                    <strong style="color: #2E7D32;">0 ₫ (Miễn phí)</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.95rem; padding-top: 10px; border-top: 1px dashed rgba(166, 124, 82, 0.3); font-weight: 700;">
+                    <span>Tổng tiền trả góp (<span id="instSummaryTerm">3</span> tháng):</span>
+                    <strong id="instSummaryTotal" style="color: var(--text-primary);">0 ₫</strong>
+                  </div>
+                </div>
               </div>
 
               <!-- KHỐI MÃ QR VIETQR CÓ BỘ ĐẾM VÀ TRẠNG THÁI THÀNH CÔNG -->

@@ -35,6 +35,7 @@ function initProductDetailPage() {
   initWishlistButton(product);
   initAddToCart(product);
   initInstallmentPlan(product);
+  initDynamicComparison(product);
 
   root.hidden = false;
 }
@@ -747,24 +748,204 @@ function initInstallmentPlan(product) {
   if (btnApply) {
     btnApply.addEventListener("click", () => {
       closeModal();
-      if (window.CartManager && typeof window.CartManager.addItem === "function") {
-        const colorName = product.colors && product.colors[selectedColorIndex]
-          ? product.colors[selectedColorIndex].name
-          : "Mặc định";
-        window.CartManager.addItem(product.id, 1, colorName);
-      } else if (window.cartManager && typeof window.cartManager.addItem === "function") {
-        window.cartManager.addItem(product.id, 1);
-      }
+      const qty = parseInt(document.getElementById("pd-qty-input")?.value, 10) || 1;
+      addProductToCart(product.id, qty, selectedColorIndex);
+
+      // Lưu thông tin gói trả góp đã chọn để tự kích hoạt bên trang Checkout
+      const installmentData = {
+        productId: product.id,
+        productName: product.name,
+        term: currentTerm,
+        monthlyPay: Math.round(product.price / currentTerm),
+        total: product.price,
+        bank: "Techcombank"
+      };
+      localStorage.setItem("nexus_selected_installment", JSON.stringify(installmentData));
+
       if (typeof window.showToast === "function") {
         window.showToast(`Đã chọn gói trả góp 0% (${currentTerm} tháng) & thêm vào giỏ hàng!`, "success");
       }
-      if (window.CartManager && typeof window.CartManager.openDrawer === "function") {
-        window.CartManager.openDrawer();
-      }
+
+      // Tự động chuyển hướng nhanh sang trang Thanh toán với gói trả góp đã chọn
+      setTimeout(() => {
+        window.location.href = "checkout.html";
+      }, 650);
     });
   }
 
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeModal();
+  });
+}
+
+/* --------------------------------------------------------------------------
+   DYNAMIC PRODUCT COMPARISON (ĐỐI CHIẾU 1-VS-1 THÔNG MINH)
+   -------------------------------------------------------------------------- */
+function initDynamicComparison(baseProduct) {
+  const selectEl = document.getElementById("compareTargetSelect");
+  const mountEl = document.getElementById("compareDynamicMount");
+  if (!selectEl || !mountEl || !Array.isArray(window.PRODUCTS)) return;
+
+  // Lọc danh sách thiết bị khác
+  const otherProducts = window.PRODUCTS.filter((p) => String(p.id) !== String(baseProduct.id));
+
+  // Đổ dữ liệu vào Dropdown
+  selectEl.innerHTML = otherProducts
+    .map((p) => `<option value="${p.id}">${p.name} — ${formatVND(p.price)}</option>`)
+    .join("");
+
+  // Chọn sản phẩm đối chiếu mặc định
+  let defaultTargetId = otherProducts[0]?.id;
+  // Ưu tiên so sánh với Flagship nếu sản phẩm hiện tại không phải Flagship
+  const flagship = otherProducts.find((p) => p.id === "nexus-vision-pro" || p.id === "NEXUS-01");
+  if (flagship) defaultTargetId = flagship.id;
+
+  if (defaultTargetId) {
+    selectEl.value = defaultTargetId;
+  }
+
+  // Helper trích xuất spec từ mảng specs
+  function getSpecValue(prod, keyword, fallback = "Chuẩn không gian") {
+    if (!prod || !Array.isArray(prod.specs)) return fallback;
+    const found = prod.specs.find(
+      (s) => s.label.toLowerCase().includes(keyword.toLowerCase())
+    );
+    return found ? found.value : fallback;
+  }
+
+  function getNumericWeight(prod) {
+    const raw = getSpecValue(prod, "trọng lượng", "400g");
+    const m = raw.match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : 400;
+  }
+
+  // Hàm render đối chiếu 2 cột
+  function renderCompareView(targetId) {
+    const targetProduct = window.PRODUCTS.find((p) => String(p.id) === String(targetId)) || otherProducts[0];
+    if (!targetProduct) return;
+
+    const baseWeight = getNumericWeight(baseProduct);
+    const targetWeight = getNumericWeight(targetProduct);
+
+    const baseRes = getSpecValue(baseProduct, "độ phân giải", "Micro-OLED Kép 4K");
+    const targetRes = getSpecValue(targetProduct, "độ phân giải", "Micro-OLED Kép 4K");
+
+    const baseHz = getSpecValue(baseProduct, "tần số", "90Hz - 120Hz");
+    const targetHz = getSpecValue(targetProduct, "tần số", "90Hz - 120Hz");
+
+    const baseBattery = getSpecValue(baseProduct, "pin", "3.5 giờ");
+    const targetBattery = getSpecValue(targetProduct, "pin", "3.5 giờ");
+
+    const baseFov = getSpecValue(baseProduct, "trường nhìn", getSpecValue(baseProduct, "cảm biến", "LiDAR 3D"));
+    const targetFov = getSpecValue(targetProduct, "trường nhìn", getSpecValue(targetProduct, "cảm biến", "LiDAR 3D"));
+
+    const baseImg = baseProduct.images && baseProduct.images[0] ? baseProduct.images[0] : "assets/images/placeholder.svg";
+    const targetImg = targetProduct.images && targetProduct.images[0] ? targetProduct.images[0] : "assets/images/placeholder.svg";
+
+    const baseIsLighter = baseWeight < targetWeight;
+    const targetIsLighter = targetWeight < baseWeight;
+    const baseIsCheaper = baseProduct.price < targetProduct.price;
+    const targetIsCheaper = targetProduct.price < baseProduct.price;
+
+    mountEl.innerHTML = `
+      <div class="compare-card-grid">
+        <!-- CỘT 1: SẢN PHẨM HIỆN TẠI -->
+        <div class="compare-prod-column is-base">
+          <div class="compare-prod-hero">
+            <span class="compare-role-tag current-tag">Thiết Bị Đang Xem</span>
+            <img src="${baseImg}" alt="${baseProduct.name}" class="compare-hero-thumb">
+            <h4 class="compare-hero-name">${baseProduct.name}</h4>
+            <div class="compare-hero-price">${formatVND(baseProduct.price)}</div>
+            <div class="compare-hero-rating">★ ${(baseProduct.rating || 5.0).toFixed(1)} (${baseProduct.reviewCount || 0} đánh giá)</div>
+          </div>
+        </div>
+
+        <!-- CỘT 2: SẢN PHẨM ĐỐI CHIẾU -->
+        <div class="compare-prod-column is-target">
+          <div class="compare-prod-hero">
+            <span class="compare-role-tag compare-tag">Thiết Bị Đối Chiếu</span>
+            <img src="${targetImg}" alt="${targetProduct.name}" class="compare-hero-thumb">
+            <h4 class="compare-hero-name">${targetProduct.name}</h4>
+            <div class="compare-hero-price">${formatVND(targetProduct.price)}</div>
+            <div class="compare-hero-action">
+              <a href="product.html?id=${targetProduct.id}" class="btn-compare-switch">Xem Chi Tiết Kính Này ›</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BẢNG ĐỐI CHIẾU THÔNG SỐ -->
+      <table class="compare-dynamic-table">
+        <thead>
+          <tr>
+            <th style="width: 28%;">Thông Số Kỹ Thuật</th>
+            <th style="width: 36%;">${baseProduct.name}</th>
+            <th style="width: 36%;">${targetProduct.name}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="spec-name"><strong>Màn hình &amp; Độ phân giải</strong></td>
+            <td>${baseRes}</td>
+            <td>${targetRes}</td>
+          </tr>
+          <tr>
+            <td class="spec-name"><strong>Tần số quét thích ứng</strong></td>
+            <td>${baseHz}</td>
+            <td>${targetHz}</td>
+          </tr>
+          <tr>
+            <td class="spec-name"><strong>Trọng lượng thân kính</strong></td>
+            <td>
+              <strong>${baseWeight}g</strong>
+              ${baseIsLighter ? '<span class="spec-win-badge">✓ Siêu nhẹ hơn</span>' : ''}
+            </td>
+            <td>
+              <strong>${targetWeight}g</strong>
+              ${targetIsLighter ? '<span class="spec-win-badge">✓ Siêu nhẹ hơn</span>' : ''}
+            </td>
+          </tr>
+          <tr>
+            <td class="spec-name"><strong>Thời lượng pin liên tục</strong></td>
+            <td>${baseBattery}</td>
+            <td>${targetBattery}</td>
+          </tr>
+          <tr>
+            <td class="spec-name"><strong>Cảm biến &amp; Góc nhìn</strong></td>
+            <td>${baseFov}</td>
+            <td>${targetFov}</td>
+          </tr>
+          <tr>
+            <td class="spec-name"><strong>Màu sắc tùy chọn</strong></td>
+            <td>${Array.isArray(baseProduct.colors) ? baseProduct.colors.map(c => c.name).join(", ") : "Tiêu chuẩn"}</td>
+            <td>${Array.isArray(targetProduct.colors) ? targetProduct.colors.map(c => c.name).join(", ") : "Tiêu chuẩn"}</td>
+          </tr>
+          <tr>
+            <td class="spec-name"><strong>Tình trạng hàng &amp; Bảo hành</strong></td>
+            <td>${baseProduct.stock > 0 ? '<span style="color:#2E7D32; font-weight:600;">● Còn hàng sẵn</span>' : 'Tạm hết'} • 24 Tháng VIP</td>
+            <td>${targetProduct.stock > 0 ? '<span style="color:#2E7D32; font-weight:600;">● Còn hàng sẵn</span>' : 'Tạm hết'} • 24 Tháng VIP</td>
+          </tr>
+          <tr>
+            <td class="spec-name"><strong>Mức giá niêm yết</strong></td>
+            <td>
+              <strong style="font-size:1.05rem; color:var(--accent-deep, #A67C52);">${formatVND(baseProduct.price)}</strong>
+              ${baseIsCheaper ? '<span class="spec-win-badge spec-win-price">★ Giá tốt hơn</span>' : ''}
+            </td>
+            <td>
+              <strong style="font-size:1.05rem; color:var(--accent-deep, #A67C52);">${formatVND(targetProduct.price)}</strong>
+              ${targetIsCheaper ? '<span class="spec-win-badge spec-win-price">★ Giá tốt hơn</span>' : ''}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+  }
+
+  // Render lần đầu
+  renderCompareView(selectEl.value);
+
+  // Lắng nghe khi người dùng đổi sản phẩm
+  selectEl.addEventListener("change", (e) => {
+    renderCompareView(e.target.value);
   });
 }

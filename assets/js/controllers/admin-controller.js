@@ -1192,7 +1192,7 @@
       const subtotal = ord.subtotal || ord.totalAmount || ord.total || 0;
       const discount = ord.discountFee || (ord.discount ? ord.discount.amount : 0) || 0;
       const total = ord.totalAmount || ord.total || 0;
-      const payment = (ord.paymentMethod === "vietqr" ? "Chuyển khoản VietQR 24/7" : (ord.paymentMethod === "installment" ? "Trả góp 0%" : "Thanh toán khi nhận (COD)"));
+      const payment = ord.paymentMethod || "Thanh toán khi nhận (COD)";
 
       return [
         escapeCSV(ord.code),
@@ -1447,9 +1447,7 @@
 
     if (shippingEl) shippingEl.textContent = ord.shippingFee ? formatVND(ord.shippingFee) : "Miễn phí toàn quốc (0 ₫)";
     if (paymentEl) {
-      paymentEl.textContent = ord.paymentMethod === "vietqr"
-        ? "Chuyển khoản VietQR 24/7 (Đã xác thực)"
-        : (ord.paymentMethod === "installment" ? "Trả góp 0% Thẻ tín dụng" : "Thanh toán khi nhận (COD)");
+      paymentEl.textContent = ord.paymentMethod || "Thanh toán khi nhận (COD)";
     }
     if (grandTotalEl) grandTotalEl.textContent = formatVND(finalTotal);
 

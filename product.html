@@ -149,68 +149,28 @@
           <table class="product-detail__specs-table" id="pd-specs-table"></table>
         </div>
 
-        <!-- TAB SO SÁNH CẤU HÌNH CÁC DÒNG KÍNH VR -->
+        <!-- TAB SO SÁNH CẤU HÌNH ĐỐI CHIẾU 1-VS-1 ĐỘNG -->
         <div class="product-detail__tab-panel" data-tab-panel="compare" role="tabpanel" hidden>
-          <div class="compare-matrix-wrap">
-            <div class="compare-matrix-header">
-              <h3 style="margin: 0; font-family: var(--font-head); font-size: 1.15rem; color: var(--text-primary);">Bảng Đối Soát Cấu Hình Flagship NEXUS VR Series</h3>
-              <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">So sánh trực quan các thông số cốt lõi giúp bạn chọn thiết bị thực tế ảo hoàn hảo nhất.</p>
+          <div class="compare-dynamic-container">
+            <div class="compare-dynamic-bar">
+              <div class="compare-bar-info">
+                <span class="compare-bar-tag">CÔNG CỤ ĐỐI SOÁT CẤU HÌNH ĐỘNG</span>
+                <h3 class="compare-bar-title">So Sánh Trực Quan Giữa 2 Thiết Bị</h3>
+                <p class="compare-bar-desc">Chọn bất kỳ sản phẩm kính VR nào trong danh mục để đối chiếu thông số song song với sản phẩm bạn đang xem.</p>
+              </div>
+              <div class="compare-bar-controls">
+                <label for="compareTargetSelect" class="compare-select-label">So sánh cùng thiết bị:</label>
+                <div class="compare-select-wrapper">
+                  <select id="compareTargetSelect" class="compare-custom-select" aria-label="Chọn thiết bị đối chiếu">
+                    <option value="">-- Đang nạp danh mục thiết bị... --</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div class="table-responsive">
-              <table class="compare-table">
-                <thead>
-                  <tr>
-                    <th>Tiêu chí cấu hình</th>
-                    <th class="col-highlight">NEXUS Vision Pro<span class="tag-flagship">Flagship Đỉnh Cao</span></th>
-                    <th>NEXUS Vision Studio<span>Sáng Tạo &amp; Đồ Họa</span></th>
-                    <th>NEXUS Air Lite<span>Siêu Nhẹ Giải Trí</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>Màn hình &amp; Độ phân giải</strong></td>
-                    <td class="col-highlight">Micro-OLED Kép 8K (3840×2160/mắt)</td>
-                    <td>Micro-OLED Kép 4K (2048×2048/mắt)</td>
-                    <td>Fast-LCD Kép 2.5K (1832×1920/mắt)</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Tần số quét hình ảnh</strong></td>
-                    <td class="col-highlight">120Hz Spatial Motion Pro</td>
-                    <td>90Hz - 120Hz Ultra Smooth</td>
-                    <td>90Hz Dynamic Refresh</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Trọng lượng thân kính</strong></td>
-                    <td class="col-highlight">420g (Vải dệt 3D siêu êm)</td>
-                    <td>380g (Hợp kim Magie siêu bền)</td>
-                    <td>295g (Thân nhựa hàng không siêu nhẹ)</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Vi xử lý tính toán</strong></td>
-                    <td class="col-highlight">Dual-Chip Apple M2 + R1 Sensor Processor</td>
-                    <td>NEXUS Quantum Spatial Core Octa-core</td>
-                    <td>Snapdragon XR2 Gen 2 Platform</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Theo dõi mắt &amp; Cử chỉ tay</strong></td>
-                    <td class="col-highlight">12 Camera + LiDAR Scanner 3D + Eye-Tracking 0ms</td>
-                    <td>8 Camera + Eye-Tracking chuẩn xác</td>
-                    <td>4 Camera quang học + Bộ điều khiển cầm tay</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Thời lượng pin</strong></td>
-                    <td class="col-highlight">3.5 giờ (Kèm dock pin MagSafe dự phòng)</td>
-                    <td>3.0 giờ liên tục</td>
-                    <td>4.0 giờ đàm thoại &amp; phim ảnh</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Giá niêm yết chính hãng</strong></td>
-                    <td class="col-highlight"><strong style="color: var(--accent-deep); font-size: 1.05rem;">79.990.000 ₫</strong></td>
-                    <td><strong style="color: var(--text-primary); font-size: 1rem;">49.990.000 ₫</strong></td>
-                    <td><strong style="color: var(--text-primary); font-size: 1rem;">24.990.000 ₫</strong></td>
-                  </tr>
-                </tbody>
-              </table>
+
+            <!-- VÙNG RENDER ĐỐI CHIẾU 2 CỘT -->
+            <div id="compareDynamicMount" class="compare-dynamic-mount">
+              <!-- Rendered dynamically by product-controller.js -->
             </div>
           </div>
         </div>

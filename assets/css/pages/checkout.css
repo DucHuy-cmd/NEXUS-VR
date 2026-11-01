@@ -442,3 +442,110 @@ CĂN CHỈNH BẰNG NHAU HOÀN HẢO CHO 2 Ô TÙY CHỌN GIAO HÀNG
     grid-column: span 1;
   }
 }
+/* =========================================================
+   INSTALLMENT 0% CHECKOUT STYLES (TRẢ GÓP 0% TẠI THANH TOÁN)
+   ========================================================= */
+.checkout-installment-box {
+  margin-top: 18px;
+  padding: 22px;
+  background: #FFF;
+  border: 1.5px solid var(--accent, #A67C52);
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(166, 124, 82, 0.1);
+  animation: fadeInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.inst-banks-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .inst-banks-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.inst-bank-card {
+  padding: 10px 12px;
+  background: #FAF7F2;
+  border: 1.5px solid #E5DCD1;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #4E342E;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.inst-bank-card:hover {
+  border-color: var(--accent, #A67C52);
+  background: #FFF;
+}
+
+.inst-bank-card.is-active {
+  border-color: var(--accent-deep, #A67C52);
+  background: linear-gradient(135deg, rgba(166,124,82,0.12) 0%, rgba(166,124,82,0.02) 100%);
+  color: var(--accent-deep, #A67C52);
+  box-shadow: 0 0 0 1px var(--accent-deep, #A67C52);
+  font-weight: 700;
+}
+
+.inst-terms-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .inst-terms-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.btn-inst-term {
+  padding: 12px 10px;
+  background: #FAF7F2;
+  border: 1.5px solid #E5DCD1;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-inst-term:hover {
+  border-color: var(--accent, #A67C52);
+}
+
+.btn-inst-term.is-active {
+  border-color: var(--accent-deep, #A67C52);
+  background: var(--accent-deep, #A67C52);
+  color: #FFF;
+  box-shadow: 0 4px 12px rgba(166, 124, 82, 0.3);
+}
+
+.btn-inst-term .term-months {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.btn-inst-term .term-pay {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-deep, #A67C52);
+}
+
+.btn-inst-term.is-active .term-pay {
+  color: #FFF;
+}

@@ -87,6 +87,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     initAccountAutofillOptions();
     initQrButtons();
     initCheckoutFeedback();
+    initInstallmentCheckout();
   }
 
   /* --------------------------------------------------------------------------
@@ -496,6 +497,9 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     // 5. Tính Tổng cộng = Tạm tính - Giảm giá + Phí vận chuyển
     const grandTotal = Math.max(0, subtotal - discountFee + shippingFee);
     totalEl.textContent = formatVND(grandTotal);
+    if (typeof updateInstallmentCalculations === "function") {
+      updateInstallmentCalculations(grandTotal);
+    }
   }
 
   /* --------------------------------------------------------------------------
@@ -833,6 +837,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
 
         const val = e.target.value;
         const cardBlock = document.getElementById("creditCardBlock");
+        const instBlock = document.getElementById("installmentSelectionBox");
 
         if (val === "bank") {
           startQrTimer();
@@ -841,6 +846,10 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
         }
 
         if (cardBlock) cardBlock.hidden = val !== "card";
+        if (instBlock) {
+          instBlock.style.display = val === "installment" ? "block" : "none";
+          if (val === "installment") renderOrderSummary();
+        }
       });
     });
   }
@@ -886,6 +895,8 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
       cleanPaymentLabel = "Chuyển khoản VietQR";
     } else if (paymentType === "card") {
       cleanPaymentLabel = "Thẻ tín dụng / Quốc tế";
+    } else if (paymentType === "installment") {
+      cleanPaymentLabel = `Trả góp 0% (${selectedInstallmentTerm}T • ${selectedInstallmentBank})`;
     }
 
     const newOrder = {
@@ -900,6 +911,11 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
       shippingFee: calcShipping,
       totalAmount: finalTotal,
       paymentMethod: cleanPaymentLabel,
+      installmentInfo: paymentType === "installment" ? {
+        bank: selectedInstallmentBank,
+        term: selectedInstallmentTerm,
+        monthlyPay: Math.round(finalTotal / selectedInstallmentTerm)
+      } : null,
       status: "processing",
       total: finalTotal,
       statusText: "Đang xử lý / Vận chuyển"
@@ -1166,3 +1182,99 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
   }
 
 })();
+/* --------------------------------------------------------------------------
+   XỬ LÝ THANH TOÁN TRẢ GÓP 0% QUA THẺ TÍN DỤNG LIÊN KẾT 12 NGÂN HÀNG
+   -------------------------------------------------------------------------- */
+let selectedInstallmentBank = "Techcombank";
+let selectedInstallmentTerm = 3;
+
+function initInstallmentCheckout() {
+  const banks = [
+    "Techcombank", "Vietcombank", "MB Bank", "VPBank",
+    "ACB", "BIDV", "TPBank", "Sacombank",
+    "Shinhan Bank", "HSBC", "VIB", "VietinBank"
+  ];
+
+  const banksGrid = document.getElementById("instBanksGrid");
+  if (banksGrid) {
+    banksGrid.innerHTML = banks.map(b => `
+      <div class="inst-bank-card ${b === selectedInstallmentBank ? 'is-active' : ''}" data-bank="${b}">
+        ${b}
+      </div>
+    `).join("");
+
+    banksGrid.querySelectorAll(".inst-bank-card").forEach(card => {
+      card.addEventListener("click", () => {
+        banksGrid.querySelectorAll(".inst-bank-card").forEach(c => c.classList.remove("is-active"));
+        card.classList.add("is-active");
+        selectedInstallmentBank = card.dataset.bank;
+        const sumBank = document.getElementById("instSummaryBank");
+        if (sumBank) sumBank.textContent = selectedInstallmentBank;
+      });
+    });
+  }
+
+  const termBtns = document.querySelectorAll("#instTermsGrid .btn-inst-term");
+  termBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      termBtns.forEach(b => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      selectedInstallmentTerm = Number(btn.dataset.instTerm) || 3;
+      renderOrderSummary();
+    });
+  });
+
+  // Tự động kiểm tra nếu khách đến từ nút "Mua Trả Góp 0%" bên trang sản phẩm
+  try {
+    const rawSaved = localStorage.getItem("nexus_selected_installment");
+    if (rawSaved) {
+      const parsed = JSON.parse(rawSaved);
+      if (parsed && parsed.term) {
+        selectedInstallmentTerm = Number(parsed.term) || 3;
+        if (parsed.bank) selectedInstallmentBank = parsed.bank;
+
+        const payInstallmentRadio = document.getElementById("payInstallmentRadio");
+        if (payInstallmentRadio) {
+          payInstallmentRadio.checked = true;
+          document.querySelectorAll(".payment-card").forEach(c => c.classList.remove("is-selected"));
+          payInstallmentRadio.closest(".payment-card")?.classList.add("is-selected");
+          const instBlock = document.getElementById("installmentSelectionBox");
+          if (instBlock) instBlock.style.display = "block";
+
+          termBtns.forEach(b => {
+            const isMatch = Number(b.dataset.instTerm) === selectedInstallmentTerm;
+            b.classList.toggle("is-active", isMatch);
+          });
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+function updateInstallmentCalculations(grandTotal) {
+  const t3 = Math.round(grandTotal / 3);
+  const t6 = Math.round(grandTotal / 6);
+  const t9 = Math.round(grandTotal / 9);
+  const t12 = Math.round(grandTotal / 12);
+
+  const el3 = document.getElementById("termPay3");
+  const el6 = document.getElementById("termPay6");
+  const el9 = document.getElementById("termPay9");
+  const el12 = document.getElementById("termPay12");
+
+  if (el3) el3.textContent = formatVND(t3) + "/tháng";
+  if (el6) el6.textContent = formatVND(t6) + "/tháng";
+  if (el9) el9.textContent = formatVND(t9) + "/tháng";
+  if (el12) el12.textContent = formatVND(t12) + "/tháng";
+
+  const currentMonthly = Math.round(grandTotal / selectedInstallmentTerm);
+  const sumMonthly = document.getElementById("instSummaryMonthly");
+  const sumTerm = document.getElementById("instSummaryTerm");
+  const sumTotal = document.getElementById("instSummaryTotal");
+  const sumBank = document.getElementById("instSummaryBank");
+
+  if (sumMonthly) sumMonthly.textContent = formatVND(currentMonthly) + "/tháng";
+  if (sumTerm) sumTerm.textContent = String(selectedInstallmentTerm);
+  if (sumTotal) sumTotal.textContent = formatVND(grandTotal);
+  if (sumBank) sumBank.textContent = selectedInstallmentBank;
+}
