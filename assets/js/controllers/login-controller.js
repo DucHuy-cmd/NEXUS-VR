@@ -667,6 +667,10 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
           formsCluster.hidden = false;
           if (tabsCluster) tabsCluster.hidden = true;
 
+          // Ẩn hoàn toàn nút 1-Click demo khi người dùng đang chỉnh sửa hồ sơ
+          const demoHelper = document.getElementById("authDemoHelper") || document.querySelector(".auth-demo-helper");
+          if (demoHelper) demoHelper.style.display = "none";
+
           const loginForm = document.getElementById("loginForm");
           const registerForm = document.getElementById("registerForm");
 
@@ -693,6 +697,23 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
         };
       }
 
+      const cancelEditBtn = document.getElementById("cancelEditProfileBtn");
+      if (cancelEditBtn) {
+        cancelEditBtn.onclick = () => {
+          if (profileDetailsForm) profileDetailsForm.hidden = true;
+          formsCluster.hidden = true;
+          profileCluster.hidden = false;
+          if (tabsCluster) tabsCluster.hidden = true;
+          const demoHelper = document.getElementById("authDemoHelper") || document.querySelector(".auth-demo-helper");
+          if (demoHelper) demoHelper.style.display = "none";
+
+          const title = document.getElementById("authTitle");
+          const subtitle = document.getElementById("authSubtitle");
+          if (title) title.textContent = "Hồ Sơ Khách Hàng";
+          if (subtitle) subtitle.textContent = "Quản lý thông tin tài khoản và đơn hàng của bạn.";
+        };
+      }
+
       const logoutBtn = document.getElementById("profileLogoutBtn");
       if (logoutBtn) {
         logoutBtn.onclick = () => {
@@ -711,6 +732,8 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
           profileCluster.hidden = true;
           formsCluster.hidden = false;
           if (tabsCluster) tabsCluster.hidden = false;
+          const demoHelper = document.getElementById("authDemoHelper") || document.querySelector(".auth-demo-helper");
+          if (demoHelper) demoHelper.style.display = "flex";
 
           const tabLogin = document.getElementById("tabLoginBtn");
           if (tabLogin) tabLogin.click();
@@ -723,6 +746,8 @@ TẦNG 3 - CONTROLLERS: ĐĂNG NHẬP / ĐĂNG KÝ / HỒ SƠ TÀI KHOẢN CHI T
         formsCluster.hidden = false;
         profileCluster.hidden = true;
         if (tabsCluster) tabsCluster.hidden = false;
+        const demoHelper = document.getElementById("authDemoHelper") || document.querySelector(".auth-demo-helper");
+        if (demoHelper) demoHelper.style.display = "flex";
 
         const title = document.getElementById("authTitle");
         const subtitle = document.getElementById("authSubtitle");

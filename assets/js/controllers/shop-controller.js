@@ -206,7 +206,7 @@
       if (addBtn.disabled) return;
       const card = addBtn.closest('.product-card');
       const selectedColorIndex = card ? Number(card.dataset.selectedColorIndex || 0) : 0;
-      addToCart(addBtn.dataset.id, 1, selectedColorIndex);
+      openQuickAddConfirmationModal(addBtn.dataset.id, selectedColorIndex);
       return;
     }
 
@@ -466,10 +466,204 @@
 
   grid.addEventListener('click', handleProductGridClick);
 
-  // Đọc từ khóa tìm kiếm từ URL parameter (?search=... hoặc ?q=...)
-  const urlSearchQuery = new URLSearchParams(window.location.search).get('search') || new URLSearchParams(window.location.search).get('q');
+
+  /* =========================================================
+     MODAL XÁC NHẬN THÊM VÀO GIỎ HÀNG (QUICK-ADD CONFIRMATION)
+     ========================================================= */
+  let activeQuickAddProduct = null;
+  let activeQuickAddQty = 1;
+  let activeQuickAddColorIndex = 0;
+
+  function openQuickAddConfirmationModal(productId, defaultColorIndex = 0) {
+    const product = getProductById(productId);
+    if (!product) return;
+
+    activeQuickAddProduct = product;
+    activeQuickAddQty = 1;
+    activeQuickAddColorIndex = defaultColorIndex || 0;
+
+    const modal = document.getElementById('quickAddModalOverlay');
+    if (!modal) return;
+
+    const modalTitle = document.getElementById('qaModalTitle');
+    const modalCategory = document.getElementById('qaModalCategory');
+    const modalPrice = document.getElementById('qaModalPrice');
+    const modalOldPrice = document.getElementById('qaModalOldPrice');
+    const modalThumb = document.getElementById('qaModalThumb');
+    const modalQtyInput = document.getElementById('qaQtyInput');
+    const modalSubtotal = document.getElementById('qaModalSubtotal');
+    const colorGroup = document.getElementById('qaColorGroup');
+    const colorSwatches = document.getElementById('qaColorSwatches');
+    const colorNameEl = document.getElementById('qaSelectedColorName');
+
+    if (modalTitle) modalTitle.textContent = product.name;
+    if (modalCategory) modalCategory.textContent = product.categoryLabel || 'SẢN PHẨM';
+    if (modalPrice) modalPrice.textContent = formatVND(product.price);
+
+    if (modalOldPrice) {
+      if (product.oldPrice && product.oldPrice > product.price) {
+        modalOldPrice.textContent = formatVND(product.oldPrice);
+        modalOldPrice.style.display = 'inline';
+      } else {
+        modalOldPrice.style.display = 'none';
+      }
+    }
+
+    // Colors
+    if (product.colors && product.colors.length > 0) {
+      if (colorGroup) colorGroup.style.display = 'block';
+      if (activeQuickAddColorIndex >= product.colors.length) activeQuickAddColorIndex = 0;
+      const chosenColor = product.colors[activeQuickAddColorIndex];
+
+      if (modalThumb) {
+        modalThumb.src = (chosenColor && chosenColor.image) ? chosenColor.image : (product.images[0] || 'assets/images/placeholder.svg');
+      }
+      if (colorNameEl) {
+        colorNameEl.textContent = chosenColor ? chosenColor.name : 'Tiêu chuẩn';
+      }
+
+      if (colorSwatches) {
+        colorSwatches.innerHTML = product.colors.map((c, idx) => `
+          <button type="button" 
+                  class="qa-swatch ${idx === activeQuickAddColorIndex ? 'is-active' : ''}" 
+                  data-idx="${idx}" 
+                  style="background-color: ${c.hex};" 
+                  title="${c.name}">
+          </button>
+        `).join('');
+
+        colorSwatches.querySelectorAll('.qa-swatch').forEach(btn => {
+          btn.addEventListener('click', () => {
+            colorSwatches.querySelectorAll('.qa-swatch').forEach(b => b.classList.remove('is-active'));
+            btn.classList.add('is-active');
+            activeQuickAddColorIndex = Number(btn.dataset.idx);
+            const clr = product.colors[activeQuickAddColorIndex];
+            if (colorNameEl && clr) colorNameEl.textContent = clr.name;
+            if (modalThumb && clr && clr.image) modalThumb.src = clr.image;
+          });
+        });
+      }
+    } else {
+      if (colorGroup) colorGroup.style.display = 'none';
+      if (modalThumb) modalThumb.src = (product.images && product.images[0]) || 'assets/images/placeholder.svg';
+    }
+
+    // Quantity & Subtotal
+    if (modalQtyInput) modalQtyInput.value = '1';
+    if (modalSubtotal) modalSubtotal.textContent = formatVND(product.price);
+
+    modal.style.display = 'flex';
+    requestAnimationFrame(() => {
+      modal.classList.add('is-active');
+    });
+  }
+
+  function closeQuickAddModal() {
+    const modal = document.getElementById('quickAddModalOverlay');
+    if (!modal) return;
+    modal.classList.remove('is-active');
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 250);
+  }
+
+  function initQuickAddModalEvents() {
+    const modal = document.getElementById('quickAddModalOverlay');
+    if (!modal || modal.dataset.bound) return;
+    modal.dataset.bound = 'true';
+
+    const btnClose = document.getElementById('btnQuickAddClose');
+    const btnCancel = document.getElementById('btnQuickAddCancel');
+    const btnConfirm = document.getElementById('btnQuickAddConfirm');
+    const btnMinus = document.getElementById('qaBtnQtyMinus');
+    const btnPlus = document.getElementById('qaBtnQtyPlus');
+    const qtyInput = document.getElementById('qaQtyInput');
+    const subtotalEl = document.getElementById('qaModalSubtotal');
+
+    if (btnClose) btnClose.addEventListener('click', closeQuickAddModal);
+    if (btnCancel) btnCancel.addEventListener('click', closeQuickAddModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeQuickAddModal();
+    });
+
+    if (btnMinus) {
+      btnMinus.addEventListener('click', () => {
+        if (activeQuickAddQty > 1) {
+          activeQuickAddQty--;
+          if (qtyInput) qtyInput.value = String(activeQuickAddQty);
+          if (subtotalEl && activeQuickAddProduct) {
+            subtotalEl.textContent = formatVND(activeQuickAddProduct.price * activeQuickAddQty);
+          }
+        }
+      });
+    }
+
+    if (btnPlus) {
+      btnPlus.addEventListener('click', () => {
+        const max = (activeQuickAddProduct && activeQuickAddProduct.stock) ? Math.min(10, activeQuickAddProduct.stock) : 10;
+        if (activeQuickAddQty < max) {
+          activeQuickAddQty++;
+          if (qtyInput) qtyInput.value = String(activeQuickAddQty);
+          if (subtotalEl && activeQuickAddProduct) {
+            subtotalEl.textContent = formatVND(activeQuickAddProduct.price * activeQuickAddQty);
+          }
+        }
+      });
+    }
+
+    if (btnConfirm) {
+      btnConfirm.addEventListener('click', () => {
+        if (!activeQuickAddProduct) return;
+        addToCart(activeQuickAddProduct.id, activeQuickAddQty, activeQuickAddColorIndex);
+        closeQuickAddModal();
+
+        const colorName = (activeQuickAddProduct.colors && activeQuickAddProduct.colors[activeQuickAddColorIndex])
+          ? ` (${activeQuickAddProduct.colors[activeQuickAddColorIndex].name})`
+          : '';
+
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Đã thêm ${activeQuickAddQty}x ${activeQuickAddProduct.name}${colorName} vào giỏ hàng!`, 'success');
+        }
+        if (typeof window.updateCartBadge === 'function') {
+          window.updateCartBadge();
+        }
+      });
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('is-active')) {
+        closeQuickAddModal();
+      }
+    });
+  }
+
+  initQuickAddModalEvents();
+
+  // Đọc từ khóa tìm kiếm và danh mục từ URL parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlSearchQuery = urlParams.get('search') || urlParams.get('q');
+  const urlCategoryQuery = urlParams.get('category');
+
   if (urlSearchQuery && searchInput) {
     searchInput.value = urlSearchQuery;
+  }
+
+  if (urlCategoryQuery) {
+    let matched = false;
+    categoryInputs.forEach(cb => {
+      if (cb.value === urlCategoryQuery) {
+        cb.checked = true;
+        matched = true;
+      } else {
+        cb.checked = false;
+      }
+    });
+    if (matched) {
+      setTimeout(() => {
+        const gridEl = document.getElementById('shop-products-grid') || document.querySelector('.shop-layout');
+        if (gridEl) gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
+    }
   }
 
   priceRangeValue.textContent = formatVND(Number(priceRange.value));

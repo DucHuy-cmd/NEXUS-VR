@@ -13,11 +13,95 @@
   border-top: 1px solid rgba(249, 246, 240, 0.08);
 }
 
+/* Newsletter bar */
+.footer__newsletter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(166, 124, 82, 0.25);
+  border-radius: 16px;
+  padding: 24px 32px;
+  margin-bottom: clamp(36px, 6vh, 56px);
+  gap: 24px;
+  flex-wrap: wrap;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.footer__newsletter-text {
+  max-width: 520px;
+}
+
+.footer__newsletter-title {
+  font-family: var(--font-head);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-light);
+  margin: 0 0 6px;
+}
+
+.footer__newsletter-desc {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-light-muted);
+  margin: 0;
+}
+
+.footer__newsletter-form {
+  flex: 1;
+  min-width: 280px;
+  max-width: 440px;
+}
+
+.footer__newsletter-input-wrap {
+  display: flex;
+  gap: 8px;
+}
+
+.footer__newsletter-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 11px 20px;
+  font-size: 0.88rem;
+  color: #FFF;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.footer__newsletter-input:focus {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 2px rgba(166, 124, 82, 0.25);
+}
+
+.footer__newsletter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #FFF;
+  border: none;
+  border-radius: 999px;
+  padding: 11px 22px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.footer__newsletter-btn:hover {
+  background: var(--accent-deep, #8B633C);
+  transform: translateY(-1px);
+}
+
 .footer__top {
   display: grid;
   grid-template-columns: 1.6fr 1fr 1fr 1fr;
   gap: clamp(30px, 5vw, 60px);
-  margin-bottom: clamp(48px, 8vh, 80px);
+  margin-bottom: clamp(36px, 6vh, 60px);
 }
 
 /* Brand column */
@@ -52,6 +136,28 @@
   font-size: 0.92rem;
   line-height: 1.65;
   color: var(--text-light-muted);
+}
+
+/* Contact info in Brand Column */
+.footer__contact-info {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: var(--text-light-muted);
+  line-height: 1.55;
+}
+
+.footer__contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.footer__contact-icon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
 }
 
 /* Link Columns */
@@ -93,9 +199,52 @@
   transform: translateX(3px);
 }
 
+/* Partners & Certifications row */
+.footer__partners-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-top: 1px solid rgba(249, 246, 240, 0.08);
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.footer__payments-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.footer__partner-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.footer__partner-badge.highlight-0pct {
+  background: rgba(166, 124, 82, 0.15);
+  border-color: rgba(166, 124, 82, 0.45);
+  color: var(--accent);
+}
+
+.footer__cert-list {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.8rem;
+  color: var(--text-light-muted);
+}
+
 /* Bottom bar */
 .footer__bottom {
-  padding-top: 32px;
+  padding-top: 24px;
   border-top: 1px solid rgba(249, 246, 240, 0.08);
   display: flex;
   justify-content: space-between;
@@ -112,13 +261,34 @@
 
 .footer__bottom-links {
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 18px;
   font-size: 0.82rem;
   color: var(--text-light-muted);
 }
 
 .footer__bottom-links span {
   opacity: 0.75;
+}
+
+/* Back to top button */
+.footer__back-to-top {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  color: var(--accent);
+  padding: 4px 14px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.footer__back-to-top:hover {
+  border-color: var(--accent);
+  background: rgba(166, 124, 82, 0.1);
 }
 
 /* Responsive adjustments */

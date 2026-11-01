@@ -81,6 +81,24 @@ const NAVBAR_HTML = `
 const FOOTER_HTML = `
 <footer class="site-footer">
   <div class="wrap">
+    <!-- KHỐI ĐĂNG KÝ BẢN TIN ĐẶC QUYỀN (NEWSLETTER) -->
+    <div class="footer__newsletter-bar">
+      <div class="footer__newsletter-text">
+        <h3 class="footer__newsletter-title">Đặc quyền điện toán không gian</h3>
+        <p class="footer__newsletter-desc">Nhận thông tin cập nhật công nghệ mới, lời mời dự sự kiện VIP và các ưu đãi thành viên độc quyền từ NEXUS VR.</p>
+      </div>
+      <form class="footer__newsletter-form" id="footerNewsletterForm" novalidate>
+        <div class="footer__newsletter-input-wrap">
+          <input type="email" id="footerNewsletterEmail" class="footer__newsletter-input" placeholder="Nhập địa chỉ email của bạn..." required>
+          <button type="submit" class="footer__newsletter-btn" id="footerNewsletterBtn">
+            <span>Đăng ký</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 4 CỘT CHÍNH CỦA FOOTER -->
     <div class="footer__top">
       <div class="footer__brand">
         <a class="footer__logo" href="index.html">
@@ -90,6 +108,20 @@ const FOOTER_HTML = `
         <p class="footer__tagline">
           Không gian điện toán đỉnh cao. Định hình tương lai tương tác thị giác với chuẩn hiển thị 8K và công thái học tĩnh lặng.
         </p>
+        <div class="footer__contact-info">
+          <div class="footer__contact-item">
+            <span class="footer__contact-icon">📍</span>
+            <span>Landmark 81, TP. HCM &bull; Tràng Tiền Plaza, Hà Nội</span>
+          </div>
+          <div class="footer__contact-item">
+            <span class="footer__contact-icon">📞</span>
+            <span>Hotline VIP: <a href="tel:19008888" style="color: var(--accent); font-weight: 700;">1900 8888</a> (24/7)</span>
+          </div>
+          <div class="footer__contact-item">
+            <span class="footer__contact-icon">✉️</span>
+            <span>Email: contact@nexusvr.vn</span>
+          </div>
+        </div>
       </div>
 
       <div class="footer__nav-group">
@@ -97,7 +129,7 @@ const FOOTER_HTML = `
         <ul class="footer__links">
           <li><a href="shop.html?category=kinh-vr">Kính thực tế ảo</a></li>
           <li><a href="shop.html?category=tay-cam">Tay cầm định vị</a></li>
-          <li><a href="shop.html?category=phu-kien">Phụ kiện & Đế sạc</a></li>
+          <li><a href="shop.html?category=phu-kien">Phụ kiện &amp; Đế sạc</a></li>
           <li><a href="product.html?id=vr-001">NEXUS Vision Pro</a></li>
         </ul>
       </div>
@@ -105,9 +137,9 @@ const FOOTER_HTML = `
       <div class="footer__nav-group">
         <h4 class="footer__heading">Thương hiệu</h4>
         <ul class="footer__links">
-          <li><a href="about.html">Triết lý thiết kế</a></li>
+          <li><a href="about.html#philosophy">Triết lý thiết kế</a></li>
           <li><a href="about.html#craftsmanship">Kỹ nghệ chế tác</a></li>
-          <li><a href="contact.html">Không gian trải nghiệm</a></li>
+          <li><a href="contact.html#showroom">Không gian trải nghiệm</a></li>
           <li><a href="contact.html#concierge">Dịch vụ Concierge</a></li>
         </ul>
       </div>
@@ -115,22 +147,42 @@ const FOOTER_HTML = `
       <div class="footer__nav-group">
         <h4 class="footer__heading">Hỗ trợ</h4>
         <ul class="footer__links">
-          <li><a href="contact.html">Câu hỏi thường gặp</a></li>
-          <li><a href="contact.html">Đặt lịch trực tiếp</a></li>
+          <li><a href="contact.html#faq">Câu hỏi thường gặp</a></li>
+          <li><a href="contact.html#booking">Đặt lịch trực tiếp</a></li>
           <li><a href="cart.html">Tra cứu giỏ hàng</a></li>
-          <li><a href="shop.html">Chính sách bảo hành</a></li>
+          <li><a href="about.html#warranty">Chính sách bảo hành</a></li>
         </ul>
       </div>
     </div>
 
+    <!-- HÀNG ĐỐI TÁC THANH TOÁN & CHỨNG CHỈ QUỐC TẾ -->
+    <div class="footer__partners-row">
+      <div class="footer__payments-list">
+        <span class="footer__partner-badge">💳 VietQR 24/7</span>
+        <span class="footer__partner-badge">Visa</span>
+        <span class="footer__partner-badge">MasterCard</span>
+        <span class="footer__partner-badge">JCB</span>
+        <span class="footer__partner-badge highlight-0pct">Trả Góp 0% Lãi Suất</span>
+      </div>
+      <div class="footer__cert-list">
+        <span class="footer__cert-item">🛡️ ISO 9001:2015</span>
+        <span class="footer__cert-item">⚡ 8K Ultra Precision</span>
+        <span class="footer__cert-item">🎧 Spatial 3D Audio</span>
+      </div>
+    </div>
+
+    <!-- HÀNG BẢN QUYỀN DƯỚI CÙNG -->
     <div class="footer__bottom">
       <p class="footer__copyright">
-        © 2026 NEXUS VR. Dự án đồ án Thiết kế Web cao cấp. Thiết kế theo phong cách Quiet Luxury.
+        &copy; 2026 NEXUS VR Inc. Tất cả các quyền được bảo lưu. Dự án môn Thiết kế Web &bull; Quiet Luxury.
       </p>
       <div class="footer__bottom-links">
         <span>Bảo mật dữ liệu</span>
         <span>Điều khoản dịch vụ</span>
         <span>Tiêu chuẩn WCAG AA</span>
+        <button type="button" class="footer__back-to-top" id="footerBackToTop" title="Cuộn lên đầu trang">
+          <span>Lên đầu trang</span> &uarr;
+        </button>
       </div>
     </div>
   </div>
@@ -1018,6 +1070,7 @@ function initAllLayout() {
   initLiveSearch();
   syncAllPageWishlistButtons();
   initPwaInstallFeature();
+  initFooterFeatures();
 
   if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
     window.addEventListener('load', () => {
@@ -1131,6 +1184,36 @@ function initPwaInstallFeature() {
   if (modal) {
     modal.addEventListener("click", (e) => {
       if (e.target === modal) closeModal();
+    });
+  }
+}
+
+function initFooterFeatures() {
+  const form = document.getElementById("footerNewsletterForm");
+  const emailInput = document.getElementById("footerNewsletterEmail");
+  if (form && !form.dataset.bound) {
+    form.dataset.bound = "true";
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const val = emailInput ? emailInput.value.trim() : "";
+      if (!val || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+        if (typeof window.showToast === "function") {
+          window.showToast("Vui lòng nhập địa chỉ email hợp lệ để nhận bản tin!", "warning");
+        }
+        return;
+      }
+      if (emailInput) emailInput.value = "";
+      if (typeof window.showToast === "function") {
+        window.showToast("Cảm ơn bạn đã đăng ký nhận bản tin đặc quyền NEXUS VR!", "success");
+      }
+    });
+  }
+
+  const backToTopBtn = document.getElementById("footerBackToTop");
+  if (backToTopBtn && !backToTopBtn.dataset.bound) {
+    backToTopBtn.dataset.bound = "true";
+    backToTopBtn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
 }
