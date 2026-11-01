@@ -462,6 +462,32 @@
     renderRevenueChart(filteredOrders);
   }
 
+  // 12 BẢNG MÀU GRADIENT ĐẲNG CẤP DÀNH RIÊNG CHO 12 THÁNG (MỖI THÁNG 1 MÀU)
+  const MONTH_GRADIENTS = [
+    { gradient: "linear-gradient(180deg, #00D2FF, #0072FF)", color: "#00D2FF", shadow: "0 0 14px rgba(0, 210, 255, 0.45)" }, // Thg 1: Cyan Ocean
+    { gradient: "linear-gradient(180deg, #C084FC, #7E22CE)", color: "#C084FC", shadow: "0 0 14px rgba(192, 132, 252, 0.45)" }, // Thg 2: Violet
+    { gradient: "linear-gradient(180deg, #34D399, #059669)", color: "#34D399", shadow: "0 0 14px rgba(52, 211, 153, 0.45)" }, // Thg 3: Emerald
+    { gradient: "linear-gradient(180deg, #FB7185, #E11D48)", color: "#FB7185", shadow: "0 0 14px rgba(251, 113, 133, 0.45)" }, // Thg 4: Rose Pink
+    { gradient: "linear-gradient(180deg, #FCD34D, #D97706)", color: "#FCD34D", shadow: "0 0 14px rgba(252, 211, 77, 0.45)" }, // Thg 5: Amber Gold
+    { gradient: "linear-gradient(180deg, #FF7675, #D63031)", color: "#FF7675", shadow: "0 0 14px rgba(255, 118, 117, 0.45)" }, // Thg 6: Coral
+    { gradient: "linear-gradient(180deg, #38BDF8, #0284C7)", color: "#38BDF8", shadow: "0 0 14px rgba(56, 189, 248, 0.45)" }, // Thg 7: Sky Azure
+    { gradient: "linear-gradient(180deg, #818CF8, #4338CA)", color: "#818CF8", shadow: "0 0 14px rgba(129, 140, 248, 0.45)" }, // Thg 8: Royal Indigo
+    { gradient: "linear-gradient(180deg, #F472B6, #BE185D)", color: "#F472B6", shadow: "0 0 14px rgba(244, 114, 182, 0.45)" }, // Thg 9: Fuchsia
+    { gradient: "linear-gradient(180deg, #FB923C, #C2410C)", color: "#FB923C", shadow: "0 0 14px rgba(251, 146, 60, 0.45)" }, // Thg 10: Tangerine
+    { gradient: "linear-gradient(180deg, #FDE047, #CA8A04)", color: "#FDE047", shadow: "0 0 16px rgba(253, 224, 71, 0.55)" }, // Thg 11: Metallic Gold
+    { gradient: "linear-gradient(180deg, #A3E635, #4D7C0F)", color: "#A3E635", shadow: "0 0 14px rgba(163, 230, 53, 0.45)" }  // Thg 12: Lime Jade
+  ];
+
+  const DAY_GRADIENTS = [
+    { gradient: "linear-gradient(180deg, #38BDF8, #0284C7)", color: "#38BDF8", shadow: "0 0 12px rgba(56, 189, 248, 0.4)" },
+    { gradient: "linear-gradient(180deg, #C084FC, #7E22CE)", color: "#C084FC", shadow: "0 0 12px rgba(192, 132, 252, 0.4)" },
+    { gradient: "linear-gradient(180deg, #34D399, #059669)", color: "#34D399", shadow: "0 0 12px rgba(52, 211, 153, 0.4)" },
+    { gradient: "linear-gradient(180deg, #FB7185, #E11D48)", color: "#FB7185", shadow: "0 0 12px rgba(251, 113, 133, 0.4)" },
+    { gradient: "linear-gradient(180deg, #FCD34D, #D97706)", color: "#FCD34D", shadow: "0 0 12px rgba(252, 211, 77, 0.4)" },
+    { gradient: "linear-gradient(180deg, #FB923C, #C2410C)", color: "#FB923C", shadow: "0 0 12px rgba(251, 146, 60, 0.4)" },
+    { gradient: "linear-gradient(180deg, #FDE047, #CA8A04)", color: "#FDE047", shadow: "0 0 14px rgba(253, 224, 71, 0.5)" }
+  ];
+
   function renderRevenueChart(filteredOrders) {
     const container = document.getElementById("revenueChartContainer");
     const summary = document.getElementById("chartPeriodSummary");
@@ -491,11 +517,13 @@
           return od.getDate() === d.getDate() && od.getMonth() === d.getMonth() && od.getFullYear() === d.getFullYear();
         });
         const rev = ordersOnDay.filter(o => o.status !== "cancelled").reduce((s, o) => s + (Number(o.totalAmount || o.total) || 0), 0);
+        const gIdx = (6 - i) % DAY_GRADIENTS.length;
         bars.push({
           label: dayStr,
           revenue: rev,
           count: ordersOnDay.length,
-          tooltipText: `${dayStr}: ${formatVND(rev)} (${ordersOnDay.length} đơn)`
+          style: DAY_GRADIENTS[gIdx],
+          tooltipText: `${dayStr}: ${ordersOnDay.length} đơn hàng • ${formatVND(rev)}`
         });
       }
     } else if (activePeriod === "month") {
@@ -508,14 +536,18 @@
           return od.getMonth() === now.getMonth() && od.getFullYear() === now.getFullYear() && od.getDate() >= startDay && od.getDate() <= endDay;
         });
         const rev = ordersInWeek.filter(o => o.status !== "cancelled").reduce((s, o) => s + (Number(o.totalAmount || o.total) || 0), 0);
+        const gIdx = (w - 1) % 4;
+        const weekGradients = [MONTH_GRADIENTS[0], MONTH_GRADIENTS[2], MONTH_GRADIENTS[9], MONTH_GRADIENTS[10]];
         bars.push({
           label: `Tuần ${w}`,
           revenue: rev,
           count: ordersInWeek.length,
-          tooltipText: `Tuần ${w} (Ngày ${startDay}-${endDay}): ${formatVND(rev)} (${ordersInWeek.length} đơn)`
+          style: weekGradients[gIdx],
+          tooltipText: `Tuần ${w} (Ngày ${startDay}-${endDay}): ${ordersInWeek.length} đơn hàng • ${formatVND(rev)}`
         });
       }
     } else {
+      // NĂM NAY HOẶC TOÀN THỜI GIAN: 12 THÁNG, MỖI THÁNG 1 MÀU RIÊNG BIỆT
       const currentYear = new Date().getFullYear();
       for (let m = 0; m < 12; m++) {
         const monthNum = m + 1;
@@ -528,14 +560,15 @@
           label: `Thg ${monthNum}`,
           revenue: rev,
           count: ordersInMonth.length,
-          tooltipText: `Tháng ${monthNum}: ${formatVND(rev)} (${ordersInMonth.length} đơn)`
+          style: MONTH_GRADIENTS[m],
+          tooltipText: `Tháng ${monthNum}: ${ordersInMonth.length} đơn hàng • ${formatVND(rev)}`
         });
       }
     }
 
-    const maxRev = Math.max(...bars.map(b => b.revenue), 1000000);
     const totalRev = bars.reduce((s, b) => s + b.revenue, 0);
     const totalOrders = bars.reduce((s, b) => s + b.count, 0);
+    const maxOrders = Math.max(...bars.map(b => b.count), 1);
 
     if (summary) {
       summary.innerHTML = `Tổng doanh số trong kỳ: <strong style="color:#D4AF37;">${formatVND(totalRev)}</strong> • <strong style="color:#F9F6F0;">${totalOrders}</strong> giao dịch`;
@@ -543,14 +576,28 @@
 
     container.innerHTML = bars
       .map((bar) => {
-        const heightPercent = bar.revenue > 0 ? Math.max(16, Math.round((bar.revenue / maxRev) * 100)) : 6;
-        const isMuted = bar.revenue === 0;
+        // TÍNH TOÁN CHIỀU CAO: 1 ĐƠN THÌ CỘT THẤP HƠN 2 ĐƠN, 3 ĐƠN THÌ CAO HƠN NỮA
+        let barHeightPx = 8;
+        let opacity = 0.3;
+
+        if (bar.count > 0) {
+          // Chiều cao cơ bản 38px + tỉ lệ theo số lượng đơn hàng (tối đa 148px)
+          barHeightPx = Math.round(38 + (bar.count / maxOrders) * 110);
+          opacity = 1;
+        }
+
+        const badgeHtml = bar.count > 0
+          ? `<span class="chart-order-badge" style="color: ${bar.style.color};">${bar.count} đơn</span>`
+          : `<span class="chart-order-badge" style="color: #665C50; opacity: 0.6;">0</span>`;
 
         return `
           <div class="chart-bar-item">
             <div class="chart-tooltip">${bar.tooltipText}</div>
-            <div class="chart-bar-fill" style="height: ${heightPercent}%; opacity: ${isMuted ? '0.25' : '1'};"></div>
-            <span class="chart-bar-label">${bar.label}</span>
+            <div class="chart-bar-track">
+              ${badgeHtml}
+              <div class="chart-bar-fill" style="height: ${barHeightPx}px; background: ${bar.style.gradient}; box-shadow: ${bar.count > 0 ? bar.style.shadow : 'none'}; opacity: ${opacity};"></div>
+            </div>
+            <span class="chart-bar-label" style="${bar.count > 0 ? 'color: #FFFFFF; font-weight: 700;' : ''}">${bar.label}</span>
           </div>
         `;
       })
