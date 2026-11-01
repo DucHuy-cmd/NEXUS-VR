@@ -1241,7 +1241,10 @@
             });
           }
           
-          showNotification("Đặt lịch VIP thành công! Yêu cầu đã được gửi đến Ban Quản Trị NEXUS VR.", "success");
+          showNotification("Đặt lịch VIP thành công! Bạn có thể xem trạng thái duyệt lịch tại mục 'Lịch Hẹn Showroom'.", "success");
+          if (typeof window.showToast === "function") {
+            window.showToast("Đặt lịch VIP thành công! Ban Quản Trị đang duyệt lịch tiếp đón.", "success");
+          }
         } catch (err) {
           console.warn("[contact] Lỗi lưu booking:", err);
           showNotification("Yêu cầu của bạn đã được ghi nhận thành công!", "success");

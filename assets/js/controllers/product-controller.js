@@ -228,49 +228,205 @@ function renderSpecsTable(product) {
   });
 }
 
-function renderReviews(product) {
+let currentProductReviews = [];
+
+async function renderReviews(product) {
   const list = document.getElementById("pd-reviews-list");
-  const reviews = Array.isArray(product.reviews) ? product.reviews : [];
+  const countBadge = document.getElementById("pd-tab-review-count");
+  const avgNumEl = document.getElementById("pd-reviews-avg");
+  const avgStarsEl = document.getElementById("pd-reviews-stars");
+  const countTextEl = document.getElementById("pd-reviews-count-text");
 
-  document.getElementById("pd-tab-review-count").textContent = reviews.length;
-  list.innerHTML = "";
+  if (!list) return;
 
-  if (reviews.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "product-detail__no-review";
-    empty.textContent = "Chưa có đánh giá nào cho sản phẩm này.";
-    list.appendChild(empty);
-    return;
+  // Lấy reviews từ product data gốc
+  let reviews = Array.isArray(product.reviews) ? [...product.reviews] : [];
+
+  // Lấy thêm reviews từ Serverless API / Cloud Database
+  if (window.apiService && typeof window.apiService.getProductReviews === "function") {
+    try {
+      const serverReviews = await window.apiService.getProductReviews(product.id);
+      if (Array.isArray(serverReviews) && serverReviews.length > 0) {
+        serverReviews.forEach(sr => {
+          if (!reviews.some(r => r.id === sr.id || (r.comment === sr.comment && r.author === sr.author))) {
+            reviews.unshift(sr);
+          }
+        });
+      }
+    } catch (e) {}
   }
 
-  reviews.forEach((review) => {
-    const item = document.createElement("div");
-    item.className = "product-detail__review";
+  currentProductReviews = reviews;
 
-    const head = document.createElement("div");
-    head.className = "product-detail__review-head";
+  // Tính điểm đánh giá trung bình
+  const totalCount = reviews.length;
+  let avgRating = 5.0;
+  if (totalCount > 0) {
+    const totalStars = reviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0);
+    avgRating = (totalStars / totalCount).toFixed(1);
+  }
 
-    const author = document.createElement("strong");
-    author.textContent = review.author || "Ẩn danh";
+  if (countBadge) countBadge.textContent = totalCount;
+  if (countTextEl) countTextEl.textContent = totalCount;
+  if (avgNumEl) avgNumEl.textContent = avgRating;
+  if (avgStarsEl) avgStarsEl.textContent = renderStars(parseFloat(avgRating));
 
-    const stars = document.createElement("span");
-    stars.className = "product-detail__review-stars";
-    stars.textContent = renderStars(review.rating || 0);
+  // Render danh sách thẻ review
+  list.innerHTML = "";
 
-    const date = document.createElement("span");
-    date.className = "product-detail__review-date";
-    date.textContent = review.date || "";
+  if (totalCount === 0) {
+    list.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; background: #fff; border-radius: 12px; border: 1px dashed var(--glass-border);">
+        <p style="color: var(--text-secondary); margin-bottom: 10px;">Chưa có đánh giá nào cho sản phẩm này.</p>
+        <span style="font-size: 0.85rem; color: #A67C52;">Hãy là người đầu tiên chia sẻ cảm nhận trải nghiệm thực tế!</span>
+      </div>
+    `;
+  } else {
+    reviews.forEach((review) => {
+      const initial = (review.author || "K").charAt(0).toUpperCase();
+      const item = document.createElement("div");
+      item.className = "review-item-card";
 
-    head.appendChild(author);
-    head.appendChild(stars);
-    head.appendChild(date);
+      item.innerHTML = `
+        <div class="review-item-header">
+          <div class="review-author-wrap">
+            <div class="review-avatar">${initial}</div>
+            <div>
+              <div style="font-weight: 700; color: #231F1C; font-size: 0.95rem;">
+                ${review.author || "Khách Hàng NEXUS"}
+                ${review.verified !== false ? '<span class="review-verified-badge">✓ Đã mua hàng</span>' : ''}
+              </div>
+              <div class="review-item-stars">${renderStars(review.rating || 5)}</div>
+            </div>
+          </div>
+          <div class="review-item-date">${review.date || "Gần đây"}</div>
+        </div>
+        <div class="review-item-body">${escapeReviewText(review.comment || "")}</div>
+      `;
+      list.appendChild(item);
+    });
+  }
 
-    const comment = document.createElement("p");
-    comment.textContent = review.comment || "";
+  initReviewForm(product);
+}
 
-    item.appendChild(head);
-    item.appendChild(comment);
-    list.appendChild(item);
+function escapeReviewText(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function initReviewForm(product) {
+  const toggleBtn = document.getElementById("btn-toggle-review-form");
+  const form = document.getElementById("pd-review-form");
+  const cancelBtn = document.getElementById("btn-cancel-review");
+  const starButtons = document.querySelectorAll("#starRatingInputs .star-item");
+  const ratingInput = document.getElementById("reviewRatingVal");
+  const nameInput = document.getElementById("reviewAuthorName");
+  const emailInput = document.getElementById("reviewAuthorEmail");
+
+  if (!form || form.dataset.bound) return;
+  form.dataset.bound = "true";
+
+  // Tự động điền thông tin nếu đã đăng nhập
+  try {
+    const user = typeof window.getCurrentUser === "function"
+      ? window.getCurrentUser()
+      : JSON.parse(localStorage.getItem("nexus_user") || "null");
+    if (user) {
+      if (nameInput && !nameInput.value) nameInput.value = user.fullName || user.name || "";
+      if (emailInput && !emailInput.value) emailInput.value = user.email || "";
+    }
+  } catch (e) {}
+
+  // Toggle form
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const isHidden = form.style.display === "none";
+      form.style.display = isHidden ? "block" : "none";
+      if (isHidden) {
+        form.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => {
+      form.style.display = "none";
+    });
+  }
+
+  // Chọn số sao (1-5 sao)
+  starButtons.forEach((star) => {
+    star.addEventListener("click", () => {
+      const val = parseInt(star.dataset.val, 10);
+      if (ratingInput) ratingInput.value = String(val);
+
+      starButtons.forEach((s) => {
+        const sVal = parseInt(s.dataset.val, 10);
+        s.classList.toggle("is-selected", sVal <= val);
+      });
+    });
+  });
+
+  // Submit form đánh giá
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById("btn-submit-review");
+    const authorName = (nameInput?.value || "").trim();
+    const authorEmail = (emailInput?.value || "").trim();
+    const comment = (document.getElementById("reviewComment")?.value || "").trim();
+    const rating = parseInt(ratingInput?.value || "5", 10);
+
+    if (!authorName || !comment) {
+      if (typeof window.showToast === "function") {
+        window.showToast("Vui lòng điền đầy đủ họ tên và cảm nhận của bạn!", "error");
+      }
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Đang gửi...";
+    }
+
+    const newReview = {
+      id: "rev_" + Date.now().toString(36),
+      productId: product.id,
+      author: authorName,
+      email: authorEmail,
+      rating: rating,
+      comment: comment,
+      verified: true,
+      date: new Date().toLocaleDateString("vi-VN")
+    };
+
+    // 1. Thêm ngay vào UI tại chỗ (Realtime Feedback)
+    currentProductReviews.unshift(newReview);
+    renderReviews(product);
+
+    // 2. Gửi lên Cloud Database
+    if (window.apiService && typeof window.apiService.submitProductReview === "function") {
+      try {
+        await window.apiService.submitProductReview(newReview);
+      } catch (err) {
+        console.warn("[Reviews] Gửi API review:", err);
+      }
+    }
+
+    if (typeof window.showToast === "function") {
+      window.showToast("Cảm ơn bạn đã gửi đánh giá sản phẩm thành công!", "success");
+    }
+
+    // Reset form
+    document.getElementById("reviewComment").value = "";
+    form.style.display = "none";
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Gửi Đánh Giá Ngay";
+    }
   });
 }
 
@@ -363,7 +519,10 @@ function initWishlistButton(product) {
     const isSaved = list.includes(String(product.id));
     btn.classList.toggle("is-active", isSaved);
     btn.setAttribute("aria-pressed", String(isSaved));
-    btn.textContent = isSaved ? "♥ Đã yêu thích" : "♡ Yêu thích";
+    const txt = document.getElementById("pd-wishlist-text");
+    if (txt) {
+      txt.textContent = isSaved ? "Đã yêu thích" : "Yêu thích";
+    }
     btn.title = isSaved ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích";
   }
 

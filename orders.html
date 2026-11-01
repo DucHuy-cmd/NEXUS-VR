@@ -47,40 +47,71 @@
       </nav>
 
       <!-- HEADING -->
+      <!-- HEADING -->
       <div class="orders-heading">
-        <p style="font-size: 0.8rem; letter-spacing: 1.5px; color: var(--accent, #A67C52); font-weight: 600; text-transform: uppercase;">NEXUS VR / ORDERS</p>
-        <h1>Đơn hàng đã đặt</h1>
-        <p style="color: var(--text-secondary, #726657);">Theo dõi tiến độ vận chuyển và lịch sử mua sắm của bạn.</p>
+        <p style="font-size: 0.8rem; letter-spacing: 1.5px; color: var(--accent, #A67C52); font-weight: 600; text-transform: uppercase;">NEXUS VR / CONCIERGE HUB</p>
+        <h1 id="ordersHeadingTitle">Quản Lý Giao Dịch &amp; Lịch Hẹn</h1>
+        <p id="ordersHeadingDesc" style="color: var(--text-secondary, #726657);">Theo dõi tiến độ vận chuyển đơn hàng và lịch đón tiếp Showroom VIP của bạn.</p>
       </div>
 
-      <!-- TABS VỚI HUY HIỆU SỐ LƯỢNG ĐƠN HÀNG -->
-      <div class="orders-tabs">
-        <button type="button" class="orders-tab-btn is-active" data-tab="active">
-          Đang xử lý <span class="order-tab-badge" id="badgeActive">2</span>
+      <!-- BỘ CHUYỂN ĐỔI CHẾ ĐỘ XEM: ĐƠN HÀNG HOẶC LỊCH HẸN SHOWROOM -->
+      <div class="orders-main-switch" style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+        <button type="button" class="orders-switch-btn is-active" id="btnSwitchOrders" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 999px; font-weight: 700; font-size: 0.9rem; cursor: pointer; border: 1.5px solid #A67C52; background: #A67C52; color: #fff; transition: all 0.2s;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <span>Đơn Hàng Của Tôi</span>
         </button>
-        <button type="button" class="orders-tab-btn" data-tab="completed">
-          Đã giao <span class="order-tab-badge" id="badgeCompleted">1</span>
-        </button>
-        <button type="button" class="orders-tab-btn" data-tab="cancelled">
-          Đã hủy <span class="order-tab-badge" id="badgeCancelled">0</span>
+        <button type="button" class="orders-switch-btn" id="btnSwitchBookings" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 999px; font-weight: 700; font-size: 0.9rem; cursor: pointer; border: 1.5px solid #E5DECE; background: #fff; color: #726657; transition: all 0.2s;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span>Lịch Hẹn Showroom VIP</span>
+          <span class="order-tab-badge" id="badgeMyBookings" style="background: rgba(166,124,82,0.15); color: #A67C52;">0</span>
         </button>
       </div>
 
-      <!-- THANH TÌM KIẾM ĐƠN HÀNG THỜI GIAN THỰC -->
-      <div class="orders-search-wrapper">
-        <div class="orders-search-box">
-          <svg class="orders-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input type="text" id="orderSearchInput" class="orders-search-input" placeholder="Tìm kiếm theo mã đơn hàng (#NEXUS-...) hoặc tên người nhận..." autocomplete="off">
-          <button type="button" id="orderSearchClearBtn" class="orders-search-clear" title="Xóa tìm kiếm" hidden aria-label="Xóa tìm kiếm">&times;</button>
+      <!-- SECTION 1: QUẢN LÝ ĐƠN HÀNG -->
+      <div id="ordersSection">
+        <!-- TABS VỚI HUY HIỆU SỐ LƯỢNG ĐƠN HÀNG -->
+        <div class="orders-tabs">
+          <button type="button" class="orders-tab-btn is-active" data-tab="active">
+            Đang xử lý <span class="order-tab-badge" id="badgeActive">0</span>
+          </button>
+          <button type="button" class="orders-tab-btn" data-tab="completed">
+            Đã giao <span class="order-tab-badge" id="badgeCompleted">0</span>
+          </button>
+          <button type="button" class="orders-tab-btn" data-tab="cancelled">
+            Đã hủy <span class="order-tab-badge" id="badgeCancelled">0</span>
+          </button>
         </div>
-        <div id="orderSearchFeedback" class="orders-search-feedback" style="display: none;"></div>
+
+        <!-- THANH TÌM KIẾM ĐƠN HÀNG THỜI GIAN THỰC -->
+        <div class="orders-search-wrapper">
+          <div class="orders-search-box">
+            <svg class="orders-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="orderSearchInput" class="orders-search-input" placeholder="Tìm kiếm theo mã đơn hàng (#NEXUS-...) hoặc tên người nhận..." autocomplete="off">
+            <button type="button" id="orderSearchClearBtn" class="orders-search-clear" title="Xóa tìm kiếm" hidden aria-label="Xóa tìm kiếm">&times;</button>
+          </div>
+          <div id="orderSearchFeedback" class="orders-search-feedback" style="display: none;"></div>
+        </div>
+
+        <!-- DANH SÁCH ĐƠN HÀNG -->
+        <div id="ordersListContainer"></div>
       </div>
 
-      <!-- DANH SÁCH ĐƠN HÀNG -->
-      <div id="ordersListContainer"></div>
+      <!-- SECTION 2: QUẢN LÝ LỊCH HẸN SHOWROOM VIP CỦA TÔI -->
+      <div id="bookingsSection" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #231F1C; margin-bottom: 4px;">Danh Sách Lịch Đón Tiếp Showroom VIP</h3>
+            <p style="font-size: 0.875rem; color: #726657;">Kiểm tra tiến độ xác nhận từ Ban Quản Trị và mã Thẻ VIP Pass của bạn.</p>
+          </div>
+          <a href="contact.html#vip-section" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: #A67C52; color: #fff; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: 0.85rem;">
+            <span>+ Đặt Thêm Lịch Mới</span>
+          </a>
+        </div>
+        <div id="userBookingsContainer"></div>
+      </div>
 
     </div>
   </main>
@@ -122,6 +153,37 @@
       <div class="apple-modal-actions">
         <button type="button" id="btnCloseCancelModal" class="btn-apple-secondary">Hủy</button>
         <button type="button" id="btnConfirmCancelModal" class="btn-apple-primary btn-apple-danger">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: GỬI PHẢN HỒI / GÓP Ý ĐƠN HÀNG (FEEDBACK) -->
+  <div id="orderFeedbackModal" class="apple-modal-overlay" hidden>
+    <div class="apple-modal-card" style="max-width: 480px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border, #E5DECE); padding-bottom: 10px;">
+        <h3 class="apple-modal-title" style="margin: 0; font-size: 1.15rem; color: #231F1C;">Góp Ý Về Đơn Hàng <span id="feedbackOrderCode" style="color: #A67C52;"></span></h3>
+        <button type="button" id="btnCloseFeedbackModal" style="background: none; border: none; font-size: 1.6rem; color: #726657; cursor: pointer; line-height: 1;">&times;</button>
+      </div>
+      <p style="font-size: 0.85rem; color: #726657; margin-bottom: 16px;">Ý kiến của bạn là động lực để NEXUS VR nâng tầm chất lượng dịch vụ.</p>
+      
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #3E2723;">Mức độ hài lòng của bạn:</label>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="feedbackSatisfactionGroup">
+          <button type="button" class="btn-satisfaction is-active" data-val="Rất hài lòng (5★)" style="padding: 6px 12px; border-radius: 8px; border: 1.5px solid #A67C52; background: rgba(166,124,82,0.1); color: #A67C52; font-weight: 600; font-size: 0.8rem; cursor: pointer;">⭐ Rất hài lòng</button>
+          <button type="button" class="btn-satisfaction" data-val="Hài lòng (4★)" style="padding: 6px 12px; border-radius: 8px; border: 1.5px solid #E5DECE; background: #fff; color: #726657; font-weight: 600; font-size: 0.8rem; cursor: pointer;">👍 Hài lòng</button>
+          <button type="button" class="btn-satisfaction" data-val="Cần cải thiện (3★)" style="padding: 6px 12px; border-radius: 8px; border: 1.5px solid #E5DECE; background: #fff; color: #726657; font-weight: 600; font-size: 0.8rem; cursor: pointer;">💡 Cần cải thiện</button>
+        </div>
+        <input type="hidden" id="feedbackRatingVal" value="Rất hài lòng (5★)">
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label for="feedbackContentInput" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #3E2723;">Nội dung phản hồi / góp ý chi tiết:</label>
+        <textarea id="feedbackContentInput" rows="4" placeholder="Chia sẻ về tốc độ đóng gói, vận chuyển, thái độ phục vụ hoặc chất lượng sản phẩm..." style="width: 100%; padding: 10px 12px; border: 1px solid #E5DECE; border-radius: 8px; font-family: inherit; font-size: 0.875rem; outline: none; box-sizing: border-box;"></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" id="btnCancelFeedbackModal" class="btn-apple-secondary" style="padding: 8px 18px;">Hủy</button>
+        <button type="button" id="btnSubmitFeedbackModal" style="padding: 8px 22px; border: none; background: #A67C52; color: #fff; border-radius: 8px; font-weight: 700; cursor: pointer;">Gửi Phản Hồi</button>
       </div>
     </div>
   </div>

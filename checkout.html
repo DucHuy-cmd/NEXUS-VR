@@ -401,6 +401,42 @@
                 </div>
               </div>
 
+              <!-- HỘP THOẠI PHẢN HỒI / GÓP Ý TRẢI NGHIỆM ĐẶT HÀNG (NO-PRINT) -->
+              <div class="checkout-feedback-card no-print" id="checkoutOrderFeedbackBox" style="margin-top: 24px; padding: 24px; border-radius: 16px; background: #fff; border: 1.5px solid var(--border, #E5DECE); box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                  <span style="font-size: 1.3rem;">💬</span>
+                  <div>
+                    <h4 style="font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--text-primary, #231F1C);">Cảm nhận của bạn về trải nghiệm đặt hàng</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary, #726657); margin: 2px 0 0;">Ý kiến của bạn giúp NEXUS VR không ngừng nâng tầm dịch vụ công nghệ tương lai.</p>
+                  </div>
+                </div>
+
+                <div id="checkoutFeedbackForm">
+                  <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary, #726657);">Mức độ hài lòng của bạn:</label>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="checkoutFeedbackRatingGroup">
+                      <button type="button" class="btn-co-rating is-active" data-val="Rất hài lòng (5★)" style="padding: 7px 14px; border-radius: 8px; border: 1.5px solid #A67C52; background: rgba(166,124,82,0.1); color: #A67C52; font-size: 0.85rem; font-weight: 600; cursor: pointer;">😍 Rất hài lòng</button>
+                      <button type="button" class="btn-co-rating" data-val="Hài lòng (4★)" style="padding: 7px 14px; border-radius: 8px; border: 1.5px solid #E5DECE; background: #fff; color: #726657; font-size: 0.85rem; font-weight: 600; cursor: pointer;">🙂 Hài lòng</button>
+                      <button type="button" class="btn-co-rating" data-val="Cần cải thiện (3★)" style="padding: 7px 14px; border-radius: 8px; border: 1.5px solid #E5DECE; background: #fff; color: #726657; font-size: 0.85rem; font-weight: 600; cursor: pointer;">😐 Cần cải thiện</button>
+                    </div>
+                  </div>
+
+                  <div style="margin-bottom: 14px;">
+                    <textarea id="checkoutFeedbackContent" rows="3" placeholder="Chia sẻ cảm nhận hoặc góp ý của bạn về sản phẩm, giao diện hoặc tốc độ giao dịch..." style="width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #E5DECE; font-family: inherit; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
+                  </div>
+
+                  <div style="display: flex; justify-content: flex-end;">
+                    <button type="button" id="btnSubmitCheckoutFeedback" style="padding: 10px 22px; border-radius: 999px; border: none; background: #A67C52; color: #fff; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.875rem;">
+                      Gửi góp ý của bạn
+                    </button>
+                  </div>
+                </div>
+
+                <div id="checkoutFeedbackSuccess" style="display: none; padding: 16px; background: rgba(46,125,50,0.08); border-radius: 10px; border: 1px solid #2e7d32; text-align: center; color: #2e7d32; font-weight: 600; font-size: 0.9rem;">
+                  ✓ Cảm ơn bạn đã đóng góp ý kiến quý báu! Phản hồi đã được chuyển trực tiếp đến Quản trị viên NEXUS.
+                </div>
+              </div>
+
               <!-- HÀNG NÚT THAO TÁC (ẨN HOÀN TOÀN KHI IN ẤN) -->
               <div class="nexus-invoice-actions no-print">
                 <button type="button" class="btn-print-invoice" id="btnPrintStep3Invoice">

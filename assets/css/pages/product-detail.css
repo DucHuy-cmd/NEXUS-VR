@@ -81,19 +81,84 @@
 .product-detail__stock.is-low { color: var(--warning); }
 .product-detail__stock.is-out { color: var(--error); }
 
-.product-detail__actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.product-detail__qty { display: flex; align-items: center; border: 1px solid var(--glass-border); border-radius: var(--radius-sm); overflow: hidden; }
-.product-detail__qty-btn { width: 40px; height: 44px; background: var(--glass-bg); border: none; font-size: 18px; cursor: pointer; color: var(--text-primary); }
+.product-detail__actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 24px; }
+.product-detail__qty { display: flex; align-items: center; border: 1px solid rgba(166,124,82,0.3); border-radius: 12px; overflow: hidden; background: #fff; height: 48px; }
+.product-detail__qty-btn { width: 40px; height: 48px; background: rgba(166,124,82,0.06); border: none; font-size: 18px; cursor: pointer; color: var(--text-primary); transition: background 0.2s; }
+.product-detail__qty-btn:hover { background: rgba(166,124,82,0.15); color: #A67C52; }
 .product-detail__qty input {
-  width: 50px; height: 44px; border: none; text-align: center; background: transparent; font-size: 15px;
+  width: 50px; height: 48px; border: none; text-align: center; background: transparent; font-size: 16px; font-weight: 600; color: #231F1C;
   -moz-appearance: textfield;
 }
 .product-detail__qty input::-webkit-outer-spin-button,
 .product-detail__qty input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-#pd-add-to-cart:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+/* NÚT THÊM VÀO GIỎ HÀNG BESPOKE LUXURY */
+.product-detail__add-btn {
+  height: 48px;
+  padding: 0 28px;
+  background: linear-gradient(135deg, #A67C52 0%, #8C653E 100%);
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-family: var(--font-head);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(166, 124, 82, 0.25);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.product-detail__add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(166, 124, 82, 0.38);
+  background: linear-gradient(135deg, #B58A5F 0%, #996F46 100%);
+}
+.product-detail__add-btn:active {
+  transform: translateY(0);
+}
+.product-detail__add-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
 
-.product-detail__wishlist-btn.is-active { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+/* NÚT YÊU THÍCH BESPOKE LUXURY */
+.product-detail__wishlist-btn {
+  height: 48px;
+  padding: 0 20px;
+  background: rgba(166, 124, 82, 0.08);
+  color: #3E2723;
+  border: 1.5px solid rgba(166, 124, 82, 0.3);
+  border-radius: 12px;
+  font-family: var(--font-head);
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.product-detail__wishlist-btn:hover {
+  background: rgba(166, 124, 82, 0.14);
+  border-color: #A67C52;
+  color: #A67C52;
+  transform: translateY(-2px);
+}
+.product-detail__wishlist-btn.is-active {
+  background: rgba(233, 30, 99, 0.1);
+  border-color: #E91E63;
+  color: #E91E63;
+}
+.product-detail__wishlist-btn.is-active svg {
+  fill: #E91E63;
+}
 
 /* ---------- TABS ---------- */
 .product-detail__tabs { margin-top: 70px; }
@@ -113,11 +178,281 @@
 .product-detail__specs-table th, .product-detail__specs-table td { text-align: left; padding: 14px 10px; font-size: 14.5px; }
 .product-detail__specs-table th { color: var(--text-secondary); font-weight: 600; width: 40%; }
 
-.product-detail__review { padding: 20px 0; border-bottom: 1px solid var(--glass-border); }
-.product-detail__review-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
-.product-detail__review-stars { color: var(--accent-bronze); font-size: 13px; }
-.product-detail__review-date { font-size: 12.5px; color: var(--text-muted); }
-.product-detail__no-review { color: var(--text-muted); }
+/* GIAO DIỆN REVIEWS & ĐÁNH GIÁ SẢN PHẨM LUXURY */
+.reviews-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.reviews-summary-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px;
+  background: #FFFFFF;
+  border: 1px solid rgba(166, 124, 82, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.reviews-score-box {
+  text-align: center;
+  min-width: 160px;
+}
+.reviews-score-num {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #A67C52;
+  font-family: var(--font-head);
+  line-height: 1;
+}
+.reviews-score-stars {
+  color: #FFA000;
+  font-size: 1.25rem;
+  margin: 6px 0;
+  letter-spacing: 2px;
+}
+.reviews-score-total {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.reviews-cta-box {
+  flex: 1;
+  min-width: 260px;
+}
+.reviews-cta-box h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #231F1C;
+  margin-bottom: 6px;
+}
+.reviews-cta-box p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.btn-write-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: #231F1C;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-write-review:hover {
+  background: #A67C52;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(166, 124, 82, 0.3);
+}
+
+/* FORM VIẾT ĐÁNH GIÁ */
+.review-form-card {
+  padding: 24px 28px;
+  background: #FFFFFF;
+  border: 1px solid rgba(166, 124, 82, 0.25);
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  animation: reviewSlideDown 0.3s ease;
+}
+
+@keyframes reviewSlideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.review-form-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #231F1C;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(166,124,82,0.15);
+}
+
+.review-rating-picker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  font-size: 0.95rem;
+  color: #231F1C;
+  font-weight: 600;
+}
+
+.star-rating-inputs {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.star-rating-inputs .star-item {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: #D1C7BD;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+}
+.star-rating-inputs .star-item.is-selected {
+  color: #FFA000;
+}
+.star-rating-inputs .star-item:hover {
+  transform: scale(1.2);
+}
+
+.review-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+@media (max-width: 600px) {
+  .review-form-grid { grid-template-columns: 1fr; }
+}
+
+.review-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.review-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #3E2723;
+}
+.review-field input,
+.review-field textarea {
+  padding: 10px 14px;
+  border: 1px solid rgba(166, 124, 82, 0.25);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #231F1C;
+  background: #FAF8F5;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  font-family: inherit;
+}
+.review-field input:focus,
+.review-field textarea:focus {
+  border-color: #A67C52;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(166, 124, 82, 0.12);
+}
+
+.review-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+.btn-review-cancel {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid rgba(166,124,82,0.3);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: #5D4037;
+}
+.btn-review-submit {
+  padding: 10px 24px;
+  background: #A67C52;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-review-submit:hover {
+  background: #8C653E;
+  transform: translateY(-1px);
+}
+
+/* DANH SÁCH REVIEW CARDS */
+.reviews-list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-item-card {
+  padding: 20px 24px;
+  background: #FFFFFF;
+  border: 1px solid rgba(229, 222, 206, 0.8);
+  border-radius: 12px;
+  transition: box-shadow 0.2s;
+}
+.review-item-card:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+}
+.review-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.review-author-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.review-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #A67C52, #5D4037);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.review-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #2E7D32;
+  background: rgba(46, 125, 50, 0.1);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  margin-left: 6px;
+}
+.review-item-stars {
+  color: #FFA000;
+  font-size: 1rem;
+  letter-spacing: 1.5px;
+}
+.review-item-date {
+  font-size: 0.8rem;
+  color: #8D6E63;
+}
+.review-item-body {
+  font-size: 0.925rem;
+  color: #3E2723;
+  line-height: 1.6;
+}
 
 /* ---------- SẢN PHẨM TƯƠNG TỰ ---------- */
 /* Dùng div thường (không phải <section>) vì global.css đã đặt

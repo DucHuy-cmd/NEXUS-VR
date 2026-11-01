@@ -32,6 +32,9 @@
     initSearch();
     initConfirmReceivedModal();
     initConfirmCancelModal();
+    initViewSwitcher();
+    initUserBookings();
+    initFeedbackModal();
     updateTabBadges();
     renderOrders();
     syncOrdersFromServerless();
@@ -441,11 +444,19 @@
         </button>
       `;
 
+      // Nút góp ý phản hồi đơn hàng
+      const feedbackBtnHTML = `
+        <button type="button" class="btn-order-feedback" data-code="${order.code || ''}" data-id="${order.id || ''}" style="padding: 8px 14px; border-radius: 8px; border: 1px solid #A67C52; background: rgba(166,124,82,0.08); color: #A67C52; font-weight: 600; cursor: pointer; font-size: 0.85rem;" title="Góp ý trải nghiệm về đơn hàng này">
+          💬 Góp ý
+        </button>
+      `;
+
       // Hàng nút thao tác theo trạng thái
       let actionsHTML = "";
       if (order.status === "active" || order.status === "processing") {
         actionsHTML = `
           <div class="btn-action-group" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            ${feedbackBtnHTML}
             ${printBtnHTML}
             <button type="button" class="btn-cancel" data-id="${order.id}" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border, #E5DECE); background: #fff; color: #d32f2f; font-weight: 600; cursor: pointer; font-size: 0.85rem;">Hủy đơn</button>
             <button type="button" class="btn-received" data-id="${order.id}" style="padding: 8px 16px; border-radius: 8px; border: none; background: #2e7d32; color: #fff; font-weight: 600; cursor: pointer; font-size: 0.85rem;">Đã nhận</button>
@@ -454,6 +465,7 @@
       } else if (order.status === "completed") {
         actionsHTML = `
           <div class="btn-action-group" style="display: flex; gap: 10px; align-items: center;">
+            ${feedbackBtnHTML}
             ${printBtnHTML}
             <div style="font-size: 0.85rem; color: #2e7d32; font-weight: 600;">✓ Giao hàng thành công</div>
           </div>
@@ -461,6 +473,7 @@
       } else if (order.status === "cancelled") {
         actionsHTML = `
           <div class="btn-action-group" style="display: flex; gap: 10px; align-items: center;">
+            ${feedbackBtnHTML}
             ${printBtnHTML}
             <div style="font-size: 0.85rem; color: #d32f2f; font-weight: 600;">✕ Đã hủy đơn hàng</div>
           </div>
@@ -473,6 +486,16 @@
         cancelReasonHTML = `
           <div style="margin-top: 10px; padding: 10px 14px; background: rgba(211, 47, 47, 0.08); border-left: 4px solid #d32f2f; border-radius: 6px; font-size: 0.85rem; color: #b71c1c; line-height: 1.5;">
             <strong>⚠️ Lý do hủy đơn:</strong> ${escapeHtml(order.cancelReason || order.notes)}
+          </div>
+        `;
+      }
+
+      // Khung hiển thị phản hồi của khách hàng nếu đã có
+      let customerFeedbackHTML = "";
+      if (order.feedback) {
+        customerFeedbackHTML = `
+          <div style="margin-top: 10px; padding: 10px 14px; background: rgba(166, 124, 82, 0.08); border-left: 4px solid #A67C52; border-radius: 6px; font-size: 0.85rem; color: #5D4037; line-height: 1.5;">
+            <strong>💬 Góp ý của bạn:</strong> ${escapeHtml(order.feedback)}
           </div>
         `;
       }
@@ -497,6 +520,7 @@
         <div class="order-products-list">${productsHTML}</div>
 
         ${cancelReasonHTML}
+        ${customerFeedbackHTML}
 
         <div class="order-card-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 14px; margin-top: 8px; flex-wrap: wrap; gap: 12px;">
           <div>
@@ -830,6 +854,293 @@
       if (e.key === "Escape" && modal && !modal.hidden) {
         closeConfirmCancelModal();
       }
+    });
+  }
+
+  /* --------------------------------------------------------------------------
+     6. CHUYỂN ĐỔI CHẾ ĐỘ XEM: ĐƠN HÀNG ⇄ LỊCH HẸN SHOWROOM VIP
+     -------------------------------------------------------------------------- */
+  function initViewSwitcher() {
+    const btnOrders = document.getElementById("btnSwitchOrders");
+    const btnBookings = document.getElementById("btnSwitchBookings");
+    const secOrders = document.getElementById("ordersSection");
+    const secBookings = document.getElementById("bookingsSection");
+    const headingTitle = document.getElementById("ordersHeadingTitle");
+    const headingDesc = document.getElementById("ordersHeadingDesc");
+
+    if (!btnOrders || !btnBookings) return;
+
+    btnOrders.addEventListener("click", () => {
+      btnOrders.style.background = "#A67C52";
+      btnOrders.style.color = "#fff";
+      btnOrders.style.borderColor = "#A67C52";
+
+      btnBookings.style.background = "#fff";
+      btnBookings.style.color = "#726657";
+      btnBookings.style.borderColor = "#E5DECE";
+
+      if (secOrders) secOrders.style.display = "block";
+      if (secBookings) secBookings.style.display = "none";
+      if (headingTitle) headingTitle.textContent = "Đơn Hàng Của Tôi";
+      if (headingDesc) headingDesc.textContent = "Theo dõi tiến độ đóng gói, vận chuyển và lịch sử mua sắm của bạn.";
+    });
+
+    btnBookings.addEventListener("click", () => {
+      btnBookings.style.background = "#A67C52";
+      btnBookings.style.color = "#fff";
+      btnBookings.style.borderColor = "#A67C52";
+
+      btnOrders.style.background = "#fff";
+      btnOrders.style.color = "#726657";
+      btnOrders.style.borderColor = "#E5DECE";
+
+      if (secOrders) secOrders.style.display = "none";
+      if (secBookings) secBookings.style.display = "block";
+      if (headingTitle) headingTitle.textContent = "Lịch Hẹn Showroom VIP";
+      if (headingDesc) headingDesc.textContent = "Trạng thái tiếp đón 1:1 và đặc quyền Thẻ VIP Pass tại Showroom Flagship.";
+      renderUserBookings();
+    });
+
+    // Hỗ trợ nhảy trực tiếp vào tab Lịch Hẹn từ link (?tab=bookings)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("tab") === "bookings") {
+        btnBookings.click();
+      }
+    } catch (e) {}
+  }
+
+  /* --------------------------------------------------------------------------
+     7. QUẢN LÝ LỊCH HẸN SHOWROOM VIP CỦA NGƯỜI DÙNG (USER ⇄ ADMIN)
+     -------------------------------------------------------------------------- */
+  async function initUserBookings() {
+    renderUserBookings();
+    // Đồng bộ từ serverless
+    if (window.apiService && typeof window.apiService.getBookings === "function") {
+      try {
+        const fresh = await window.apiService.getBookings();
+        if (Array.isArray(fresh) && fresh.length > 0) {
+          localStorage.setItem("nexus_bookings", JSON.stringify(fresh));
+          renderUserBookings();
+        }
+      } catch (e) {}
+    }
+  }
+
+  function renderUserBookings() {
+    const container = document.getElementById("userBookingsContainer");
+    const badge = document.getElementById("badgeMyBookings");
+    if (!container) return;
+
+    let user = null;
+    try {
+      user = typeof window.getCurrentUser === "function"
+        ? window.getCurrentUser()
+        : JSON.parse(localStorage.getItem("nexus_user") || "null");
+    } catch (e) {}
+
+    const allBookings = JSON.parse(localStorage.getItem("nexus_bookings") || "[]");
+    const userEmail = (user?.email || "").toLowerCase().trim();
+    const userPhone = (user?.phone || "").trim();
+
+    // Lọc lịch hẹn của chính người dùng này
+    let myBookings = allBookings;
+    if (userEmail || userPhone) {
+      myBookings = allBookings.filter(b => {
+        const bEmail = (b.email || "").toLowerCase().trim();
+        const bPhone = (b.phone || "").trim();
+        return (userEmail && bEmail === userEmail) || (userPhone && bPhone === userPhone);
+      });
+      // Nếu không tìm thấy bằng email thì fallback lấy tất cả nếu danh sách ít
+      if (myBookings.length === 0 && allBookings.length > 0) {
+        myBookings = allBookings;
+      }
+    }
+
+    if (badge) badge.textContent = myBookings.length;
+
+    if (myBookings.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 60px 20px; background: #fff; border-radius: 16px; border: 1px solid var(--border, #E5DECE);">
+          <div style="font-size: 2.2rem; margin-bottom: 12px;">🎟️</div>
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: #231F1C; margin-bottom: 6px;">Bạn chưa có lịch hẹn Showroom nào</h3>
+          <p style="color: #726657; font-size: 0.9rem; margin-bottom: 20px;">Đăng ký trải nghiệm thực tế không gian 1:1 miễn phí tại Showroom Flagship để nhận thẻ VIP Pass.</p>
+          <a href="contact.html#vip-section" style="display: inline-block; padding: 10px 24px; background: #A67C52; color: #fff; border-radius: 999px; font-weight: 600; text-decoration: none; font-size: 0.875rem;">Đăng Ký Trải Nghiệm Ngay</a>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = "";
+
+    myBookings.forEach((b) => {
+      const card = document.createElement("div");
+      card.style.background = "#fff";
+      card.style.borderRadius = "14px";
+      card.style.border = "1px solid var(--border, #E5DECE)";
+      card.style.padding = "20px 24px";
+      card.style.marginBottom = "16px";
+      card.style.boxShadow = "0 4px 16px rgba(0,0,0,0.02)";
+
+      let statusBadge = "";
+      let statusDesc = "";
+      let actionHTML = "";
+
+      if (b.status === "confirmed") {
+        statusBadge = `<span style="padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; background: rgba(76,175,80,0.15); color: #2E7D32;">✓ Đã Xác Nhận</span>`;
+        statusDesc = `<div style="margin-top: 8px; font-size: 0.85rem; color: #2E7D32;">Ban Quản Trị đã chuẩn bị phòng tiếp đón VIP riêng cho bạn. Vui lòng xuất trình mã lịch hẹn khi đến Showroom.</div>`;
+        actionHTML = `<a href="contact.html" style="padding: 8px 16px; border-radius: 8px; background: #2E7D32; color: #fff; text-decoration: none; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">🎟️ Xem Thẻ VIP Pass</a>`;
+      } else if (b.status === "cancelled") {
+        statusBadge = `<span style="padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; background: rgba(211,47,47,0.15); color: #D32F2F;">✕ Từ Chối / Đã Hủy</span>`;
+        statusDesc = `
+          <div style="margin-top: 10px; padding: 10px 14px; background: rgba(211,47,47,0.08); border-left: 4px solid #D32F2F; border-radius: 6px; font-size: 0.85rem; color: #B71C1C;">
+            <strong>⚠️ Lý do từ chối:</strong> ${escapeHtml(b.message || "Khung giờ này hiện đã kín chỗ hoặc showroom tạm nâng cấp kỹ thuật.")}
+          </div>
+        `;
+        actionHTML = `<a href="contact.html#vip-section" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #A67C52; background: #fff; color: #A67C52; text-decoration: none; font-weight: 600; font-size: 0.85rem;">Chọn Giờ Khác</a>`;
+      } else if (b.status === "completed") {
+        statusBadge = `<span style="padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; background: rgba(33,150,243,0.15); color: #1976D2;">★ Đã Tiếp Đón</span>`;
+        statusDesc = `<div style="margin-top: 8px; font-size: 0.85rem; color: #1976D2;">Cảm ơn quý khách đã ghé thăm và trải nghiệm hệ sinh thái NEXUS VR.</div>`;
+      } else {
+        statusBadge = `<span style="padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; background: rgba(255,152,0,0.15); color: #E65100;">⏳ Chờ Duyệt Lịch</span>`;
+        statusDesc = `<div style="margin-top: 8px; font-size: 0.85rem; color: #E65100;">Yêu cầu của bạn đang được Chuyên viên Concierge sắp xếp lịch trống.</div>`;
+      }
+
+      card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border, #E5DECE); padding-bottom: 12px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <span style="font-weight: 700; color: #A67C52; font-size: 1.05rem;">#VIP-${escapeHtml(b.id || 'NEXUS')}</span>
+            <span style="font-size: 0.8rem; color: #726657; margin-left: 8px;">(${b.createdAt || b.bookingDate || ''})</span>
+          </div>
+          ${statusBadge}
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.875rem; margin-bottom: 12px;">
+          <div>Dịch vụ: <strong style="color: #231F1C;">${escapeHtml(b.service || 'Trải nghiệm NEXUS VR 1:1')}</strong></div>
+          <div>Khung giờ hẹn: <strong style="color: #231F1C;">${escapeHtml(b.timeSlot || '10:00 - 11:30')} (${escapeHtml(b.bookingDate || 'Hôm nay')})</strong></div>
+          <div>Khách hàng: <strong>${escapeHtml(b.name || 'Quý Khách')}</strong> (${escapeHtml(b.phone || 'Chưa có SĐT')})</div>
+          <div>Địa điểm: <strong>NEXUS Flagship Showroom — Tầng 3, Bitexco Q.1, TP.HCM</strong></div>
+        </div>
+
+        ${statusDesc}
+
+        ${actionHTML ? `<div style="margin-top: 14px; display: flex; justify-content: flex-end; gap: 10px;">${actionHTML}</div>` : ''}
+      `;
+
+      container.appendChild(card);
+    });
+  }
+
+  /* --------------------------------------------------------------------------
+     8. GỬI PHẢN HỒI / GÓP Ý ĐƠN HÀNG (FEEDBACK MODAL)
+     -------------------------------------------------------------------------- */
+  let currentFeedbackOrderId = null;
+
+  function initFeedbackModal() {
+    const modal = document.getElementById("orderFeedbackModal");
+    const closeBtn = document.getElementById("btnCloseFeedbackModal");
+    const cancelBtn = document.getElementById("btnCancelFeedbackModal");
+    const submitBtn = document.getElementById("btnSubmitFeedbackModal");
+    const codeDisplay = document.getElementById("feedbackOrderCode");
+    const satisfactionBtns = document.querySelectorAll("#feedbackSatisfactionGroup .btn-satisfaction");
+    const ratingVal = document.getElementById("feedbackRatingVal");
+    const contentInput = document.getElementById("feedbackContentInput");
+
+    if (!modal) return;
+
+    // Chọn mức độ hài lòng
+    satisfactionBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        satisfactionBtns.forEach(b => {
+          b.classList.remove("is-active");
+          b.style.borderColor = "#E5DECE";
+          b.style.background = "#fff";
+          b.style.color = "#726657";
+        });
+        btn.classList.add("is-active");
+        btn.style.borderColor = "#A67C52";
+        btn.style.background = "rgba(166,124,82,0.1)";
+        btn.style.color = "#A67C52";
+        if (ratingVal) ratingVal.value = btn.dataset.val;
+      });
+    });
+
+    const closeModal = () => {
+      modal.hidden = true;
+      currentFeedbackOrderId = null;
+      if (contentInput) contentInput.value = "";
+    };
+
+    closeBtn?.addEventListener("click", closeModal);
+    cancelBtn?.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // Lắng nghe bấm nút Góp ý trên thẻ đơn hàng
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".btn-order-feedback");
+      if (btn) {
+        currentFeedbackOrderId = btn.dataset.id;
+        const code = btn.dataset.code;
+        if (codeDisplay) codeDisplay.textContent = code ? `(${code})` : "";
+        modal.hidden = false;
+        if (contentInput) contentInput.focus();
+      }
+    });
+
+    // Submit phản hồi
+    submitBtn?.addEventListener("click", async () => {
+      if (!currentFeedbackOrderId) return;
+      const text = (contentInput?.value || "").trim();
+      const rating = ratingVal?.value || "Rất hài lòng (5★)";
+
+      if (!text) {
+        if (typeof window.showToast === "function") {
+          window.showToast("Vui lòng nhập nội dung góp ý của bạn!", "error");
+        }
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Đang gửi...";
+
+      const fullFeedback = `[${rating}] ${text}`;
+
+      // Cập nhật vào LocalStorage
+      const orders = getOrders();
+      const order = orders.find(o => o.id === currentFeedbackOrderId || o.code === currentFeedbackOrderId);
+      if (order) {
+        order.feedback = fullFeedback;
+        saveOrders(orders);
+      }
+
+      // Cập nhật vào Master orders
+      try {
+        const master = JSON.parse(localStorage.getItem("nexus_orders") || "[]");
+        const mOrder = master.find(o => o.id === currentFeedbackOrderId || o.code === currentFeedbackOrderId);
+        if (mOrder) {
+          mOrder.feedback = fullFeedback;
+          localStorage.setItem("nexus_orders", JSON.stringify(master));
+        }
+      } catch (e) {}
+
+      // Gửi lên Serverless API
+      if (window.apiService && typeof window.apiService.updateOrderStatus === "function") {
+        try {
+          await window.apiService.updateOrderStatus(currentFeedbackOrderId, order?.status || "processing", fullFeedback);
+        } catch (e) {}
+      }
+
+      closeModal();
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Gửi Phản Hồi";
+
+      if (typeof window.showToast === "function") {
+        window.showToast("Cảm ơn bạn đã gửi góp ý! NEXUS VR đã tiếp nhận phản hồi.", "success");
+      }
+
+      renderOrders();
     });
   }
 })();

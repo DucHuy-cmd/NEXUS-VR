@@ -438,6 +438,45 @@
       } catch (err) {
         return { success: true, mode: "local_memory", stock };
       }
+    },
+
+    /**
+     * Đánh giá sản phẩm: Lấy danh sách reviews
+     */
+    async getProductReviews(productId) {
+      try {
+        const res = await fetch(`${API_BASE}/reviews?productId=${encodeURIComponent(productId)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        return (data.success && Array.isArray(data.reviews)) ? data.reviews : [];
+      } catch (e) {
+        const localKey = "nexus_reviews_" + productId;
+        return JSON.parse(localStorage.getItem(localKey) || "[]");
+      }
+    },
+
+    /**
+     * Đánh giá sản phẩm: Gửi đánh giá mới
+     */
+    async submitProductReview(reviewData) {
+      try {
+        const localKey = "nexus_reviews_" + reviewData.productId;
+        const current = JSON.parse(localStorage.getItem(localKey) || "[]");
+        current.unshift(reviewData);
+        localStorage.setItem(localKey, JSON.stringify(current));
+      } catch (e) {}
+
+      try {
+        const res = await fetch(`${API_BASE}/reviews`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(reviewData)
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (err) {
+        return { success: true, mode: "local_storage", review: reviewData };
+      }
     }
   };
 

@@ -16,6 +16,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
   let qrTimerInterval = null;
   let remainingSeconds = 300;
   let isBankTransferConfirmed = false;
+  let lastCreatedOrderId = null;
 
   const formatVND = (num) => (num || 0).toLocaleString("vi-VN") + " ₫";
 
@@ -85,6 +86,7 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     initShippingAndPaymentOptions();
     initAccountAutofillOptions();
     initQrButtons();
+    initCheckoutFeedback();
   }
 
   /* --------------------------------------------------------------------------
@@ -945,6 +947,13 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
     clearAppliedCoupon();
 
     // RENDER HÓA ĐƠN BƯỚC 3 & CHUYỂN BƯỚC HOÀN TẤT
+    lastCreatedOrderId = newOrder.id;
+    const fbForm = document.getElementById("checkoutFeedbackForm");
+    const fbSuccess = document.getElementById("checkoutFeedbackSuccess");
+    const fbContent = document.getElementById("checkoutFeedbackContent");
+    if (fbForm) fbForm.style.display = "block";
+    if (fbSuccess) fbSuccess.style.display = "none";
+    if (fbContent) fbContent.value = "";
     renderCheckoutStep3Invoice(newOrder);
     setStep(3);
 
@@ -1027,4 +1036,92 @@ TẦNG 3 - CONTROLLERS: ĐIỀU KHIỂN LUỒNG THANH TOÁN 3 BƯỚC & KÊ KHAI
       });
     }
   }
+
+  /* --------------------------------------------------------------------------
+  10. PHẢN HỒI / GÓP Ý TRẢI NGHIỆM ĐẶT HÀNG NGAY TẠI BƯỚC 3
+  -------------------------------------------------------------------------- */
+  function initCheckoutFeedback() {
+    const ratingBtns = document.querySelectorAll("#checkoutFeedbackRatingGroup .btn-co-rating");
+    const content = document.getElementById("checkoutFeedbackContent");
+    const submitBtn = document.getElementById("btnSubmitCheckoutFeedback");
+    const successBox = document.getElementById("checkoutFeedbackSuccess");
+    const formBox = document.getElementById("checkoutFeedbackForm");
+
+    if (!submitBtn) return;
+
+    let selectedRating = "Rất hài lòng (5★)";
+
+    ratingBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        ratingBtns.forEach(b => {
+          b.classList.remove("is-active");
+          b.style.borderColor = "#E5DECE";
+          b.style.background = "#fff";
+          b.style.color = "#726657";
+        });
+        btn.classList.add("is-active");
+        btn.style.borderColor = "#A67C52";
+        btn.style.background = "rgba(166,124,82,0.1)";
+        btn.style.color = "#A67C52";
+        selectedRating = btn.dataset.val;
+      });
+    });
+
+    submitBtn.addEventListener("click", async () => {
+      const text = (content?.value || "").trim();
+      if (!text) {
+        if (typeof window.showToast === "function") {
+          window.showToast("Vui lòng nhập lời nhận xét hoặc góp ý trước khi gửi!", "warning");
+        } else {
+          alert("Vui lòng nhập lời nhận xét hoặc góp ý trước khi gửi!");
+        }
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Đang gửi...";
+
+      const fullFeedback = `[${selectedRating}] ${text}`;
+
+      if (lastCreatedOrderId) {
+        try {
+          const userKey = getUserKeySuffix();
+          const orderKey = "nexus_orders" + userKey;
+          const orders = JSON.parse(localStorage.getItem(orderKey) || "[]");
+          const target = orders.find(o => o.id === lastCreatedOrderId || o.code === lastCreatedOrderId);
+          if (target) {
+            target.feedback = fullFeedback;
+            localStorage.setItem(orderKey, JSON.stringify(orders));
+          }
+
+          const master = JSON.parse(localStorage.getItem("nexus_orders") || "[]");
+          const mTarget = master.find(o => o.id === lastCreatedOrderId || o.code === lastCreatedOrderId);
+          if (mTarget) {
+            mTarget.feedback = fullFeedback;
+            localStorage.setItem("nexus_orders", JSON.stringify(master));
+          }
+        } catch (e) {
+          console.warn("[checkout] Lỗi lưu feedback local:", e);
+        }
+
+        if (window.apiService && typeof window.apiService.updateOrderStatus === "function") {
+          try {
+            await window.apiService.updateOrderStatus(lastCreatedOrderId, "processing", fullFeedback);
+          } catch (e) {
+            console.warn("[checkout] Lỗi gửi feedback serverless:", e);
+          }
+        }
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Gửi góp ý của bạn";
+      if (formBox) formBox.style.display = "none";
+      if (successBox) successBox.style.display = "block";
+
+      if (typeof window.showToast === "function") {
+        window.showToast("Cảm ơn góp ý của bạn! NEXUS đã ghi nhận phản hồi.", "success");
+      }
+    });
+  }
+
 })();

@@ -23,6 +23,16 @@
 
   const formatVND = (num) => (num || 0).toLocaleString("vi-VN") + " ₫";
 
+  function escapeHtml(text) {
+    if (!text) return "";
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
   document.addEventListener("DOMContentLoaded", initAdminDashboard);
 
   async function initAdminDashboard() {
@@ -438,6 +448,8 @@
             <td>
               <strong>${ord.customer ? ord.customer.name : "Khách vãng lai"}</strong><br>
               <span style="font-size:0.8rem; color:#877D72;">${ord.customer ? ord.customer.phone : ""}</span>
+              ${ord.feedback ? `<div style="margin-top:6px; font-size:0.78rem; color:#D4AF37; background:rgba(212,175,55,0.12); padding:3px 8px; border-radius:4px; border:1px solid rgba(212,175,55,0.3); max-width:240px; line-height:1.4;">💬 <strong>Góp ý khách:</strong> ${escapeHtml(ord.feedback)}</div>` : ''}
+              ${ord.notes && ord.status === 'cancelled' ? `<div style="margin-top:6px; font-size:0.78rem; color:#EF5350; background:rgba(239,83,80,0.12); padding:3px 8px; border-radius:4px; border:1px solid rgba(239,83,80,0.3); max-width:240px; line-height:1.4;">⚠️ <strong>Lý do hủy:</strong> ${escapeHtml(ord.notes)}</div>` : ''}
             </td>
             <td><span class="admin-badge">${itemsCount} món</span></td>
             <td><strong>${formatVND(ord.total)}</strong></td>
