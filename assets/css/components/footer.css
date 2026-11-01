@@ -199,49 +199,6 @@
   transform: translateX(3px);
 }
 
-/* Partners & Certifications row */
-.footer__partners-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 0;
-  border-top: 1px solid rgba(249, 246, 240, 0.08);
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 8px;
-}
-
-.footer__payments-list {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.footer__partner-badge {
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 4px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.footer__partner-badge.highlight-0pct {
-  background: rgba(166, 124, 82, 0.15);
-  border-color: rgba(166, 124, 82, 0.45);
-  color: var(--accent);
-}
-
-.footer__cert-list {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: 0.8rem;
-  color: var(--text-light-muted);
-}
-
 /* Bottom bar */
 .footer__bottom {
   padding-top: 24px;
@@ -269,26 +226,6 @@
 
 .footer__bottom-links span {
   opacity: 0.75;
-}
-
-/* Back to top button */
-.footer__back-to-top {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 999px;
-  color: var(--accent);
-  padding: 4px 14px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.2s ease;
-}
-
-.footer__back-to-top:hover {
-  border-color: var(--accent);
-  background: rgba(166, 124, 82, 0.1);
 }
 
 /* Responsive adjustments */

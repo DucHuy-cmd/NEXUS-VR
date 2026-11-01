@@ -654,7 +654,8 @@
             <div class="nexus-invoice__company-info">
               <strong>CÔNG TY TNHH NEXUS VR VIỆT NAM</strong><br>
               Thiết bị điện toán không gian & Kính thực tế ảo cao cấp<br>
-              Hotline: 1900 8888 • Email: contact@nexusvr.vn<br>
+              Địa chỉ: Tầng 28 Penthouse, NEXUS Tower, Phố đi bộ Nguyễn Huệ, Quận 1, TP. HCM<br>
+              Hotline: 0889 378 929 • Email: contact@nexusvr.vn<br>
               Website: www.nexusvr.vn
             </div>
           </div>

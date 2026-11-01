@@ -111,15 +111,15 @@ const FOOTER_HTML = `
         <div class="footer__contact-info">
           <div class="footer__contact-item">
             <span class="footer__contact-icon">📍</span>
-            <span>Landmark 81, TP. HCM &bull; Tràng Tiền Plaza, Hà Nội</span>
+            <span>Tầng 28 Penthouse, NEXUS Tower, Phố đi bộ Nguyễn Huệ, Quận 1, TP. HCM</span>
           </div>
           <div class="footer__contact-item">
             <span class="footer__contact-icon">📞</span>
-            <span>Hotline VIP: <a href="tel:19008888" style="color: var(--accent); font-weight: 700;">1900 8888</a> (24/7)</span>
+            <span>Hotline VIP: <a href="tel:0889378929" style="color: var(--accent); font-weight: 700;">0889 378 929</a> (24/7)</span>
           </div>
           <div class="footer__contact-item">
             <span class="footer__contact-icon">✉️</span>
-            <span>Email: contact@nexusvr.vn</span>
+            <span>Email: contact@nexusvr.vn &bull; vu03032007@gmail.com</span>
           </div>
         </div>
       </div>
@@ -155,22 +155,6 @@ const FOOTER_HTML = `
       </div>
     </div>
 
-    <!-- HÀNG ĐỐI TÁC THANH TOÁN & CHỨNG CHỈ QUỐC TẾ -->
-    <div class="footer__partners-row">
-      <div class="footer__payments-list">
-        <span class="footer__partner-badge">💳 VietQR 24/7</span>
-        <span class="footer__partner-badge">Visa</span>
-        <span class="footer__partner-badge">MasterCard</span>
-        <span class="footer__partner-badge">JCB</span>
-        <span class="footer__partner-badge highlight-0pct">Trả Góp 0% Lãi Suất</span>
-      </div>
-      <div class="footer__cert-list">
-        <span class="footer__cert-item">🛡️ ISO 9001:2015</span>
-        <span class="footer__cert-item">⚡ 8K Ultra Precision</span>
-        <span class="footer__cert-item">🎧 Spatial 3D Audio</span>
-      </div>
-    </div>
-
     <!-- HÀNG BẢN QUYỀN DƯỚI CÙNG -->
     <div class="footer__bottom">
       <p class="footer__copyright">
@@ -180,9 +164,6 @@ const FOOTER_HTML = `
         <span>Bảo mật dữ liệu</span>
         <span>Điều khoản dịch vụ</span>
         <span>Tiêu chuẩn WCAG AA</span>
-        <button type="button" class="footer__back-to-top" id="footerBackToTop" title="Cuộn lên đầu trang">
-          <span>Lên đầu trang</span> &uarr;
-        </button>
       </div>
     </div>
   </div>
@@ -1209,11 +1190,5 @@ function initFooterFeatures() {
     });
   }
 
-  const backToTopBtn = document.getElementById("footerBackToTop");
-  if (backToTopBtn && !backToTopBtn.dataset.bound) {
-    backToTopBtn.dataset.bound = "true";
-    backToTopBtn.addEventListener("click", () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
+
 }
