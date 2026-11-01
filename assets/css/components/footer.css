@@ -2,12 +2,13 @@
    NEXUS VR — components/footer.css
    TẦNG 2 - COMPONENTS: GLOBAL FOOTER
    Concept: Quiet Luxury / Warm Minimalist Tech
+   Responsive: Mobile, iPhone (375px), Android, iPad, Desktop
    ========================================================= */
 
 .site-footer {
   background-color: var(--bg-dark);
   color: var(--text-light);
-  padding: clamp(64px, 10vh, 100px) 0 40px;
+  padding: clamp(48px, 8vh, 80px) 0 40px;
   position: relative;
   z-index: 20;
   border-top: 1px solid rgba(249, 246, 240, 0.08);
@@ -21,45 +22,55 @@
   background: rgba(255, 255, 255, 0.025);
   border: 1px solid rgba(166, 124, 82, 0.25);
   border-radius: 16px;
-  padding: 24px 32px;
+  padding: clamp(16px, 3vw, 24px) clamp(16px, 3.5vw, 32px);
   margin-bottom: clamp(36px, 6vh, 56px);
-  gap: 24px;
+  gap: clamp(16px, 2.5vw, 24px);
   flex-wrap: wrap;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .footer__newsletter-text {
+  flex: 1 1 260px;
+  min-width: 0;
   max-width: 520px;
 }
 
 .footer__newsletter-title {
   font-family: var(--font-head);
-  font-size: 1.15rem;
+  font-size: clamp(1.05rem, 2vw, 1.2rem);
   font-weight: 700;
   color: var(--text-light);
   margin: 0 0 6px;
+  line-height: 1.35;
 }
 
 .footer__newsletter-desc {
-  font-size: 0.88rem;
+  font-size: clamp(0.82rem, 1.5vw, 0.88rem);
   line-height: 1.6;
   color: var(--text-light-muted);
   margin: 0;
 }
 
 .footer__newsletter-form {
-  flex: 1;
-  min-width: 280px;
+  flex: 1 1 280px;
+  min-width: 0;
   max-width: 440px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .footer__newsletter-input-wrap {
   display: flex;
   gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .footer__newsletter-input {
   flex: 1;
+  min-width: 0;
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 999px;
@@ -68,6 +79,7 @@
   color: #FFF;
   outline: none;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .footer__newsletter-input:focus {
@@ -79,6 +91,7 @@
 .footer__newsletter-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   background: var(--accent);
   color: #FFF;
@@ -90,6 +103,8 @@
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .footer__newsletter-btn:hover {
@@ -237,15 +252,78 @@
     grid-column: 1 / -1;
     max-width: 100%;
   }
+  .footer__newsletter-bar {
+    padding: 20px 24px;
+    gap: 18px;
+  }
+  .footer__newsletter-text {
+    max-width: 100%;
+  }
+  .footer__newsletter-form {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer__newsletter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 20px 18px;
+    border-radius: 14px;
+    gap: 16px;
+  }
+  .footer__newsletter-form {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 560px) {
   .footer__top {
     grid-template-columns: 1fr;
-    gap: 36px;
+    gap: 32px;
   }
   .footer__bottom {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
+  }
+  .footer__bottom-links {
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer__newsletter-bar {
+    padding: 16px 14px;
+    border-radius: 14px;
+    gap: 14px;
+  }
+  .footer__newsletter-title {
+    font-size: 1.05rem;
+  }
+  .footer__newsletter-desc {
+    font-size: 0.84rem;
+  }
+  .footer__newsletter-input-wrap {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  .footer__newsletter-input {
+    width: 100%;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    text-align: left;
+  }
+  .footer__newsletter-btn {
+    width: 100%;
+    border-radius: 10px;
+    padding: 12px 18px;
+    min-height: 46px;
+    font-size: 0.92rem;
   }
 }

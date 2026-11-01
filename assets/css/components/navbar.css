@@ -545,7 +545,9 @@ body.menu-locked {
   right: 0;
   bottom: 0;
   width: 100%;
-  max-width: 440px;
+  max-width: min(440px, 100vw);
+  max-width: 100%;
+  box-sizing: border-box;
   background-color: var(--bg-primary, #F9F6F0);
   z-index: 9999;
   box-shadow: -10px 0 35px rgba(20, 18, 16, 0.18);
@@ -1189,7 +1191,9 @@ body.menu-locked {
 
 .pwa-modal-card {
   width: 100%;
-  max-width: 500px;
+  max-width: min(500px, 92vw);
+  max-width: 100%;
+  box-sizing: border-box;
   background: #FFF;
   border-radius: 16px;
   overflow: hidden;

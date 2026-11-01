@@ -549,3 +549,58 @@ CĂN CHỈNH BẰNG NHAU HOÀN HẢO CHO 2 Ô TÙY CHỌN GIAO HÀNG
 .btn-inst-term.is-active .term-pay {
   color: #FFF;
 }
+
+
+/* Responsive adjustments for Checkout Panel on mobile (iPhone XS 375px, Android 360px) */
+@media (max-width: 480px) {
+  .checkout-main-panel {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+  .checkout-installment-box {
+    padding: 16px 14px;
+    border-radius: 12px;
+  }
+  .checkout-stepper {
+    margin: 0 auto 32px;
+  }
+  .checkout-step {
+    padding: 0 4px;
+  }
+  .checkout-step__num {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+  .checkout-step__label {
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+  }
+  .inst-banks-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  .inst-bank-card {
+    padding: 8px 6px;
+    font-size: 0.78rem;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .inst-terms-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  .btn-inst-term {
+    padding: 10px 6px;
+    min-height: 52px;
+  }
+  .btn-inst-term .term-months {
+    font-size: 0.85rem;
+  }
+  .btn-inst-term .term-pay {
+    font-size: 0.76rem;
+    white-space: nowrap;
+  }
+}

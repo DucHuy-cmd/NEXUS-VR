@@ -940,6 +940,8 @@
 /* TABLE SO SÁNH ĐỐI CHIẾU */
 .compare-dynamic-table {
   width: 100%;
+  min-width: 480px;
+  border: none;
   border-collapse: separate;
   border-spacing: 0;
   background: #FFF;
@@ -1007,3 +1009,32 @@
   }
 }
 
+
+
+/* Responsive wrapper for comparison table */
+.compare-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+  margin-top: 16px;
+  border: 1px solid rgba(166, 124, 82, 0.2);
+  background: #FFF;
+  box-shadow: inset -8px 0 10px -8px rgba(0, 0, 0, 0.1);
+}
+
+.compare-scroll-hint {
+  display: none;
+  font-size: 0.76rem;
+  color: var(--accent-deep, #A67C52);
+  text-align: center;
+  margin-top: 8px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  .compare-scroll-hint {
+    display: block;
+  }
+}

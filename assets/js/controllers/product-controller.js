@@ -875,7 +875,9 @@ function initDynamicComparison(baseProduct) {
       </div>
 
       <!-- BẢNG ĐỐI CHIẾU THÔNG SỐ -->
-      <table class="compare-dynamic-table">
+      <div class="compare-scroll-hint">← Vuốt sang ngang để đối chiếu chi tiết 15+ thông số →</div>
+      <div class="compare-table-responsive">
+        <table class="compare-dynamic-table">
         <thead>
           <tr>
             <th style="width: 28%;">Thông Số Kỹ Thuật</th>
@@ -937,7 +939,8 @@ function initDynamicComparison(baseProduct) {
             </td>
           </tr>
         </tbody>
-      </table>
+        </table>
+      </div>
     `;
   }
 
