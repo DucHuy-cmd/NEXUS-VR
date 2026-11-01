@@ -37,6 +37,11 @@ function initProductDetailPage() {
   initInstallmentPlan(product);
   initDynamicComparison(product);
 
+  // KÍCH HOẠT TÍNH NĂNG XOAY 360° & PHÓNG TO THÔNG MINH
+  init360SpatialStudioEvents();
+  initOmnichannelZoom();
+  initLightboxEvents();
+
   root.hidden = false;
 }
 
@@ -955,7 +960,10 @@ function initDynamicComparison(baseProduct) {
 
 
 /* ==========================================================================
-   TÍNH NĂNG ĐỘT PHÁ: KÍNH LÚP PHÓNG TO & TRÌNH XOAY 360 ĐỘ KHÔNG GIAN
+   TÍNH NĂNG ĐỘT PHÁ: XOAY 360° KHÔNG GIAN & PHÓNG TO THÔNG MINH ĐA NỀN TẢNG
+   - PC: Chỉ phóng to khi BẤM nút "Phóng to" / click mở Lightbox (cuộn chuột, pan kéo)
+   - Điện thoại / iPad: Chạm 2 lần (Double-Tap) & Vuốt 2 ngón tay (Pinch to Zoom)
+   - Xoay 360°: Kéo chuột (PC) / Vuốt tay (Mobile) xoay quanh trục kèm âm thanh Web Audio
    ========================================================================== */
 let is360ModeActive = false;
 let current360Angle = 0;
@@ -964,8 +972,29 @@ let autoSpinAnimationId = null;
 let isDragging360 = false;
 let dragStartX = 0;
 let angleStartDrag = 0;
+
+// Trạng thái Phóng to trên Mobile (Double-Tap & Pinch to Zoom)
+let mobileZoomScale = 1.0;
+let mobilePanX = 0;
+let mobilePanY = 0;
+let lastTouchTapTime = 0;
+let lastTouchTapX = 0;
+let lastTouchTapY = 0;
+let initialPinchDistance = 0;
+let pinchStartScale = 1.0;
+let isPinching = false;
+let isTouchingPan = false;
+let touchPanStartX = 0;
+let touchPanStartY = 0;
+
+// Trạng thái Lightbox trên PC & Fullscreen
 let currentLightboxIndex = 0;
 let lightboxZoomLevel = 1.0;
+let lightboxPanX = 0;
+let lightboxPanY = 0;
+let isLightboxDragging = false;
+let lbDragStartX = 0;
+let lbDragStartY = 0;
 let currentProductGalleryImages = [];
 
 function playSpatial360Tick() {
@@ -980,7 +1009,7 @@ function playSpatial360Tick() {
     osc.type = "sine";
     osc.frequency.setValueAtTime(1100, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(450, ctx.currentTime + 0.035);
-    gain.gain.setValueAtTime(0.03, ctx.currentTime);
+    gain.gain.setValueAtTime(0.035, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.035);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -989,34 +1018,147 @@ function playSpatial360Tick() {
   } catch (e) {}
 }
 
-function initHoverMagnifier() {
+/* --------------------------------------------------------------------------
+   1. PHÓNG TO THÔNG MINH TRÊN MOBILE & DESKTOP (OMNICHANNEL ZOOM)
+   -------------------------------------------------------------------------- */
+function applyMobileZoomTransform() {
+  const img = document.getElementById("pd-main-img");
+  if (!img) return;
+  if (mobileZoomScale <= 1.05) {
+    img.style.transform = "scale(1) translate(0px, 0px)";
+    img.style.transformOrigin = "center center";
+    mobilePanX = 0;
+    mobilePanY = 0;
+    mobileZoomScale = 1.0;
+  } else {
+    img.style.transform = `scale(${mobileZoomScale}) translate(${mobilePanX}px, ${mobilePanY}px)`;
+  }
+}
+
+function resetMobileZoom() {
+  mobileZoomScale = 1.0;
+  mobilePanX = 0;
+  mobilePanY = 0;
+  applyMobileZoomTransform();
+}
+
+function initOmnichannelZoom() {
   const container = document.getElementById("pd-main-image");
   const img = document.getElementById("pd-main-img");
   if (!container || !img) return;
 
-  container.addEventListener("mousemove", (e) => {
-    if (is360ModeActive) return;
-    const rect = container.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const originX = (x / rect.width) * 100;
-    const originY = (y / rect.height) * 100;
-    img.style.transformOrigin = `${originX}% ${originY}%`;
-  });
+  // Đảm bảo không có phóng to tự động khi rê chuột
+  img.style.transform = "scale(1)";
+  img.style.transformOrigin = "center center";
 
-  container.addEventListener("mouseleave", () => {
-    if (is360ModeActive) return;
-    img.style.transformOrigin = "center center";
-  });
-
-  // Nhấp vào ảnh để mở Lightbox nếu không phải đang trong chế độ 360
+  // PC: Nhấp vào ảnh để mở Lightbox (nếu không đang trong chế độ 360)
   container.addEventListener("click", (e) => {
     if (is360ModeActive) return;
     if (e.target.closest(".gallery-action-pod") || e.target.closest("#pd-discount-badge")) return;
-    openLuxuryLightbox();
+    // Nếu là click chuột trên PC (không phải chạm cảm ứng zoom trên mobile)
+    if (window.matchMedia("(pointer: fine)").matches) {
+      openLuxuryLightbox();
+    }
+  });
+
+  // MOBILE: DOUBLE-TAP TO ZOOM (Chạm 2 lần phóng to 2.5x tại vị trí chạm)
+  container.addEventListener("touchend", (e) => {
+    if (is360ModeActive) return;
+    if (e.target.closest(".gallery-action-pod") || e.target.closest("#pd-discount-badge")) return;
+
+    const currentTime = Date.now();
+    const tapLength = currentTime - lastTouchTapTime;
+    const touch = e.changedTouches[0];
+    if (!touch) return;
+
+    const deltaX = Math.abs(touch.clientX - lastTouchTapX);
+    const deltaY = Math.abs(touch.clientY - lastTouchTapY);
+
+    if (tapLength < 320 && deltaX < 25 && deltaY < 25) {
+      // ĐÂY LÀ DOUBLE TAP!
+      e.preventDefault();
+      if (mobileZoomScale > 1.2) {
+        // Đang zoom -> thu nhỏ về 1x
+        resetMobileZoom();
+      } else {
+        // Đang 1x -> phóng to 2.5x tại vị trí chạm ngón tay
+        const rect = container.getBoundingClientRect();
+        const originX = ((touch.clientX - rect.left) / rect.width) * 100;
+        const originY = ((touch.clientY - rect.top) / rect.height) * 100;
+        img.style.transformOrigin = `${originX}% ${originY}%`;
+        mobileZoomScale = 2.5;
+        img.style.transform = `scale(${mobileZoomScale})`;
+      }
+      lastTouchTapTime = 0;
+    } else {
+      lastTouchTapTime = currentTime;
+      lastTouchTapX = touch.clientX;
+      lastTouchTapY = touch.clientY;
+    }
+  });
+
+  // MOBILE: PINCH TO ZOOM (2 ngón tay vuốt to / chụm lại)
+  container.addEventListener("touchstart", (e) => {
+    if (is360ModeActive) return;
+
+    if (e.touches.length === 2) {
+      isPinching = true;
+      initialPinchDistance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      pinchStartScale = mobileZoomScale;
+
+      const rect = container.getBoundingClientRect();
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+      img.style.transformOrigin = `${(midX / rect.width) * 100}% ${(midY / rect.height) * 100}%`;
+    } else if (e.touches.length === 1 && mobileZoomScale > 1.1) {
+      // Bắt đầu Pan khi đang zoom
+      isTouchingPan = true;
+      touchPanStartX = e.touches[0].clientX - mobilePanX;
+      touchPanStartY = e.touches[0].clientY - mobilePanY;
+    }
+  }, { passive: false });
+
+  container.addEventListener("touchmove", (e) => {
+    if (is360ModeActive) return;
+
+    if (isPinching && e.touches.length === 2) {
+      e.preventDefault();
+      const currentDistance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      if (initialPinchDistance > 0) {
+        const factor = currentDistance / initialPinchDistance;
+        mobileZoomScale = Math.min(3.5, Math.max(1.0, pinchStartScale * factor));
+        img.style.transform = `scale(${mobileZoomScale})`;
+      }
+    } else if (isTouchingPan && e.touches.length === 1 && mobileZoomScale > 1.1) {
+      e.preventDefault();
+      mobilePanX = e.touches[0].clientX - touchPanStartX;
+      mobilePanY = e.touches[0].clientY - touchPanStartY;
+      applyMobileZoomTransform();
+    }
+  }, { passive: false });
+
+  container.addEventListener("touchend", (e) => {
+    if (isPinching && e.touches.length < 2) {
+      isPinching = false;
+      if (mobileZoomScale < 1.15) {
+        resetMobileZoom();
+      }
+    }
+    if (e.touches.length === 0) {
+      isTouchingPan = false;
+    }
   });
 }
 
+/* --------------------------------------------------------------------------
+   2. TRÌNH XOAY 360 ĐỘ KHÔNG GIAN (SPATIAL 360° STUDIO)
+   -------------------------------------------------------------------------- */
 function getAngleDescription(angle) {
   const normalized = ((angle % 360) + 360) % 360;
   if (normalized >= 315 || normalized < 45) return `${Math.round(normalized)}° • Mặt trước chính diện`;
@@ -1056,7 +1198,6 @@ function runAutoSpinLoop() {
   const prevAngle = current360Angle;
   current360Angle = (current360Angle + 0.45) % 360;
 
-  // Phát tick âm thanh khi qua các góc chuẩn
   if (Math.floor(prevAngle / 90) !== Math.floor(current360Angle / 90)) {
     playSpatial360Tick();
   }
@@ -1088,6 +1229,8 @@ function stop360AutoSpin() {
 
 function enable360Mode() {
   is360ModeActive = true;
+  resetMobileZoom();
+
   const container = document.getElementById("pd-main-image");
   const controlBar = document.getElementById("spatial360ControlBar");
   const hint = document.getElementById("spatial360Hint");
@@ -1139,8 +1282,10 @@ function init360SpatialStudioEvents() {
   const btnAuto = document.getElementById("btn360AutoSpin");
   const slider = document.getElementById("spatial360Slider");
 
-  if (btnToggle) {
+  if (btnToggle && !btnToggle.dataset.bound360) {
+    btnToggle.dataset.bound360 = "true";
     btnToggle.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       if (is360ModeActive) {
         disable360Mode();
@@ -1150,15 +1295,19 @@ function init360SpatialStudioEvents() {
     });
   }
 
-  if (btnClose) {
+  if (btnClose && !btnClose.dataset.bound360) {
+    btnClose.dataset.bound360 = "true";
     btnClose.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       disable360Mode();
     });
   }
 
-  if (btnReset) {
+  if (btnReset && !btnReset.dataset.bound360) {
+    btnReset.dataset.bound360 = "true";
     btnReset.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       stop360AutoSpin();
       update360Visual(0);
@@ -1166,8 +1315,10 @@ function init360SpatialStudioEvents() {
     });
   }
 
-  if (btnAuto) {
+  if (btnAuto && !btnAuto.dataset.bound360) {
+    btnAuto.dataset.bound360 = "true";
     btnAuto.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       if (is360AutoSpinning) {
         stop360AutoSpin();
@@ -1177,15 +1328,18 @@ function init360SpatialStudioEvents() {
     });
   }
 
-  if (slider) {
+  if (slider && !slider.dataset.bound360) {
+    slider.dataset.bound360 = "true";
     slider.addEventListener("input", (e) => {
       stop360AutoSpin();
       update360Visual(Number(e.target.value));
     });
   }
 
-  if (container) {
-    // DRAG CHUỘT
+  if (container && !container.dataset.bound360Drag) {
+    container.dataset.bound360Drag = "true";
+
+    // DRAG CHUỘT TRÊN PC
     container.addEventListener("mousedown", (e) => {
       if (!is360ModeActive) return;
       isDragging360 = true;
@@ -1208,9 +1362,9 @@ function init360SpatialStudioEvents() {
       }
     });
 
-    // VUỐT CẢM ỨNG TRÊN MOBILE / IPAD
+    // VUỐT CẢM ỨNG 1 NGÓN ĐỂ XOAY TRÊN MOBILE / IPAD
     container.addEventListener("touchstart", (e) => {
-      if (!is360ModeActive || !e.touches[0]) return;
+      if (!is360ModeActive || e.touches.length !== 1) return;
       isDragging360 = true;
       dragStartX = e.touches[0].clientX;
       angleStartDrag = current360Angle;
@@ -1218,7 +1372,7 @@ function init360SpatialStudioEvents() {
     }, { passive: true });
 
     container.addEventListener("touchmove", (e) => {
-      if (!isDragging360 || !is360ModeActive || !e.touches[0]) return;
+      if (!isDragging360 || !is360ModeActive || e.touches.length !== 1) return;
       const deltaX = e.touches[0].clientX - dragStartX;
       const newAngle = angleStartDrag + deltaX * 0.9;
       update360Visual(newAngle);
@@ -1233,6 +1387,9 @@ function init360SpatialStudioEvents() {
   }
 }
 
+/* --------------------------------------------------------------------------
+   3. LUXURY FULLSCREEN LIGHTBOX (CHO PC & TOÀN MÀN HÌNH)
+   -------------------------------------------------------------------------- */
 function openLuxuryLightbox() {
   const overlay = document.getElementById("luxuryLightboxOverlay");
   const mainImg = document.getElementById("lightboxMainImg");
@@ -1246,7 +1403,6 @@ function openLuxuryLightbox() {
 
   if (title) title.textContent = productTitle;
 
-  // Lấy danh sách ảnh hiện hành
   const thumbs = document.querySelectorAll("#pd-thumbs .product-detail__thumb img");
   currentProductGalleryImages = [];
   thumbs.forEach((t) => {
@@ -1260,9 +1416,10 @@ function openLuxuryLightbox() {
   if (currentLightboxIndex === -1) currentLightboxIndex = 0;
 
   lightboxZoomLevel = 1.0;
+  lightboxPanX = 0;
+  lightboxPanY = 0;
   updateLightboxImage();
 
-  // Render thumbnails trong lightbox
   if (thumbsWrap) {
     thumbsWrap.innerHTML = "";
     currentProductGalleryImages.forEach((src, idx) => {
@@ -1273,6 +1430,8 @@ function openLuxuryLightbox() {
       btn.addEventListener("click", () => {
         currentLightboxIndex = idx;
         lightboxZoomLevel = 1.0;
+        lightboxPanX = 0;
+        lightboxPanY = 0;
         updateLightboxImage();
       });
       thumbsWrap.appendChild(btn);
@@ -1301,7 +1460,7 @@ function updateLightboxImage() {
 
   const src = currentProductGalleryImages[currentLightboxIndex] || "";
   mainImg.src = src;
-  mainImg.style.transform = `scale(${lightboxZoomLevel})`;
+  mainImg.style.transform = `scale(${lightboxZoomLevel}) translate(${lightboxPanX}px, ${lightboxPanY}px)`;
 
   if (thumbsWrap) {
     thumbsWrap.querySelectorAll(".lb-thumb").forEach((t, i) => {
@@ -1320,50 +1479,127 @@ function initLightboxEvents() {
   const btnPrev = document.getElementById("btnLbPrev");
   const btnNext = document.getElementById("btnLbNext");
   const overlay = document.getElementById("luxuryLightboxOverlay");
+  const canvas = document.getElementById("luxuryLightboxCanvas");
+  const mainImg = document.getElementById("lightboxMainImg");
 
-  if (btnOpen) btnOpen.addEventListener("click", openLuxuryLightbox);
-  if (btnClose) btnClose.addEventListener("click", closeLuxuryLightbox);
+  if (btnOpen && !btnOpen.dataset.boundLb) {
+    btnOpen.dataset.boundLb = "true";
+    btnOpen.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openLuxuryLightbox();
+    });
+  }
 
-  if (btnZoomIn) {
+  if (btnClose && !btnClose.dataset.boundLb) {
+    btnClose.dataset.boundLb = "true";
+    btnClose.addEventListener("click", closeLuxuryLightbox);
+  }
+
+  if (btnZoomIn && !btnZoomIn.dataset.boundLb) {
+    btnZoomIn.dataset.boundLb = "true";
     btnZoomIn.addEventListener("click", () => {
-      lightboxZoomLevel = Math.min(3.5, lightboxZoomLevel + 0.35);
+      lightboxZoomLevel = Math.min(4.0, lightboxZoomLevel + 0.35);
       updateLightboxImage();
     });
   }
 
-  if (btnZoomOut) {
+  if (btnZoomOut && !btnZoomOut.dataset.boundLb) {
+    btnZoomOut.dataset.boundLb = "true";
     btnZoomOut.addEventListener("click", () => {
       lightboxZoomLevel = Math.max(0.7, lightboxZoomLevel - 0.35);
+      if (lightboxZoomLevel <= 1.0) {
+        lightboxPanX = 0;
+        lightboxPanY = 0;
+      }
       updateLightboxImage();
     });
   }
 
-  if (btnReset) {
+  if (btnReset && !btnReset.dataset.boundLb) {
+    btnReset.dataset.boundLb = "true";
     btnReset.addEventListener("click", () => {
       lightboxZoomLevel = 1.0;
+      lightboxPanX = 0;
+      lightboxPanY = 0;
       updateLightboxImage();
     });
   }
 
-  if (btnPrev) {
+  if (btnPrev && !btnPrev.dataset.boundLb) {
+    btnPrev.dataset.boundLb = "true";
     btnPrev.addEventListener("click", () => {
       if (currentProductGalleryImages.length <= 1) return;
       currentLightboxIndex = (currentLightboxIndex - 1 + currentProductGalleryImages.length) % currentProductGalleryImages.length;
       lightboxZoomLevel = 1.0;
+      lightboxPanX = 0;
+      lightboxPanY = 0;
       updateLightboxImage();
     });
   }
 
-  if (btnNext) {
+  if (btnNext && !btnNext.dataset.boundLb) {
+    btnNext.dataset.boundLb = "true";
     btnNext.addEventListener("click", () => {
       if (currentProductGalleryImages.length <= 1) return;
       currentLightboxIndex = (currentLightboxIndex + 1) % currentProductGalleryImages.length;
       lightboxZoomLevel = 1.0;
+      lightboxPanX = 0;
+      lightboxPanY = 0;
       updateLightboxImage();
     });
   }
 
-  if (overlay) {
+  // CUỘN CON LĂN CHUỘT (MOUSE WHEEL ZOOM) TRONG LIGHTBOX TRÊN PC
+  if (canvas && !canvas.dataset.boundWheel) {
+    canvas.dataset.boundWheel = "true";
+    canvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      if (e.deltaY < 0) {
+        lightboxZoomLevel = Math.min(4.0, lightboxZoomLevel + 0.2);
+      } else {
+        lightboxZoomLevel = Math.max(0.7, lightboxZoomLevel - 0.2);
+        if (lightboxZoomLevel <= 1.0) {
+          lightboxPanX = 0;
+          lightboxPanY = 0;
+        }
+      }
+      updateLightboxImage();
+    }, { passive: false });
+
+    // KÉO CHUỘT ĐỂ DI CHUYỂN (DRAG TO PAN KHI ĐANG ZOOM)
+    canvas.addEventListener("mousedown", (e) => {
+      if (lightboxZoomLevel <= 1.05) return;
+      isLightboxDragging = true;
+      lbDragStartX = e.clientX - lightboxPanX;
+      lbDragStartY = e.clientY - lightboxPanY;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isLightboxDragging || lightboxZoomLevel <= 1.05) return;
+      lightboxPanX = e.clientX - lbDragStartX;
+      lightboxPanY = e.clientY - lbDragStartY;
+      updateLightboxImage();
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (isLightboxDragging) isLightboxDragging = false;
+    });
+
+    // NHẤP ĐÚP CHUỘT (DOUBLE CLICK) ĐỂ PHÓNG TO / THU NHỎ
+    canvas.addEventListener("dblclick", (e) => {
+      if (lightboxZoomLevel > 1.2) {
+        lightboxZoomLevel = 1.0;
+        lightboxPanX = 0;
+        lightboxPanY = 0;
+      } else {
+        lightboxZoomLevel = 2.2;
+      }
+      updateLightboxImage();
+    });
+  }
+
+  if (overlay && !overlay.dataset.boundClick) {
+    overlay.dataset.boundClick = "true";
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay || e.target.id === "luxuryLightboxBody" || e.target.id === "luxuryLightboxCanvas") {
         closeLuxuryLightbox();
@@ -1371,11 +1607,15 @@ function initLightboxEvents() {
     });
   }
 
-  window.addEventListener("keydown", (e) => {
-    const isOverlayOpen = overlay && overlay.classList.contains("is-open");
-    if (!isOverlayOpen) return;
-    if (e.key === "Escape") closeLuxuryLightbox();
-    else if (e.key === "ArrowLeft") btnPrev && btnPrev.click();
-    else if (e.key === "ArrowRight") btnNext && btnNext.click();
-  });
+  if (!window._lightboxKeyBound) {
+    window._lightboxKeyBound = true;
+    window.addEventListener("keydown", (e) => {
+      const ol = document.getElementById("luxuryLightboxOverlay");
+      const isOverlayOpen = ol && ol.classList.contains("is-open");
+      if (!isOverlayOpen) return;
+      if (e.key === "Escape") closeLuxuryLightbox();
+      else if (e.key === "ArrowLeft") document.getElementById("btnLbPrev")?.click();
+      else if (e.key === "ArrowRight") document.getElementById("btnLbNext")?.click();
+    });
+  }
 }

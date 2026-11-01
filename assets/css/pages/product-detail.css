@@ -27,6 +27,7 @@
 
 .product-detail__main-image {
   position: relative;
+  cursor: pointer;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--bg-tertiary);
@@ -74,13 +75,7 @@
   filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.12));
 }
 
-/* Hover Zoom Lens trên Desktop (Kính lúp) */
-@media (hover: hover) and (pointer: fine) {
-  .product-detail__main-image:not(.is-360-active):hover img {
-    transform: scale(2.2);
-    cursor: zoom-in;
-  }
-}
+/* Zoom on demand only (Double-tap, Pinch or Click Lightbox) */
 
 /* Cụm nút hành động góc trên (Action Badges Pod) */
 .gallery-action-pod {

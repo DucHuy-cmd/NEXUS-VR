@@ -1,5 +1,5 @@
 // NEXUS VR Service Worker for Offline Caching & PWA Support (Network-First Strategy)
-const CACHE_NAME = 'nexus-vr-cache-v10';
+const CACHE_NAME = 'nexus-vr-cache-v11';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
