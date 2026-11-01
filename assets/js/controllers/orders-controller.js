@@ -884,7 +884,7 @@
       if (secOrders) secOrders.style.display = "block";
       if (secBookings) secBookings.style.display = "none";
       if (headingTitle) headingTitle.textContent = "Đơn Hàng Của Tôi";
-      if (headingDesc) headingDesc.textContent = "Theo dõi tiến độ đóng gói, vận chuyển và lịch sử mua sắm của bạn.";
+      if (headingDesc) headingDesc.textContent = "";
     });
 
     btnBookings.addEventListener("click", () => {
@@ -899,7 +899,7 @@
       if (secOrders) secOrders.style.display = "none";
       if (secBookings) secBookings.style.display = "block";
       if (headingTitle) headingTitle.textContent = "Lịch Hẹn Showroom VIP";
-      if (headingDesc) headingDesc.textContent = "Trạng thái tiếp đón 1:1 và đặc quyền Thẻ VIP Pass tại Showroom Flagship.";
+      if (headingDesc) headingDesc.textContent = "";
       renderUserBookings();
     });
 

@@ -98,19 +98,41 @@
            TAB 1: TỔNG QUAN HỆ THỐNG
            ========================================== -->
       <section class="admin-tab-pane" id="pane-overview">
-        <h1 class="admin-header-title">Tổng Quan Hoạt Động</h1>
+        <div class="admin-overview-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+          <div>
+            <h1 class="admin-header-title" style="margin-bottom: 4px;">Tổng Quan Hoạt Động</h1>
+            <p style="font-size: 0.85rem; color: #877D72; margin: 0;">Theo dõi chỉ số kinh doanh, tốc độ tăng trưởng và vận hành toàn hệ thống.</p>
+          </div>
 
-        <!-- KPI CARDS -->
+          <!-- BỘ ĐIỀU KHIỂN THỜI GIAN CHUẨN ENTERPRISE (SHOPIFY / STRIPE STYLE) -->
+          <div class="admin-time-toolbar" id="adminTimeToolbar">
+            <div class="time-presets-group">
+              <button type="button" class="btn-time-preset is-active" data-period="all">Toàn Thời Gian</button>
+              <button type="button" class="btn-time-preset" data-period="today">Hôm Nay</button>
+              <button type="button" class="btn-time-preset" data-period="7days">7 Ngày Qua</button>
+              <button type="button" class="btn-time-preset" data-period="month">Tháng Này</button>
+              <button type="button" class="btn-time-preset" data-period="year">Năm Nay</button>
+            </div>
+            <div class="time-custom-range">
+              <input type="date" id="adminDateFrom" class="admin-date-input" title="Từ ngày">
+              <span style="color: #877D72; font-size: 0.8rem;">-</span>
+              <input type="date" id="adminDateTo" class="admin-date-input" title="Đến ngày">
+              <button type="button" id="btnApplyCustomDate" class="btn-apply-date">Lọc</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI CARDS (DỮ LIỆU TỰ ĐỘNG CẬP NHẬT THEO KỲ ĐÃ CHỌN) -->
         <div class="admin-kpi-grid">
           <div class="admin-kpi-card">
             <div class="admin-kpi-top">
-              <span class="admin-kpi-label">DOANH THU TÍCH LŨY</span>
+              <span class="admin-kpi-label" id="labelKpiRevenue">DOANH THU THUẦN</span>
               <div class="admin-kpi-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
               </div>
             </div>
             <div class="admin-kpi-val" id="kpiRevenue">0 ₫</div>
-            <div class="admin-kpi-trend">↑ 18.5% so với tháng trước</div>
+            <div class="admin-kpi-trend" id="kpiRevenueTrend">Toàn thời gian</div>
           </div>
 
           <div class="admin-kpi-card">
@@ -121,40 +143,58 @@
               </div>
             </div>
             <div class="admin-kpi-val" id="kpiOrders">0</div>
-            
+            <div class="admin-kpi-trend" id="kpiOrdersTrend" style="color: #877D72;">Tất cả trạng thái</div>
           </div>
 
           <div class="admin-kpi-card">
             <div class="admin-kpi-top">
-              <span class="admin-kpi-label">LỊCH HẸN CHỜ DUYỆT</span>
+              <span class="admin-kpi-label">GIÁ TRỊ TB / ĐƠN (AOV)</span>
+              <div class="admin-kpi-icon" style="background: rgba(255, 183, 77, 0.15); color: #FFA726;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+              </div>
+            </div>
+            <div class="admin-kpi-val" id="kpiAov" style="color: #FFA726;">0 ₫</div>
+            <div class="admin-kpi-trend" style="color: #877D72;">Doanh thu / Số đơn</div>
+          </div>
+
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-top">
+              <span class="admin-kpi-label">LỊCH HẸN SHOWROOM</span>
               <div class="admin-kpi-icon" style="background: rgba(76,175,80,0.15); color:#81C784;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               </div>
             </div>
             <div class="admin-kpi-val" id="kpiBookings" style="color:#81C784;">0</div>
-            
+            <div class="admin-kpi-trend" style="color: #81C784;">Tiếp đón khách VIP</div>
           </div>
 
           <div class="admin-kpi-card">
             <div class="admin-kpi-top">
-              <span class="admin-kpi-label">SẢN PHẨM HOẠT ĐỘNG</span>
-              <div class="admin-kpi-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-              </div>
-            </div>
-            <div class="admin-kpi-val" id="kpiProducts">18</div>
-            
-          </div>
-
-          <div class="admin-kpi-card">
-            <div class="admin-kpi-top">
-              <span class="admin-kpi-label">KHÁCH HÀNG ĐĂNG KÝ</span>
+              <span class="admin-kpi-label">KHÁCH HÀNG</span>
               <div class="admin-kpi-icon" style="background: rgba(33,150,243,0.15); color:#64B5F6;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               </div>
             </div>
             <div class="admin-kpi-val" id="kpiUsers" style="color:#64B5F6;">0</div>
-            
+            <div class="admin-kpi-trend" style="color: #64B5F6;">Tài khoản đăng ký</div>
+          </div>
+        </div>
+
+        <!-- BIỂU ĐỒ TRỰC QUAN DOANH THU & ĐƠN HÀNG (SHOPIFY / STRIPE ANALYTICS STYLE) -->
+        <div class="admin-card-panel" style="margin-bottom: 24px;">
+          <div class="admin-panel-head" style="align-items: flex-start;">
+            <div>
+              <h2 class="admin-panel-title" style="margin-bottom: 4px;">Xu Hướng Doanh Thu</h2>
+              <p style="font-size: 0.85rem; color: #877D72; margin: 0;" id="chartPeriodSummary">Phân bổ doanh số thực tế theo thời gian.</p>
+            </div>
+            <div id="chartMetricBadge" style="padding: 4px 12px; border-radius: 999px; background: rgba(166,124,82,0.15); border: 1px solid rgba(166,124,82,0.3); color: #D4AF37; font-size: 0.8rem; font-weight: 700;">
+              Chế độ: Toàn thời gian
+            </div>
+          </div>
+
+          <!-- KHUNG BIỂU ĐỒ TƯƠNG TÁC -->
+          <div id="revenueChartContainer" style="padding: 24px 14px 12px; min-height: 200px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(166,124,82,0.15); position: relative;">
+            <!-- JS Render động -->
           </div>
         </div>
 

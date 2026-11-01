@@ -20,6 +20,9 @@
   let ordersList = [];
   let bookingsList = [];
   let usersList = [];
+  let activePeriod = "all";
+  let customDateFrom = null;
+  let customDateTo = null;
 
   const formatVND = (num) => (num || 0).toLocaleString("vi-VN") + " ₫";
 
@@ -43,6 +46,7 @@
     loadAllData();
     renderAllViews();
     initSearchAndFilters();
+    initTimeToolbar();
     checkDatabaseConnection();
     initRealtimeSync();
   }
@@ -347,24 +351,103 @@
     renderUsersTable();
   }
 
-  function renderKPIs() {
-    const totalRevenue = ordersList
-      .filter((o) => o.status === "completed" || o.status === "processing")
-      .reduce((sum, o) => sum + (o.total || 0), 0);
+  /* ---------------------------------------------------------
+     THUẬT TOÁN ĐỊNH DẠNG & LỌC THỜI GIAN CHUẨN ENTERPRISE
+     --------------------------------------------------------- */
+  function parseOrderDate(order) {
+    if (!order) return new Date();
 
+    if (order.id && typeof order.id === "string" && order.id.startsWith("ORD_")) {
+      const ts = Number(order.id.replace("ORD_", ""));
+      if (!isNaN(ts) && ts > 1000000000000) return new Date(ts);
+    }
+
+    const str = order.createdAt;
+    if (!str || typeof str !== "string") return new Date();
+
+    if (str === "Hôm nay" || str === "Vừa xong") return new Date();
+
+    const match = str.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (match) {
+      const day = parseInt(match[1], 10);
+      const month = parseInt(match[2], 10) - 1;
+      const year = parseInt(match[3], 10);
+      return new Date(year, month, day);
+    }
+
+    const isoDate = new Date(str);
+    if (!isNaN(isoDate.getTime())) return isoDate;
+
+    return new Date();
+  }
+
+  function getFilteredOrdersByPeriod() {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const todayEnd = todayStart + 24 * 60 * 60 * 1000 - 1;
+
+    return ordersList.filter((ord) => {
+      const d = parseOrderDate(ord);
+      const t = d.getTime();
+
+      if (activePeriod === "today") {
+        return t >= todayStart && t <= todayEnd;
+      }
+      if (activePeriod === "7days") {
+        return t >= now.getTime() - 7 * 24 * 60 * 60 * 1000;
+      }
+      if (activePeriod === "month") {
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+      }
+      if (activePeriod === "year") {
+        return d.getFullYear() === now.getFullYear();
+      }
+      if (activePeriod === "custom") {
+        if (customDateFrom && t < customDateFrom.getTime()) return false;
+        if (customDateTo && t > (customDateTo.getTime() + 24 * 60 * 60 * 1000 - 1)) return false;
+        return true;
+      }
+      return true; // all
+    });
+  }
+
+  function renderKPIs() {
+    const filteredOrders = getFilteredOrdersByPeriod();
+
+    const totalRevenue = filteredOrders
+      .filter((o) => o.status === "completed" || o.status === "processing")
+      .reduce((sum, o) => sum + (Number(o.totalAmount || o.total) || 0), 0);
+
+    const aov = filteredOrders.length > 0 ? Math.round(totalRevenue / filteredOrders.length) : 0;
     const pendingBookingsCount = bookingsList.filter((b) => b.status === "pending").length;
 
     const kpiRevenue = document.getElementById("kpiRevenue");
     const kpiOrders = document.getElementById("kpiOrders");
+    const kpiAov = document.getElementById("kpiAov");
     const kpiBookings = document.getElementById("kpiBookings");
     const kpiProducts = document.getElementById("kpiProducts");
     const kpiUsers = document.getElementById("kpiUsers");
+    const kpiRevenueTrend = document.getElementById("kpiRevenueTrend");
+    const kpiOrdersTrend = document.getElementById("kpiOrdersTrend");
+
+    const periodNames = {
+      all: "Toàn thời gian",
+      today: "Kỳ: Hôm nay",
+      "7days": "Kỳ: 7 ngày qua",
+      month: "Kỳ: Tháng này",
+      year: "Kỳ: Năm nay",
+      custom: "Kỳ: Tùy chỉnh"
+    };
 
     if (kpiRevenue) kpiRevenue.textContent = formatVND(totalRevenue);
-    if (kpiOrders) kpiOrders.textContent = ordersList.length;
+    if (kpiOrders) kpiOrders.textContent = filteredOrders.length;
+    if (kpiAov) kpiAov.textContent = formatVND(aov);
     if (kpiBookings) kpiBookings.textContent = pendingBookingsCount;
     if (kpiProducts) kpiProducts.textContent = (window.PRODUCTS || []).length || 18;
     if (kpiUsers) kpiUsers.textContent = usersList.length;
+
+    if (kpiRevenueTrend) kpiRevenueTrend.textContent = periodNames[activePeriod] || "Toàn thời gian";
+    if (kpiOrdersTrend) kpiOrdersTrend.textContent = `${filteredOrders.length} đơn trong kỳ`;
 
     // Badges trên sidebar
     const badgeOrders = document.getElementById("sidebarBadgeOrders");
@@ -374,15 +457,114 @@
     if (badgeOrders) badgeOrders.textContent = ordersList.length;
     if (badgeBookings) badgeBookings.textContent = pendingBookingsCount;
     if (badgeUsers) badgeUsers.textContent = usersList.length;
+
+    // Render biểu đồ doanh thu trực quan phong cách Shopify / Stripe
+    renderRevenueChart(filteredOrders);
+  }
+
+  function renderRevenueChart(filteredOrders) {
+    const container = document.getElementById("revenueChartContainer");
+    const summary = document.getElementById("chartPeriodSummary");
+    const badge = document.getElementById("chartMetricBadge");
+    if (!container) return;
+
+    const labelMap = {
+      all: "Chế độ: Toàn thời gian",
+      today: "Chế độ: Hôm nay (24 giờ)",
+      "7days": "Chế độ: 7 ngày qua",
+      month: "Chế độ: Tháng này",
+      year: "Chế độ: Năm nay",
+      custom: "Chế độ: Khoảng ngày tùy chọn"
+    };
+
+    if (badge) badge.textContent = labelMap[activePeriod] || "Chế độ: Tùy chỉnh";
+
+    let bars = [];
+
+    if (activePeriod === "today" || activePeriod === "7days") {
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dayStr = d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+        const ordersOnDay = filteredOrders.filter((o) => {
+          const od = parseOrderDate(o);
+          return od.getDate() === d.getDate() && od.getMonth() === d.getMonth() && od.getFullYear() === d.getFullYear();
+        });
+        const rev = ordersOnDay.filter(o => o.status !== "cancelled").reduce((s, o) => s + (Number(o.totalAmount || o.total) || 0), 0);
+        bars.push({
+          label: dayStr,
+          revenue: rev,
+          count: ordersOnDay.length,
+          tooltipText: `${dayStr}: ${formatVND(rev)} (${ordersOnDay.length} đơn)`
+        });
+      }
+    } else if (activePeriod === "month") {
+      const now = new Date();
+      for (let w = 1; w <= 4; w++) {
+        const startDay = (w - 1) * 7 + 1;
+        const endDay = w === 4 ? 31 : w * 7;
+        const ordersInWeek = filteredOrders.filter((o) => {
+          const od = parseOrderDate(o);
+          return od.getMonth() === now.getMonth() && od.getFullYear() === now.getFullYear() && od.getDate() >= startDay && od.getDate() <= endDay;
+        });
+        const rev = ordersInWeek.filter(o => o.status !== "cancelled").reduce((s, o) => s + (Number(o.totalAmount || o.total) || 0), 0);
+        bars.push({
+          label: `Tuần ${w}`,
+          revenue: rev,
+          count: ordersInWeek.length,
+          tooltipText: `Tuần ${w} (Ngày ${startDay}-${endDay}): ${formatVND(rev)} (${ordersInWeek.length} đơn)`
+        });
+      }
+    } else {
+      const currentYear = new Date().getFullYear();
+      for (let m = 0; m < 12; m++) {
+        const monthNum = m + 1;
+        const ordersInMonth = filteredOrders.filter((o) => {
+          const od = parseOrderDate(o);
+          return od.getMonth() === m && (activePeriod !== "year" || od.getFullYear() === currentYear);
+        });
+        const rev = ordersInMonth.filter(o => o.status !== "cancelled").reduce((s, o) => s + (Number(o.totalAmount || o.total) || 0), 0);
+        bars.push({
+          label: `Thg ${monthNum}`,
+          revenue: rev,
+          count: ordersInMonth.length,
+          tooltipText: `Tháng ${monthNum}: ${formatVND(rev)} (${ordersInMonth.length} đơn)`
+        });
+      }
+    }
+
+    const maxRev = Math.max(...bars.map(b => b.revenue), 1000000);
+    const totalRev = bars.reduce((s, b) => s + b.revenue, 0);
+    const totalOrders = bars.reduce((s, b) => s + b.count, 0);
+
+    if (summary) {
+      summary.innerHTML = `Tổng doanh số trong kỳ: <strong style="color:#D4AF37;">${formatVND(totalRev)}</strong> • <strong style="color:#F9F6F0;">${totalOrders}</strong> giao dịch`;
+    }
+
+    container.innerHTML = bars
+      .map((bar) => {
+        const heightPercent = bar.revenue > 0 ? Math.max(16, Math.round((bar.revenue / maxRev) * 100)) : 6;
+        const isMuted = bar.revenue === 0;
+
+        return `
+          <div class="chart-bar-item">
+            <div class="chart-tooltip">${bar.tooltipText}</div>
+            <div class="chart-bar-fill" style="height: ${heightPercent}%; opacity: ${isMuted ? '0.25' : '1'};"></div>
+            <span class="chart-bar-label">${bar.label}</span>
+          </div>
+        `;
+      })
+      .join("");
   }
 
   function renderOverviewTables() {
     const mountRecentOrders = document.getElementById("overviewRecentOrders");
     if (!mountRecentOrders) return;
 
-    const recent = ordersList.slice(0, 4);
+    const filteredOrders = getFilteredOrdersByPeriod();
+    const recent = filteredOrders.slice(0, 5);
     if (recent.length === 0) {
-      mountRecentOrders.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#877D72;">Chưa có đơn hàng nào</td></tr>`;
+      mountRecentOrders.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#877D72; padding: 24px;">Không có đơn hàng nào trong kỳ được chọn</td></tr>`;
       return;
     }
 
@@ -399,7 +581,7 @@
           <tr>
             <td><strong>${ord.code}</strong></td>
             <td>${ord.customer ? ord.customer.name : "Khách hàng"}</td>
-            <td>${formatVND(ord.total)}</td>
+            <td><strong>${formatVND(ord.totalAmount || ord.total)}</strong></td>
             <td><span class="status-pill ${s.cls}">${s.label}</span></td>
             <td>${ord.createdAt || "Hôm nay"}</td>
           </tr>
@@ -778,6 +960,24 @@
       localStorage.setItem(CACHE_KEY_ORDERS, JSON.stringify(ordersList));
     }
 
+        // Lưu cờ hủy phiên người dùng vào localStorage để các tab người dùng đang mở tự động đăng xuất
+    if (email) {
+      try {
+        localStorage.setItem("nexus_invalidated_user", JSON.stringify({
+          email: email,
+          timestamp: Date.now()
+        }));
+      } catch (e) {}
+
+      try {
+        const curUser = JSON.parse(localStorage.getItem("nexus_user") || "null");
+        if (curUser && curUser.email && curUser.email.toLowerCase().trim() === email) {
+          localStorage.removeItem("nexus_user");
+          localStorage.removeItem("nexus_session");
+        }
+      } catch (e) {}
+    }
+
     // 3. Xóa các kho đơn hàng người dùng nexus_orders_* và giỏ hàng của khách này
     if (email) {
       const userKey = "_" + email.toLowerCase().replace(/[^a-z0-9]/g, "_");
@@ -817,6 +1017,50 @@
     if (!order) return;
     window.open(`orders.html?print=${encodeURIComponent(orderCode)}`, "_blank");
   };
+
+
+  function initTimeToolbar() {
+    const presetBtns = document.querySelectorAll("#adminTimeToolbar .btn-time-preset");
+    const dateFromInput = document.getElementById("adminDateFrom");
+    const dateToInput = document.getElementById("adminDateTo");
+    const applyBtn = document.getElementById("btnApplyCustomDate");
+
+    presetBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        presetBtns.forEach((b) => b.classList.remove("is-active"));
+        btn.classList.add("is-active");
+
+        activePeriod = btn.dataset.period || "all";
+        renderKPIs();
+        renderOverviewTables();
+      });
+    });
+
+    applyBtn?.addEventListener("click", () => {
+      const fromVal = dateFromInput?.value;
+      const toVal = dateToInput?.value;
+
+      if (!fromVal && !toVal) {
+        if (typeof window.showToast === "function") {
+          window.showToast("Vui lòng chọn ngày để lọc!", "warning");
+        }
+        return;
+      }
+
+      presetBtns.forEach((b) => b.classList.remove("is-active"));
+
+      customDateFrom = fromVal ? new Date(fromVal) : null;
+      customDateTo = toVal ? new Date(toVal) : null;
+      activePeriod = "custom";
+
+      renderKPIs();
+      renderOverviewTables();
+
+      if (typeof window.showToast === "function") {
+        window.showToast("Đã áp dụng bộ lọc ngày thành công!", "success");
+      }
+    });
+  }
 
   function initSearchAndFilters() {
     const orderSearch = document.getElementById("orderSearchInput");

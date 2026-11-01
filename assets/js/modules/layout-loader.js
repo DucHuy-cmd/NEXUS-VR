@@ -851,9 +851,77 @@ window.closeWishlistDrawer = closeWishlistDrawer;
 window.updateUserState = updateUserState;
 window.syncAllPageWishlistButtons = syncAllPageWishlistButtons;
 
+
+// =========================================================
+// REALTIME SESSION INVALIDATION (CƯỠNG CHẾ ĐĂNG XUẤT KHI BỊ XÓA TÀI KHOẢN)
+// =========================================================
+let isForcedLoggingOut = false;
+
+function executeForcedLogout() {
+  if (isForcedLoggingOut) return;
+  isForcedLoggingOut = true;
+
+  localStorage.removeItem("nexus_user");
+  localStorage.removeItem("nexus_session");
+
+  if (typeof window.showToast === "function") {
+    window.showToast("Tài khoản của bạn đã bị Quản trị viên xóa khỏi hệ thống. Đang chuyển về trang đăng nhập...", "error", 4000);
+  } else {
+    alert("⚠️ Thông báo Quản trị:\nTài khoản của bạn đã bị Quản trị viên xóa khỏi hệ thống. Phiên làm việc đã kết thúc.");
+  }
+
+  setTimeout(() => {
+    window.location.href = "login.html";
+  }, 1600);
+}
+
+function checkSessionValidity() {
+  try {
+    const rawUser = localStorage.getItem("nexus_user");
+    if (!rawUser) return;
+    const user = JSON.parse(rawUser);
+    if (!user || !user.email) return;
+
+    // 1. Kiểm tra cờ cưỡng chế đăng xuất realtime
+    const rawInvalidated = localStorage.getItem("nexus_invalidated_user");
+    if (rawInvalidated) {
+      const invData = JSON.parse(rawInvalidated);
+      if (invData && invData.email && invData.email.toLowerCase().trim() === user.email.toLowerCase().trim()) {
+        executeForcedLogout();
+        return;
+      }
+    }
+
+    // 2. Đối chiếu với danh sách tài khoản còn tồn tại (nếu có nexus_users)
+    const rawUsers = localStorage.getItem("nexus_users");
+    if (rawUsers) {
+      const users = JSON.parse(rawUsers);
+      if (Array.isArray(users) && users.length > 0) {
+        const uEmail = user.email.toLowerCase().trim();
+        const stillExists = users.some(u => (u.email && u.email.toLowerCase().trim() === uEmail) || (u.id && u.id === user.id));
+        if (!stillExists && user.role !== "admin" && user.email !== "admin@nexusvr.vn") {
+          executeForcedLogout();
+          return;
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+window.checkSessionValidity = checkSessionValidity;
+
 window.addEventListener("storage", (e) => {
   if (e.key && (e.key.startsWith("nexus_cart") || e.key === "nexus_cart")) updateCartBadge();
   if (e.key === "nexus_user" || e.key === "currentUser") updateUserState();
+  if (e.key === "nexus_invalidated_user" && e.newValue) {
+    try {
+      const inv = JSON.parse(e.newValue);
+      const curUser = JSON.parse(localStorage.getItem("nexus_user") || "null");
+      if (curUser && curUser.email && curUser.email.toLowerCase().trim() === (inv.email || "").toLowerCase().trim()) {
+        executeForcedLogout();
+      }
+    } catch (err) {}
+  }
   if (e.key === "nexus_wishlist") {
     updateWishlistBadge();
     renderWishlistDrawerContent();
@@ -869,12 +937,14 @@ window.addEventListener("nexus:wishlist-updated", () => {
 });
 
 window.addEventListener("pageshow", () => {
+  checkSessionValidity();
   updateCartBadge();
   updateWishlistBadge();
   syncAllPageWishlistButtons();
 });
 
 window.addEventListener("load", () => {
+  checkSessionValidity();
   updateCartBadge();
   updateWishlistBadge();
   syncAllPageWishlistButtons();
