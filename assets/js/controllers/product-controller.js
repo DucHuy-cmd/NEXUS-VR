@@ -952,3 +952,430 @@ function initDynamicComparison(baseProduct) {
     renderCompareView(e.target.value);
   });
 }
+
+
+/* ==========================================================================
+   TÍNH NĂNG ĐỘT PHÁ: KÍNH LÚP PHÓNG TO & TRÌNH XOAY 360 ĐỘ KHÔNG GIAN
+   ========================================================================== */
+let is360ModeActive = false;
+let current360Angle = 0;
+let is360AutoSpinning = false;
+let autoSpinAnimationId = null;
+let isDragging360 = false;
+let dragStartX = 0;
+let angleStartDrag = 0;
+let currentLightboxIndex = 0;
+let lightboxZoomLevel = 1.0;
+let currentProductGalleryImages = [];
+
+function playSpatial360Tick() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    if (!window._spatialAudioCtx) window._spatialAudioCtx = new AudioCtx();
+    const ctx = window._spatialAudioCtx;
+    if (ctx.state === "suspended") ctx.resume();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(1100, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(450, ctx.currentTime + 0.035);
+    gain.gain.setValueAtTime(0.03, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.035);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.035);
+  } catch (e) {}
+}
+
+function initHoverMagnifier() {
+  const container = document.getElementById("pd-main-image");
+  const img = document.getElementById("pd-main-img");
+  if (!container || !img) return;
+
+  container.addEventListener("mousemove", (e) => {
+    if (is360ModeActive) return;
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const originX = (x / rect.width) * 100;
+    const originY = (y / rect.height) * 100;
+    img.style.transformOrigin = `${originX}% ${originY}%`;
+  });
+
+  container.addEventListener("mouseleave", () => {
+    if (is360ModeActive) return;
+    img.style.transformOrigin = "center center";
+  });
+
+  // Nhấp vào ảnh để mở Lightbox nếu không phải đang trong chế độ 360
+  container.addEventListener("click", (e) => {
+    if (is360ModeActive) return;
+    if (e.target.closest(".gallery-action-pod") || e.target.closest("#pd-discount-badge")) return;
+    openLuxuryLightbox();
+  });
+}
+
+function getAngleDescription(angle) {
+  const normalized = ((angle % 360) + 360) % 360;
+  if (normalized >= 315 || normalized < 45) return `${Math.round(normalized)}° • Mặt trước chính diện`;
+  if (normalized >= 45 && normalized < 135) return `${Math.round(normalized)}° • Cạnh phải thân kính`;
+  if (normalized >= 135 && normalized < 225) return `${Math.round(normalized)}° • Quai đeo sau & Đệm mắt`;
+  return `${Math.round(normalized)}° • Cạnh trái thân kính`;
+}
+
+function update360Visual(angle) {
+  const stage = document.getElementById("pd3dStage");
+  const badge = document.getElementById("spatial360AngleBadge");
+  const slider = document.getElementById("spatial360Slider");
+
+  current360Angle = ((angle % 360) + 360) % 360;
+
+  if (stage) {
+    const tiltX = Math.sin((current360Angle * Math.PI) / 180) * 4;
+    const shadowOffset = Math.sin((current360Angle * Math.PI) / 180) * 18;
+    stage.style.transform = `perspective(1200px) rotateY(${current360Angle}deg) rotateX(${tiltX}deg)`;
+    const img = stage.querySelector("img");
+    if (img) {
+      img.style.filter = `drop-shadow(${shadowOffset}px 20px 24px rgba(0, 0, 0, 0.22))`;
+    }
+  }
+
+  if (badge) {
+    badge.textContent = getAngleDescription(current360Angle);
+  }
+
+  if (slider && Number(slider.value) !== Math.round(current360Angle)) {
+    slider.value = Math.round(current360Angle);
+  }
+}
+
+function runAutoSpinLoop() {
+  if (!is360AutoSpinning || !is360ModeActive) return;
+  const prevAngle = current360Angle;
+  current360Angle = (current360Angle + 0.45) % 360;
+
+  // Phát tick âm thanh khi qua các góc chuẩn
+  if (Math.floor(prevAngle / 90) !== Math.floor(current360Angle / 90)) {
+    playSpatial360Tick();
+  }
+
+  update360Visual(current360Angle);
+  autoSpinAnimationId = requestAnimationFrame(runAutoSpinLoop);
+}
+
+function start360AutoSpin() {
+  is360AutoSpinning = true;
+  const btn = document.getElementById("btn360AutoSpin");
+  if (btn) {
+    btn.classList.add("is-spinning");
+    btn.innerHTML = '<span class="spin-icon">⏸</span><span class="spin-text">Tạm dừng</span>';
+  }
+  cancelAnimationFrame(autoSpinAnimationId);
+  autoSpinAnimationId = requestAnimationFrame(runAutoSpinLoop);
+}
+
+function stop360AutoSpin() {
+  is360AutoSpinning = false;
+  cancelAnimationFrame(autoSpinAnimationId);
+  const btn = document.getElementById("btn360AutoSpin");
+  if (btn) {
+    btn.classList.remove("is-spinning");
+    btn.innerHTML = '<span class="spin-icon">▶</span><span class="spin-text">Tự động xoay</span>';
+  }
+}
+
+function enable360Mode() {
+  is360ModeActive = true;
+  const container = document.getElementById("pd-main-image");
+  const controlBar = document.getElementById("spatial360ControlBar");
+  const hint = document.getElementById("spatial360Hint");
+  const btn = document.getElementById("btnToggle360");
+  const img = document.getElementById("pd-main-img");
+
+  if (container) container.classList.add("is-360-active");
+  if (controlBar) controlBar.style.display = "flex";
+  if (hint) hint.style.display = "inline-flex";
+  if (btn) btn.classList.add("is-active");
+
+  if (img) {
+    img.style.transform = "scale(1)";
+    img.style.transformOrigin = "center center";
+  }
+
+  update360Visual(current360Angle);
+  start360AutoSpin();
+  playSpatial360Tick();
+}
+
+function disable360Mode() {
+  is360ModeActive = false;
+  stop360AutoSpin();
+
+  const container = document.getElementById("pd-main-image");
+  const controlBar = document.getElementById("spatial360ControlBar");
+  const hint = document.getElementById("spatial360Hint");
+  const btn = document.getElementById("btnToggle360");
+  const stage = document.getElementById("pd3dStage");
+
+  if (container) container.classList.remove("is-360-active");
+  if (controlBar) controlBar.style.display = "none";
+  if (hint) hint.style.display = "none";
+  if (btn) btn.classList.remove("is-active");
+
+  if (stage) {
+    stage.style.transform = "perspective(1200px) rotateY(0deg) rotateX(0deg)";
+    const img = stage.querySelector("img");
+    if (img) img.style.filter = "drop-shadow(0 14px 28px rgba(0, 0, 0, 0.12))";
+  }
+}
+
+function init360SpatialStudioEvents() {
+  const container = document.getElementById("pd-main-image");
+  const btnToggle = document.getElementById("btnToggle360");
+  const btnClose = document.getElementById("btn360Close");
+  const btnReset = document.getElementById("btn360Reset");
+  const btnAuto = document.getElementById("btn360AutoSpin");
+  const slider = document.getElementById("spatial360Slider");
+
+  if (btnToggle) {
+    btnToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (is360ModeActive) {
+        disable360Mode();
+      } else {
+        enable360Mode();
+      }
+    });
+  }
+
+  if (btnClose) {
+    btnClose.addEventListener("click", (e) => {
+      e.stopPropagation();
+      disable360Mode();
+    });
+  }
+
+  if (btnReset) {
+    btnReset.addEventListener("click", (e) => {
+      e.stopPropagation();
+      stop360AutoSpin();
+      update360Visual(0);
+      playSpatial360Tick();
+    });
+  }
+
+  if (btnAuto) {
+    btnAuto.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (is360AutoSpinning) {
+        stop360AutoSpin();
+      } else {
+        start360AutoSpin();
+      }
+    });
+  }
+
+  if (slider) {
+    slider.addEventListener("input", (e) => {
+      stop360AutoSpin();
+      update360Visual(Number(e.target.value));
+    });
+  }
+
+  if (container) {
+    // DRAG CHUỘT
+    container.addEventListener("mousedown", (e) => {
+      if (!is360ModeActive) return;
+      isDragging360 = true;
+      dragStartX = e.clientX;
+      angleStartDrag = current360Angle;
+      stop360AutoSpin();
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging360 || !is360ModeActive) return;
+      const deltaX = e.clientX - dragStartX;
+      const newAngle = angleStartDrag + deltaX * 0.85;
+      update360Visual(newAngle);
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (isDragging360) {
+        isDragging360 = false;
+        playSpatial360Tick();
+      }
+    });
+
+    // VUỐT CẢM ỨNG TRÊN MOBILE / IPAD
+    container.addEventListener("touchstart", (e) => {
+      if (!is360ModeActive || !e.touches[0]) return;
+      isDragging360 = true;
+      dragStartX = e.touches[0].clientX;
+      angleStartDrag = current360Angle;
+      stop360AutoSpin();
+    }, { passive: true });
+
+    container.addEventListener("touchmove", (e) => {
+      if (!isDragging360 || !is360ModeActive || !e.touches[0]) return;
+      const deltaX = e.touches[0].clientX - dragStartX;
+      const newAngle = angleStartDrag + deltaX * 0.9;
+      update360Visual(newAngle);
+    }, { passive: true });
+
+    container.addEventListener("touchend", () => {
+      if (isDragging360) {
+        isDragging360 = false;
+        playSpatial360Tick();
+      }
+    });
+  }
+}
+
+function openLuxuryLightbox() {
+  const overlay = document.getElementById("luxuryLightboxOverlay");
+  const mainImg = document.getElementById("lightboxMainImg");
+  const title = document.getElementById("lightboxProductTitle");
+  const thumbsWrap = document.getElementById("lightboxThumbs");
+
+  if (!overlay || !mainImg) return;
+
+  const currentMainSrc = document.getElementById("pd-main-img")?.src || "";
+  const productTitle = document.getElementById("pd-title")?.textContent || "NEXUS VR";
+
+  if (title) title.textContent = productTitle;
+
+  // Lấy danh sách ảnh hiện hành
+  const thumbs = document.querySelectorAll("#pd-thumbs .product-detail__thumb img");
+  currentProductGalleryImages = [];
+  thumbs.forEach((t) => {
+    if (t.src) currentProductGalleryImages.push(t.src);
+  });
+  if (currentProductGalleryImages.length === 0 && currentMainSrc) {
+    currentProductGalleryImages.push(currentMainSrc);
+  }
+
+  currentLightboxIndex = currentProductGalleryImages.indexOf(currentMainSrc);
+  if (currentLightboxIndex === -1) currentLightboxIndex = 0;
+
+  lightboxZoomLevel = 1.0;
+  updateLightboxImage();
+
+  // Render thumbnails trong lightbox
+  if (thumbsWrap) {
+    thumbsWrap.innerHTML = "";
+    currentProductGalleryImages.forEach((src, idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "lb-thumb" + (idx === currentLightboxIndex ? " is-active" : "");
+      btn.innerHTML = `<img src="${src}" alt="Thumb ${idx + 1}">`;
+      btn.addEventListener("click", () => {
+        currentLightboxIndex = idx;
+        lightboxZoomLevel = 1.0;
+        updateLightboxImage();
+      });
+      thumbsWrap.appendChild(btn);
+    });
+  }
+
+  overlay.style.display = "flex";
+  requestAnimationFrame(() => overlay.classList.add("is-open"));
+  document.body.style.overflow = "hidden";
+}
+
+function closeLuxuryLightbox() {
+  const overlay = document.getElementById("luxuryLightboxOverlay");
+  if (!overlay) return;
+  overlay.classList.remove("is-open");
+  setTimeout(() => {
+    overlay.style.display = "none";
+    document.body.style.overflow = "";
+  }, 250);
+}
+
+function updateLightboxImage() {
+  const mainImg = document.getElementById("lightboxMainImg");
+  const thumbsWrap = document.getElementById("lightboxThumbs");
+  if (!mainImg) return;
+
+  const src = currentProductGalleryImages[currentLightboxIndex] || "";
+  mainImg.src = src;
+  mainImg.style.transform = `scale(${lightboxZoomLevel})`;
+
+  if (thumbsWrap) {
+    thumbsWrap.querySelectorAll(".lb-thumb").forEach((t, i) => {
+      if (i === currentLightboxIndex) t.classList.add("is-active");
+      else t.classList.remove("is-active");
+    });
+  }
+}
+
+function initLightboxEvents() {
+  const btnOpen = document.getElementById("btnOpenLightbox");
+  const btnClose = document.getElementById("btnLbClose");
+  const btnZoomIn = document.getElementById("btnLbZoomIn");
+  const btnZoomOut = document.getElementById("btnLbZoomOut");
+  const btnReset = document.getElementById("btnLbReset");
+  const btnPrev = document.getElementById("btnLbPrev");
+  const btnNext = document.getElementById("btnLbNext");
+  const overlay = document.getElementById("luxuryLightboxOverlay");
+
+  if (btnOpen) btnOpen.addEventListener("click", openLuxuryLightbox);
+  if (btnClose) btnClose.addEventListener("click", closeLuxuryLightbox);
+
+  if (btnZoomIn) {
+    btnZoomIn.addEventListener("click", () => {
+      lightboxZoomLevel = Math.min(3.5, lightboxZoomLevel + 0.35);
+      updateLightboxImage();
+    });
+  }
+
+  if (btnZoomOut) {
+    btnZoomOut.addEventListener("click", () => {
+      lightboxZoomLevel = Math.max(0.7, lightboxZoomLevel - 0.35);
+      updateLightboxImage();
+    });
+  }
+
+  if (btnReset) {
+    btnReset.addEventListener("click", () => {
+      lightboxZoomLevel = 1.0;
+      updateLightboxImage();
+    });
+  }
+
+  if (btnPrev) {
+    btnPrev.addEventListener("click", () => {
+      if (currentProductGalleryImages.length <= 1) return;
+      currentLightboxIndex = (currentLightboxIndex - 1 + currentProductGalleryImages.length) % currentProductGalleryImages.length;
+      lightboxZoomLevel = 1.0;
+      updateLightboxImage();
+    });
+  }
+
+  if (btnNext) {
+    btnNext.addEventListener("click", () => {
+      if (currentProductGalleryImages.length <= 1) return;
+      currentLightboxIndex = (currentLightboxIndex + 1) % currentProductGalleryImages.length;
+      lightboxZoomLevel = 1.0;
+      updateLightboxImage();
+    });
+  }
+
+  if (overlay) {
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay || e.target.id === "luxuryLightboxBody" || e.target.id === "luxuryLightboxCanvas") {
+        closeLuxuryLightbox();
+      }
+    });
+  }
+
+  window.addEventListener("keydown", (e) => {
+    const isOverlayOpen = overlay && overlay.classList.contains("is-open");
+    if (!isOverlayOpen) return;
+    if (e.key === "Escape") closeLuxuryLightbox();
+    else if (e.key === "ArrowLeft") btnPrev && btnPrev.click();
+    else if (e.key === "ArrowRight") btnNext && btnNext.click();
+  });
+}

@@ -31,8 +31,443 @@
   overflow: hidden;
   background: var(--bg-tertiary);
   aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: pan-y;
+  border: 1px solid rgba(166, 124, 82, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
-.product-detail__main-image img { width: 100%; height: 100%; object-fit: cover; }
+
+.product-detail__main-image.is-360-active {
+  border-color: var(--accent, #A67C52);
+  box-shadow: 0 12px 40px rgba(166, 124, 82, 0.2);
+  cursor: grab;
+}
+
+.product-detail__main-image.is-360-active:active {
+  cursor: grabbing;
+}
+
+.product-detail__3d-stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  transition: transform 0.08s ease-out;
+  will-change: transform;
+}
+
+.product-detail__main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: clamp(16px, 4vw, 28px);
+  box-sizing: border-box;
+  display: block;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, transform-origin;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.12));
+}
+
+/* Hover Zoom Lens trên Desktop (Kính lúp) */
+@media (hover: hover) and (pointer: fine) {
+  .product-detail__main-image:not(.is-360-active):hover img {
+    transform: scale(2.2);
+    cursor: zoom-in;
+  }
+}
+
+/* Cụm nút hành động góc trên (Action Badges Pod) */
+.gallery-action-pod {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+}
+
+.gallery-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(166, 124, 82, 0.35);
+  color: #3E2723;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gallery-action-btn:hover {
+  background: var(--accent, #A67C52);
+  color: #FFF;
+  border-color: var(--accent, #A67C52);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(166, 124, 82, 0.25);
+}
+
+.gallery-action-btn.is-active {
+  background: var(--accent-deep, #8B633C);
+  color: #FFF;
+  border-color: var(--accent-deep, #8B633C);
+  box-shadow: 0 0 0 2px rgba(166, 124, 82, 0.4);
+}
+
+:root.dark-mode .gallery-action-btn {
+  background: rgba(28, 24, 21, 0.88);
+  border-color: rgba(166, 124, 82, 0.4);
+  color: #F7F3EE;
+}
+
+:root.dark-mode .gallery-action-btn:hover,
+:root.dark-mode .gallery-action-btn.is-active {
+  background: var(--accent, #A67C52);
+  color: #FFF;
+}
+
+.gallery-zoom-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #FFF;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 5;
+  white-space: nowrap;
+}
+
+.product-detail__main-image:not(.is-360-active):hover .gallery-zoom-hint {
+  opacity: 1;
+}
+
+.spatial-360-hint {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(166, 124, 82, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #FFF;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 8;
+  animation: pulseGold 2s infinite;
+}
+
+@keyframes pulseGold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(166, 124, 82, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(166, 124, 82, 0); }
+}
+
+/* Thanh điều khiển Studio 360° */
+.spatial-360-control-bar {
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: var(--bg-surface, #FAF7F2);
+  border: 1px solid rgba(166, 124, 82, 0.25);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeInDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root.dark-mode .spatial-360-control-bar {
+  background: #1C1815;
+  border-color: rgba(166, 124, 82, 0.3);
+}
+
+.spatial-360-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-360-autospin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #E5DECE);
+  background: #FFF;
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-360-autospin.is-spinning {
+  background: var(--accent, #A67C52);
+  color: #FFF;
+  border-color: var(--accent, #A67C52);
+}
+
+.spatial-360-angle-badge {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent-deep, #A67C52);
+  padding: 4px 10px;
+  background: rgba(166, 124, 82, 0.1);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.btn-360-reset, .btn-360-close {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #E5DECE);
+  background: #FFF;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-360-reset:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-360-close:hover {
+  background: #C62828;
+  color: #FFF;
+  border-color: #C62828;
+}
+
+:root.dark-mode .btn-360-autospin,
+:root.dark-mode .btn-360-reset,
+:root.dark-mode .btn-360-close {
+  background: #25201C;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #DDD;
+}
+
+.spatial-360-slider-wrap {
+  width: 100%;
+}
+
+.spatial-360-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(166, 124, 82, 0.25);
+  outline: none;
+  accent-color: var(--accent, #A67C52);
+  cursor: pointer;
+}
+
+/* MODAL LIGHTBOX TOÀN MÀN HÌNH */
+.luxury-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(14, 12, 10, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.luxury-lightbox-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.luxury-lightbox-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 16px 24px;
+  box-sizing: border-box;
+}
+
+.luxury-lightbox-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lightbox-info-title {
+  color: #F7F3EE;
+  font-family: var(--font-head);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.lightbox-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-lb-action, .btn-lb-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFF;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-lb-action:hover, .btn-lb-close:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.luxury-lightbox-body {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 20px 0;
+}
+
+.luxury-lightbox-canvas {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  user-select: none;
+}
+
+.luxury-lightbox-canvas:active {
+  cursor: grabbing;
+}
+
+.luxury-lightbox-canvas img {
+  max-width: 85vw;
+  max-height: 70vh;
+  object-fit: contain;
+  transition: transform 0.15s ease-out;
+  transform-origin: center center;
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
+}
+
+.btn-lb-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #FFF;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-lb-nav:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-lb-prev { left: 20px; }
+.btn-lb-next { right: 20px; }
+
+.luxury-lightbox-footer {
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+}
+
+.luxury-lightbox-thumbs {
+  display: flex;
+  gap: 10px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 4px;
+}
+
+.lb-thumb {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  background: #25201C;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.lb-thumb.is-active, .lb-thumb:hover {
+  opacity: 1;
+  border-color: var(--accent);
+}
+
+.lb-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 
 .product-detail__badge {
   position: absolute; top: 16px; left: 16px;

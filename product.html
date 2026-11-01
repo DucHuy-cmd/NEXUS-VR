@@ -57,12 +57,57 @@
     <div id="product-detail-root" hidden>
 
       <div class="product-detail">
-        <!-- GALLERY -->
+        <!-- GALLERY CHUẨN XA XỈ VỚI TÍNH NĂNG XOAY 360° & PHÓNG TO CHI TIẾT -->
         <div class="product-detail__gallery">
           <div class="product-detail__main-image" id="pd-main-image">
-            <img id="pd-main-img" src="assets/images/placeholder.svg" alt="NEXUS VR" onerror="this.onerror=null; this.src='assets/images/placeholder.svg';">
+            <!-- 3D WRAPPER CHO CHẾ ĐỘ XOAY 360° VÀ KÍNH LÚP -->
+            <div class="product-detail__3d-stage" id="pd3dStage">
+              <img id="pd-main-img" src="assets/images/placeholder.svg" alt="NEXUS VR" onerror="this.onerror=null; this.src='assets/images/placeholder.svg';">
+            </div>
+
             <span class="product-detail__badge" id="pd-discount-badge" hidden></span>
+
+            <!-- CỤM NÚT ĐIỀU KHIỂN GÓC TRÊN BÊN PHẢI (ACTION BADGES POD) -->
+            <div class="gallery-action-pod">
+              <button type="button" class="gallery-action-btn" id="btnToggle360" title="Chế độ không gian xoay 360°" aria-label="Xoay 360 độ">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>Xoay 360°</span>
+              </button>
+              <button type="button" class="gallery-action-btn" id="btnOpenLightbox" title="Phóng to toàn cảnh sắc nét" aria-label="Phóng to ảnh">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                <span>Phóng to</span>
+              </button>
+            </div>
+
+            <!-- GỢI Ý RÊ CHUỘT PHÓNG TO (DESKTOP) -->
+            <div class="gallery-zoom-hint" id="galleryZoomHint">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <span>Di chuột để soi kính lúp</span>
+            </div>
+
+            <!-- GỢI Ý KÉO XOAY KHI BẬT 360 -->
+            <div class="spatial-360-hint" id="spatial360Hint" style="display: none;">
+              <span class="hint-hand-icon">✋</span>
+              <span>Kéo chuột hoặc vuốt để xoay 360°</span>
+            </div>
           </div>
+
+          <!-- THANH ĐIỀU KHIỂN STUDIO 360° (HIỆN KHI BẬT CHẾ ĐỘ 360) -->
+          <div class="spatial-360-control-bar" id="spatial360ControlBar" style="display: none;">
+            <div class="spatial-360-top-row">
+              <button type="button" class="btn-360-autospin is-spinning" id="btn360AutoSpin">
+                <span class="spin-icon">⏸</span>
+                <span class="spin-text">Tạm dừng</span>
+              </button>
+              <span class="spatial-360-angle-badge" id="spatial360AngleBadge">0° • Mặt trước</span>
+              <button type="button" class="btn-360-reset" id="btn360Reset" title="Đặt lại góc 0°">⟲ Góc chuẩn</button>
+              <button type="button" class="btn-360-close" id="btn360Close" title="Thoát 360°">✕</button>
+            </div>
+            <div class="spatial-360-slider-wrap">
+              <input type="range" class="spatial-360-slider" id="spatial360Slider" min="0" max="360" value="0" aria-label="Góc xoay 360 độ">
+            </div>
+          </div>
+
           <div class="product-detail__thumbs" id="pd-thumbs"></div>
         </div>
 
@@ -320,6 +365,32 @@
         <button type="button" class="btn-installment-choose" id="btnApplyInstallmentPlan">
           Mua Trả Góp 0% Gói Này
         </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL LIGHTBOX PHÓNG TO TOÀN CẢNH (FULLSCREEN LUXURY LIGHTBOX) -->
+  <div class="luxury-lightbox-overlay" id="luxuryLightboxOverlay" style="display: none;" aria-hidden="true">
+    <div class="luxury-lightbox-dialog">
+      <div class="luxury-lightbox-toolbar">
+        <div class="lightbox-info-title" id="lightboxProductTitle">NEXUS Vision Pro</div>
+        <div class="lightbox-actions">
+          <button type="button" class="btn-lb-action" id="btnLbZoomIn" title="Phóng to" aria-label="Phóng to">+</button>
+          <button type="button" class="btn-lb-action" id="btnLbZoomOut" title="Thu nhỏ" aria-label="Thu nhỏ">−</button>
+          <button type="button" class="btn-lb-action" id="btnLbReset" title="Tỷ lệ 100%" aria-label="Tỷ lệ chuẩn">1:1</button>
+          <button type="button" class="btn-lb-close" id="btnLbClose" title="Đóng (Esc)" aria-label="Đóng">&times;</button>
+        </div>
+      </div>
+      <div class="luxury-lightbox-body" id="luxuryLightboxBody">
+        <button type="button" class="btn-lb-nav btn-lb-prev" id="btnLbPrev" aria-label="Ảnh trước">‹</button>
+        <div class="luxury-lightbox-canvas" id="luxuryLightboxCanvas">
+          <img id="lightboxMainImg" src="" alt="Phóng to sản phẩm">
+        </div>
+        <button type="button" class="btn-lb-nav btn-lb-next" id="btnLbNext" aria-label="Ảnh kế tiếp">›</button>
+      </div>
+      <div class="luxury-lightbox-footer">
+        <div class="luxury-lightbox-thumbs" id="lightboxThumbs"></div>
       </div>
     </div>
   </div>
